@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "heavenys-client",
+  "version": "${mod_version}",
+  "name": "Heavenys Client",
+  "description": "A performance-focused, visually polished Fabric client mod with a clean White/Butter-Yellow aesthetic. Strictly no cheating modules.",
+  "authors": [
+    "HeavenysTeam"
+  ],
+  "contact": {
+    "sources": "https://github.com/heavenys/heavenys-client",
+    "issues": "https://github.com/heavenys/heavenys-client/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/heavenys-client/textures/gui/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.heavenys.client.HeavenysClient"
+    ]
+  },
+  "mixins": [
+    "heavenys-client.mixins.json"
+  ],
+  "accessWidener": "heavenys-client.accesswidener",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "~${minecraft_version}",
+    "java": ">=${java_version}",
+    "sodium": "*",
+    "iris": "*",
+    "lithium": "*"
+  },
+  "suggests": {
+    "cloth-config": "*"
+  },
+  "custom": {
+    "modmenu:badges": ["library"],
+    "modmenu:links": {}
+  }
+}

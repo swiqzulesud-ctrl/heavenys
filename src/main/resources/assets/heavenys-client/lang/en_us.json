@@ -1,0 +1,12 @@
+{
+  "heavenys-client.title": "Heavenys Client",
+  "heavenys-client.menu.title": "Heavenys Client — HUD Settings",
+  "heavenys-client.menu.close": "Close",
+  "heavenys-client.module.armor_status": "Armor Status",
+  "heavenys-client.module.potion_status": "Potion Status",
+  "heavenys-client.module.keystrokes": "Keystrokes",
+  "heavenys-client.module.fps": "FPS Counter",
+  "heavenys-client.module.ping": "Ping Display",
+  "heavenys-client.module.enabled": "Enabled",
+  "heavenys-client.module.disabled": "Disabled"
+}
