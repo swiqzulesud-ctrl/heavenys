@@ -1,0 +1,22 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.classpath
+*.project
+.settings/
+
+# Loom remapping caches
+.cache/
+remappedJars/
+
+# macOS
+.DS_Store
+
+# Generated access widener (Loom copies it)
+src/main/resources/*.aw.cache

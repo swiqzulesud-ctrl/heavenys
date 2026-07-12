@@ -1,0 +1,5 @@
+accessWidener v2 named
+
+# Allow HUD overlay to read the raw hand swing progress for 1.7-style animation
+accessible field net/minecraft/client/network/AbstractClientPlayerEntity handSwingProgress F
+accessible field net/minecraft/client/network/AbstractClientPlayerEntity lastHandSwingProgress F
