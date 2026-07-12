@@ -1,0 +1,8 @@
+# PyInstaller outputs
+build/
+dist/
+*.spec.bak
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
