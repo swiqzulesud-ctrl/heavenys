@@ -1,12 +1,12 @@
 package dev.smplugin.util;
 
 import dev.smplugin.SMPlugin;
-import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Map;
@@ -38,13 +38,13 @@ public final class ChatInput implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onChat(AsyncChatEvent event) {
+    public void onChat(AsyncPlayerChatEvent event) {
         Consumer<String> callback = pending.remove(event.getPlayer().getUniqueId());
         if (callback == null) {
             return;
         }
         event.setCancelled(true);
-        String input = Text.plain(event.message()).trim();
+        String input = event.getMessage().trim();
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (input.equalsIgnoreCase("cancel")) {
                 Text.msg(event.getPlayer(), "<gray>Input cancelled.</gray>");

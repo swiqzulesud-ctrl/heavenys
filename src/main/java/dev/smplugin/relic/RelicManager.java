@@ -5,13 +5,15 @@ import dev.smplugin.data.Database;
 import dev.smplugin.util.Fx;
 import dev.smplugin.util.Keys;
 import dev.smplugin.util.Text;
-import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -117,6 +119,12 @@ public final class RelicManager {
     private void tick() {
         long now = System.currentTimeMillis();
 
+        // Failsafe: if the boss entity died without our death handler running
+        // (shouldn't happen, but never leave the event stuck "active").
+        if (guardian != null && guardian.isDead()) {
+            despawnGuardian(true);
+        }
+
         // Scheduled events kick off their countdown 10 minutes ahead of time.
         if (scheduleEnabled() && nextScheduledSpawn > 0 && spawnAt == 0 && !isFightActive()
                 && now >= nextScheduledSpawn - 600_000L) {
@@ -128,12 +136,6 @@ public final class RelicManager {
                 scheduleNext();
             }
             return;
-        }
-
-        // Failsafe: if the boss entity died without our death handler running
-        // (shouldn't happen, but never leave the event stuck "active").
-        if (guardian != null && guardian.isDead()) {
-            despawnGuardian(true);
         }
 
         if (spawnAt == 0) {
@@ -247,26 +249,28 @@ public final class RelicManager {
         double health = cfg.getDouble("relic.boss.health", 420.0);
 
         guardian = arena.getWorld().spawn(arena, WitherSkeleton.class, boss -> {
-            boss.customName(Text.mm("<white>Sovereign <gold>Guardian</gold></white>"));
+            boss.setCustomName(Text.legacy("<white>Sovereign <gold>Guardian</gold></white>"));
             boss.setCustomNameVisible(false);
             boss.setPersistent(true);
             boss.setRemoveWhenFarAway(false);
             boss.setCanPickupItems(false);
             boss.getPersistentDataContainer().set(Keys.GUARDIAN, PersistentDataType.BYTE, (byte) 1);
 
-            setAttr(boss, Attribute.MAX_HEALTH, health);
+            setAttr(boss, Attribute.GENERIC_MAX_HEALTH, health);
             boss.setHealth(health);
-            setAttr(boss, Attribute.ATTACK_DAMAGE, cfg.getDouble("relic.boss.attack-damage", 18.0));
-            setAttr(boss, Attribute.KNOCKBACK_RESISTANCE, cfg.getDouble("relic.boss.knockback-resistance", 1.0));
-            setAttr(boss, Attribute.MOVEMENT_SPEED, cfg.getDouble("relic.boss.movement-speed", 0.33));
-            setAttr(boss, Attribute.ARMOR, cfg.getDouble("relic.boss.armor", 14.0));
-            setAttr(boss, Attribute.FOLLOW_RANGE, 64.0);
+            setAttr(boss, Attribute.GENERIC_ATTACK_DAMAGE, cfg.getDouble("relic.boss.attack-damage", 18.0));
+            setAttr(boss, Attribute.GENERIC_KNOCKBACK_RESISTANCE, cfg.getDouble("relic.boss.knockback-resistance", 1.0));
+            setAttr(boss, Attribute.GENERIC_MOVEMENT_SPEED, cfg.getDouble("relic.boss.movement-speed", 0.33));
+            setAttr(boss, Attribute.GENERIC_ARMOR, cfg.getDouble("relic.boss.armor", 14.0));
+            setAttr(boss, Attribute.GENERIC_FOLLOW_RANGE, 64.0);
 
             var equipment = boss.getEquipment();
-            equipment.setItemInMainHand(new ItemStack(Material.NETHERITE_AXE));
-            equipment.setHelmet(new ItemStack(Material.GOLDEN_HELMET));
-            equipment.setItemInMainHandDropChance(0f);
-            equipment.setHelmetDropChance(0f);
+            if (equipment != null) {
+                equipment.setItemInMainHand(new ItemStack(Material.NETHERITE_AXE));
+                equipment.setHelmet(new ItemStack(Material.GOLDEN_HELMET));
+                equipment.setItemInMainHandDropChance(0f);
+                equipment.setHelmetDropChance(0f);
+            }
         });
 
         eventStart = System.currentTimeMillis();
@@ -276,8 +280,8 @@ public final class RelicManager {
         participantNames.clear();
         gearWarned.clear();
 
-        bossBar = BossBar.bossBar(Text.mm("<white><bold>Sovereign Guardian</bold></white>"),
-                1.0f, BossBar.Color.WHITE, BossBar.Overlay.NOTCHED_10);
+        bossBar = Bukkit.createBossBar(Text.legacy("<white><bold>Sovereign Guardian</bold></white>"),
+                BarColor.WHITE, BarStyle.SEGMENTED_10);
 
         // Arrival fanfare.
         Text.broadcast("<gold>⚠</gold> <white>The <gold>Sovereign Guardian</gold> has risen at "
@@ -308,7 +312,7 @@ public final class RelicManager {
         final int[] seconds = {0};
         fightTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (guardian == null || !guardian.isValid()) {
-                return; // death handler tears everything down
+                return; // death handler / failsafe tears everything down
             }
             seconds[0]++;
             updateBossBar(radius);
@@ -334,17 +338,17 @@ public final class RelicManager {
     }
 
     private void updateBossBar(double radius) {
-        float progress = (float) Math.clamp(guardian.getHealth()
-                / guardian.getAttribute(Attribute.MAX_HEALTH).getValue(), 0.0, 1.0);
-        bossBar.progress(progress);
+        AttributeInstance max = guardian.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        double progress = max == null ? 0 : guardian.getHealth() / max.getValue();
+        bossBar.setProgress(Math.clamp(progress, 0.0, 1.0));
         double visibleRange = Math.max(radius * 2, 96);
         for (Player player : Bukkit.getOnlinePlayers()) {
             boolean near = player.getWorld().equals(guardian.getWorld())
                     && player.getLocation().distanceSquared(guardian.getLocation()) <= visibleRange * visibleRange;
             if (near) {
-                player.showBossBar(bossBar);
+                bossBar.addPlayer(player);
             } else {
-                player.hideBossBar(bossBar);
+                bossBar.removePlayer(player);
             }
         }
     }
@@ -383,10 +387,12 @@ public final class RelicManager {
         World world = center.getWorld();
 
         world.strikeLightningEffect(center);
-        world.spawnParticle(org.bukkit.Particle.FLASH, center.clone().add(0, 1, 0), 2,
-                0, 0, 0, 0, org.bukkit.Color.WHITE);
+        world.spawnParticle(org.bukkit.Particle.FLASH, center.clone().add(0, 1, 0), 2);
         Fx.whiteBurst(center);
-        for (Player player : world.getNearbyPlayers(center, 6)) {
+        for (Entity nearby : world.getNearbyEntities(center, 6, 6, 6)) {
+            if (!(nearby instanceof Player player)) {
+                continue;
+            }
             player.damage(aoeDamage, guardian);
             player.setVelocity(player.getLocation().toVector().subtract(center.toVector())
                     .normalize().multiply(0.8).setY(0.4));
@@ -410,11 +416,14 @@ public final class RelicManager {
                 spot.add(0, 1, 0);
             }
             world.spawn(spot, Skeleton.class, add -> {
-                add.customName(Text.mm("<white>Sovereign Echo</white>"));
+                add.setCustomName(Text.legacy("<white>Sovereign Echo</white>"));
                 add.getPersistentDataContainer().set(Keys.GUARDIAN_ADD, PersistentDataType.BYTE, (byte) 1);
-                add.getEquipment().setItemInMainHand(new ItemStack(Material.BOW));
-                add.getEquipment().setItemInMainHandDropChance(0f);
-                setAttr(add, Attribute.MAX_HEALTH, 30.0);
+                var equipment = add.getEquipment();
+                if (equipment != null) {
+                    equipment.setItemInMainHand(new ItemStack(Material.BOW));
+                    equipment.setItemInMainHandDropChance(0f);
+                }
+                setAttr(add, Attribute.GENERIC_MAX_HEALTH, 30.0);
                 add.setHealth(30.0);
             });
             world.spawnParticle(org.bukkit.Particle.CLOUD, spot.add(0, 1, 0), 12, 0.3, 0.5, 0.3, 0.02);
@@ -426,21 +435,22 @@ public final class RelicManager {
             return;
         }
         double threshold = plugin.getConfig().getDouble("relic.boss.enrage-threshold", 0.30);
-        double max = guardian.getAttribute(Attribute.MAX_HEALTH).getValue();
+        AttributeInstance maxAttr = guardian.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        double max = maxAttr == null ? 1 : maxAttr.getValue();
         if (guardian.getHealth() / max > threshold) {
             return;
         }
         enraged = true;
         double multiplier = plugin.getConfig().getDouble("relic.boss.enrage-damage-multiplier", 1.5);
-        AttributeInstance damage = guardian.getAttribute(Attribute.ATTACK_DAMAGE);
+        AttributeInstance damage = guardian.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
         if (damage != null) {
             damage.setBaseValue(damage.getBaseValue() * multiplier);
         }
-        AttributeInstance speed = guardian.getAttribute(Attribute.MOVEMENT_SPEED);
+        AttributeInstance speed = guardian.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
         if (speed != null) {
             speed.setBaseValue(speed.getBaseValue() * 1.2);
         }
-        bossBar.name(Text.mm("<gold><bold>Sovereign Guardian</bold> — ENRAGED</gold>"));
+        bossBar.setTitle(Text.legacy("<gold><bold>Sovereign Guardian</bold> — ENRAGED</gold>"));
         Text.broadcast("<gold>⚠</gold> <white>The <gold>Sovereign Guardian</gold> is wounded... and <bold>enraged</bold>!</white>");
         guardian.getWorld().playSound(guardian.getLocation(), org.bukkit.Sound.ENTITY_WITHER_AMBIENT, 2f, 0.5f);
         Fx.whiteBurst(guardian.getLocation());
@@ -495,13 +505,12 @@ public final class RelicManager {
         World world = deathLocation.getWorld();
         Item drop = world.dropItemNaturally(deathLocation.clone().add(0, 0.5, 0), RelicItems.createRelic());
         drop.setGlowing(true);
-        drop.setUnlimitedLifetime(true);
-        drop.setPersistent(true);
-        drop.customName(Text.mm("<gold><bold>✦ Crown-Splitter Axe ✦</bold></gold>"));
+        drop.setCustomName(Text.legacy("<gold><bold>✦ Crown-Splitter Axe ✦</bold></gold>"));
         drop.setCustomNameVisible(true);
         setRelicExists(true);
 
-        // Sky-high END_ROD beam over the drop for ~60s so everyone converges.
+        // Sky-high END_ROD beam over the drop for ~60s so everyone converges;
+        // the item's age is reset each pass so it can't despawn while marked.
         final int[] ticks = {0};
         Bukkit.getScheduler().runTaskTimer(plugin, task -> {
             ticks[0] += 10;
@@ -509,6 +518,7 @@ public final class RelicManager {
                 task.cancel();
                 return;
             }
+            drop.setTicksLived(1);
             Fx.beamTick(drop.getLocation());
         }, 10L, 10L);
 
@@ -546,7 +556,7 @@ public final class RelicManager {
             auraTask = null;
         }
         if (bossBar != null) {
-            Bukkit.getOnlinePlayers().forEach(p -> p.hideBossBar(bossBar));
+            bossBar.removeAll();
             bossBar = null;
         }
         guardian = null;

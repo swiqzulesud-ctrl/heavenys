@@ -1,7 +1,15 @@
 # SMPlugin
 
-A white/gold prestige layer for survival SMP servers, built for **Paper 26.1.2** on **Java 25**
-(the minimum Java version required by the Paper 26.x API line).
+A white/gold prestige layer for survival SMP servers, built for **Arclight 1.21.1**
+(Forge / NeoForge / Fabric hybrid) on **Java 21**.
+
+> **Download:** grab the ready-to-use jar from
+> [`dist/SMPlugin-1.0.0-arclight-1.21.1.jar`](dist/SMPlugin-1.0.0-arclight-1.21.1.jar)
+> and drop it into your server's `plugins/` folder.
+
+Arclight implements the **Spigot API** (not the Paper API), so the plugin targets
+`spigot-api 1.21.1` and ships with the Adventure/MiniMessage library shaded and relocated
+into the jar. It also runs unchanged on plain Spigot/Paper 1.21.1 servers.
 
 ## Features
 
@@ -58,10 +66,11 @@ Permissions: `smplugin.crowns.use/admin`, `smplugin.build.use`, `smplugin.relic.
 `smplugin.admin` (grants all admin nodes).
 
 ## Tech
-- Paper API `26.1.2`, Java 25, Maven.
+- Spigot API `1.21.1` (Arclight-compatible), Java 21, Maven.
 - SQLite persistence (kills, crown holders, bonus hearts, vote cycles, relic flag,
   participation logs) — all reads/writes off the main thread.
-- Adventure/MiniMessage everywhere (no legacy `§` codes).
+- Adventure/MiniMessage for all text, shaded + relocated (`dev.smplugin.libs.kyori`) and
+  bridged through `adventure-platform-bukkit`, since Spigot/Arclight don't bundle Adventure.
 - PersistentDataContainer tags on the relic item, boss entities and GUI items.
 
 ## Building
@@ -70,8 +79,14 @@ Permissions: `smplugin.crowns.use/admin`, `smplugin.build.use`, `smplugin.relic.
 mvn package
 ```
 
-The jar lands in `target/SMPlugin-1.0.0.jar`. Drop it into `plugins/`; the SQLite driver is
-pulled automatically at first startup via the plugin `libraries` mechanism.
+The jar lands in `target/SMPlugin-1.0.0.jar` (identical to the one in `dist/`). Drop it into
+`plugins/`; the SQLite driver is pulled automatically at first startup via the plugin
+`libraries` mechanism.
+
+### Verified on Arclight
+Smoke-tested on `arclight-neoforge-1.21.1-1.0.1`: plugin loads/enables, all commands respond,
+the full Sovereign Guardian lifecycle works (summon → fight → relic drop → one-copy lock →
+destruction → re-arm), and shutdown is clean.
 
 ## Configuration
 See `src/main/resources/config.yml` — vote cycle lengths, relic schedule, boss stats,

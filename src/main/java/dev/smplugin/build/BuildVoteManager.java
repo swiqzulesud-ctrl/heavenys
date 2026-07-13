@@ -340,7 +340,8 @@ public final class BuildVoteManager {
 
         // White fireworks over the winning build's showcase point.
         Location showcase = winner.location();
-        if (showcase != null && showcase.isChunkLoaded()) {
+        if (showcase != null && showcase.getWorld()
+                .isChunkLoaded(showcase.getBlockX() >> 4, showcase.getBlockZ() >> 4)) {
             launchCelebration(showcase);
         }
 

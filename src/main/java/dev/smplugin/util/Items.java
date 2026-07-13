@@ -1,17 +1,17 @@
 package dev.smplugin.util;
 
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 
 /**
- * ItemStack builders used by every GUI, keeping lore/name theming in one place.
+ * ItemStack builders used by every GUI, keeping name/lore theming in one place.
+ * Uses legacy strings because Spigot/Arclight item meta predates components.
  */
 public final class Items {
 
@@ -21,20 +21,26 @@ public final class Items {
     /** Builds a named, lored item tagged as a GUI element (non-takeable). */
     public static ItemStack gui(Material material, String nameMini, String... loreMini) {
         ItemStack stack = new ItemStack(material);
-        stack.editMeta(meta -> {
-            meta.displayName(Text.mm("<!italic>" + nameMini));
+        ItemMeta meta = stack.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(Text.legacy("<!italic>" + nameMini));
             if (loreMini.length > 0) {
-                meta.lore(Text.lore(loreMini));
+                meta.setLore(Text.legacyLore(loreMini));
             }
             meta.getPersistentDataContainer().set(Keys.GUI_ITEM, PersistentDataType.BYTE, (byte) 1);
-        });
+            stack.setItemMeta(meta);
+        }
         return stack;
     }
 
-    /** Same as {@link #gui} but with a pre-built lore list. */
-    public static ItemStack gui(Material material, String nameMini, List<Component> lore) {
+    /** Same as {@link #gui} but with a pre-built legacy lore list. */
+    public static ItemStack gui(Material material, String nameMini, List<String> legacyLore) {
         ItemStack stack = gui(material, nameMini);
-        stack.editMeta(meta -> meta.lore(lore));
+        ItemMeta meta = stack.getItemMeta();
+        if (meta != null) {
+            meta.setLore(legacyLore);
+            stack.setItemMeta(meta);
+        }
         return stack;
     }
 
@@ -51,12 +57,11 @@ public final class Items {
     /** A player head with the given owner's skin, themed name and lore. */
     public static ItemStack head(OfflinePlayer owner, String nameMini, String... loreMini) {
         ItemStack stack = gui(Material.PLAYER_HEAD, nameMini, loreMini);
-        stack.editMeta(SkullMeta.class, meta -> meta.setOwningPlayer(owner));
+        ItemMeta meta = stack.getItemMeta();
+        if (meta instanceof SkullMeta skull) {
+            skull.setOwningPlayer(owner);
+            stack.setItemMeta(skull);
+        }
         return stack;
-    }
-
-    /** A player head resolved by name (skin fetched async by the server). */
-    public static ItemStack headByName(String playerName, String nameMini, String... loreMini) {
-        return head(Bukkit.getOfflinePlayer(playerName), nameMini, loreMini);
     }
 }

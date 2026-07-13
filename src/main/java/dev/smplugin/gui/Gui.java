@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,7 @@ public abstract class Gui implements InventoryHolder {
 
     protected Gui(SMPlugin plugin, int rows, String titleMini) {
         this.plugin = plugin;
-        this.inventory = Bukkit.createInventory(this, rows * 9, Text.mm(titleMini));
+        this.inventory = Bukkit.createInventory(this, rows * 9, Text.legacy(titleMini));
     }
 
     /** Populates the inventory for the given viewer. */
@@ -88,7 +87,7 @@ public abstract class Gui implements InventoryHolder {
     }
 
     @Override
-    public @NotNull Inventory getInventory() {
+    public Inventory getInventory() {
         return inventory;
     }
 }

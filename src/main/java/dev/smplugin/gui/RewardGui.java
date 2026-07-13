@@ -4,10 +4,9 @@ import dev.smplugin.SMPlugin;
 import dev.smplugin.build.RewardManager;
 import dev.smplugin.build.RewardType;
 import dev.smplugin.util.Items;
-import net.kyori.adventure.text.Component;
 import dev.smplugin.util.Text;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,20 +38,19 @@ public final class RewardGui extends Gui {
         close(22);
     }
 
-    private org.bukkit.inventory.ItemStack rewardItem(Player viewer, RewardType type) {
-        List<Component> lore = new ArrayList<>();
+    private ItemStack rewardItem(Player viewer, RewardType type) {
+        List<String> lore = new ArrayList<>();
         for (String line : type.description()) {
-            lore.add(Text.mm("<!italic><gray>" + line + "</gray>"));
+            lore.add(Text.legacy("<!italic><gray>" + line + "</gray>"));
         }
-        lore.add(Component.empty());
+        lore.add("");
         if (type == RewardType.HEARTS) {
             int current = rewards.bonusHearts(viewer.getUniqueId());
             int cap = plugin.getConfig().getInt("builder-vote.rewards.max-bonus-hearts", 10);
-            lore.add(Text.mm("<!italic><gray>Your bonus hearts: <white>" + current + "</white>/<white>" + cap + "</white></gray>"));
-            lore.add(Component.empty());
+            lore.add(Text.legacy("<!italic><gray>Your bonus hearts: <white>" + current + "</white>/<white>" + cap + "</white></gray>"));
+            lore.add("");
         }
-        lore.add(Text.mm("<!italic><white>Click to claim — one reward per win!</white>"));
-        Material icon = type.icon();
-        return Items.gui(icon, "<gold>✦ " + type.displayName() + "</gold>", lore);
+        lore.add(Text.legacy("<!italic><white>Click to claim — one reward per win!</white>"));
+        return Items.gui(type.icon(), "<gold>✦ " + type.displayName() + "</gold>", lore);
     }
 }

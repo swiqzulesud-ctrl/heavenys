@@ -50,10 +50,10 @@ public final class BuildCommand implements CommandExecutor, TabCompleter {
     private void sendHelp(CommandSender sender) {
         BuildVoteManager votes = plugin.buildVote();
         Text.msg(sender, "<gold>─── ✦ Builder Vote ✦ ───</gold>");
-        sender.sendMessage(Text.mm("<white>  /build submit <name> <gray>— enter your build (stand next to it)</gray>"));
-        sender.sendMessage(Text.mm("<white>  /build vote <gray>— open the voting menu</gray>"));
-        sender.sendMessage(Text.mm("<white>  /build results <gray>— last cycle's winner</gray>"));
-        sender.sendMessage(Text.mm("<white>  /build reward <gray>— claim an unclaimed win reward</gray>"));
+        Text.raw(sender, ("<white>  /build submit <name> <gray>— enter your build (stand next to it)</gray>"));
+        Text.raw(sender, ("<white>  /build vote <gray>— open the voting menu</gray>"));
+        Text.raw(sender, ("<white>  /build results <gray>— last cycle's winner</gray>"));
+        Text.raw(sender, ("<white>  /build reward <gray>— claim an unclaimed win reward</gray>"));
         String phase = switch (votes.phase()) {
             case WAITING -> "Nominations open in <white>" + Text.duration(votes.secondsUntilNextPhase()) + "</white>.";
             case NOMINATION -> "Nominations are <white>open now</white> for another <white>"
@@ -61,7 +61,7 @@ public final class BuildCommand implements CommandExecutor, TabCompleter {
             case VOTING -> "Voting is <white>open now</white> for another <white>"
                     + Text.duration(votes.secondsUntilNextPhase()) + "</white>!";
         };
-        sender.sendMessage(Text.mm("<gray>  Current phase: " + phase + "</gray>"));
+        Text.raw(sender, ("<gray>  Current phase: " + phase + "</gray>"));
     }
 
     private void submit(CommandSender sender, String[] args) {
@@ -114,9 +114,9 @@ public final class BuildCommand implements CommandExecutor, TabCompleter {
                     .withZone(ZoneId.systemDefault())
                     .format(Instant.ofEpochMilli(result.finished()));
             Text.msg(sender, "<gold>─── ✦ Last Builder Vote ✦ ───</gold>");
-            sender.sendMessage(Text.mm("<white>  Winner: <gold>" + result.winnerName() + "</gold>"));
-            sender.sendMessage(Text.mm("<white>  Build: <gold>" + result.buildName() + "</gold>"));
-            sender.sendMessage(Text.mm("<white>  Votes: <gold>" + result.votes() + "</gold> <gray>(" + when + ")</gray>"));
+            Text.raw(sender, ("<white>  Winner: <gold>" + result.winnerName() + "</gold>"));
+            Text.raw(sender, ("<white>  Build: <gold>" + result.buildName() + "</gold>"));
+            Text.raw(sender, ("<white>  Votes: <gold>" + result.votes() + "</gold> <gray>(" + when + ")</gray>"));
         });
     }
 

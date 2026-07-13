@@ -14,7 +14,7 @@ public final class GuiListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (!(event.getView().getTopInventory().getHolder(false) instanceof Gui gui)) {
+        if (!(event.getView().getTopInventory().getHolder() instanceof Gui gui)) {
             return;
         }
         event.setCancelled(true);
@@ -26,7 +26,7 @@ public final class GuiListener implements Listener {
 
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
-        if (event.getView().getTopInventory().getHolder(false) instanceof Gui) {
+        if (event.getView().getTopInventory().getHolder() instanceof Gui) {
             event.setCancelled(true);
         }
     }

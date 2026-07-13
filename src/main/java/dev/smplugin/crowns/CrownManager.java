@@ -5,9 +5,8 @@ import dev.smplugin.data.Database;
 import dev.smplugin.util.Fx;
 import dev.smplugin.util.Keys;
 import dev.smplugin.util.Text;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
@@ -188,7 +187,7 @@ public final class CrownManager {
     private void spawnHologram(Player player) {
         removeHologram(player.getUniqueId());
         TextDisplay display = player.getWorld().spawn(player.getLocation(), TextDisplay.class, d -> {
-            d.text(Text.mm("<gold><bold>♛</bold></gold>"));
+            d.setText(Text.legacy("<gold><bold>♛</bold></gold>"));
             d.setBillboard(Display.Billboard.CENTER);
             d.setPersistent(false);
             d.setDefaultBackground(false);
@@ -225,8 +224,8 @@ public final class CrownManager {
         if (team == null) {
             team = board.registerNewTeam(type.teamName());
         }
-        team.prefix(Text.mm("<gold>" + type.tabPrefix() + "</gold> <white>"));
-        team.color(NamedTextColor.WHITE); // white name + white glow outline
+        team.setPrefix(Text.legacy("<gold>" + type.tabPrefix() + "</gold> <white>"));
+        team.setColor(ChatColor.WHITE); // white name + white glow outline
         return team;
     }
 
@@ -236,13 +235,13 @@ public final class CrownManager {
         }
     }
 
-    /** Component describing a crown's holder for GUIs and chat. */
-    public Component holderLine(CrownType type) {
+    /** MiniMessage line describing a crown's holder for GUIs and chat. */
+    public String holderLineMini(CrownType type) {
         Holder holder = holders.get(type);
         if (holder == null) {
-            return Text.mm("<gray>Currently <white>unclaimed</white>.</gray>");
+            return "<gray>Currently <white>unclaimed</white>.</gray>";
         }
-        return Text.mm("<gray>Held by <white><bold>" + holder.name() + "</bold></white> for <white>"
-                + Text.duration((System.currentTimeMillis() - holder.since()) / 1000) + "</white>.</gray>");
+        return "<gray>Held by <white><bold>" + holder.name() + "</bold></white> for <white>"
+                + Text.duration((System.currentTimeMillis() - holder.since()) / 1000) + "</white>.</gray>";
     }
 }

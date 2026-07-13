@@ -13,27 +13,45 @@
     <description>Crowns prestige system, builder votes and the Sovereign's Relic boss event for a survival SMP.</description>
 
     <properties>
-        <!-- Paper 26.x requires Java 25 (class file 69) -->
-        <java.version>25</java.version>
+        <!-- Arclight (latest: Minecraft 1.21.1) implements the Spigot API and
+             runs on Java 21, so the plugin targets exactly that. -->
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Paper API for Minecraft 26.1.2 (latest stable line) -->
-        <paper.version>26.1.2.build.74-stable</paper.version>
+        <spigot.version>1.21.1-R0.1-SNAPSHOT</spigot.version>
+        <!-- Adventure is shaded (and relocated) because Spigot/Arclight do not
+             bundle it the way Paper does. -->
+        <adventure.version>4.21.0</adventure.version>
+        <adventure.platform.version>4.4.1</adventure.platform.version>
         <sqlite.version>3.53.2.0</sqlite.version>
     </properties>
 
     <repositories>
         <repository>
-            <id>papermc</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
+            <id>spigotmc</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>sonatype</id>
+            <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>${paper.version}</version>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${spigot.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bukkit</artifactId>
+            <version>${adventure.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>${adventure.version}</version>
         </dependency>
         <!-- Provided at runtime through the plugin.yml "libraries" mechanism -->
         <dependency>
@@ -60,6 +78,39 @@
                 <configuration>
                     <release>${java.version}</release>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.kyori</pattern>
+                                    <shadedPattern>dev.smplugin.libs.kyori</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

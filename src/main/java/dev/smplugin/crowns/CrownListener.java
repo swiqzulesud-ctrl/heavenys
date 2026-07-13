@@ -50,7 +50,7 @@ public final class CrownListener implements Listener {
 
     @EventHandler
     public void onHolderDeath(PlayerDeathEvent event) {
-        crowns.removeHologram(event.getPlayer().getUniqueId());
+        crowns.removeHologram(event.getEntity().getUniqueId());
     }
 
     @EventHandler

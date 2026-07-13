@@ -14,8 +14,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityRemoveEvent;
-import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -133,11 +133,11 @@ public final class RelicListener implements Listener {
 
     /** The scramble is decided: announce whoever grabs the axe. */
     @EventHandler(ignoreCancelled = true)
-    public void onRelicPickup(PlayerAttemptPickupItemEvent event) {
-        if (!RelicItems.isRelic(event.getItem().getItemStack())) {
+    public void onRelicPickup(EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof Player player)
+                || !RelicItems.isRelic(event.getItem().getItemStack())) {
             return;
         }
-        Player player = event.getPlayer();
         Text.broadcast("<gold>✦</gold> <white><bold>" + player.getName()
                 + "</bold> has claimed the <gold>Crown-Splitter Axe</gold>!</white>");
         Bukkit.getOnlinePlayers().forEach(Fx::fanfare);

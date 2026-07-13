@@ -56,7 +56,7 @@ public final class CrownsCommand implements CommandExecutor, TabCompleter {
         List<KillTracker.Entry> top = plugin.kills().top(10);
         Text.msg(sender, "<gold>─── 👑 Crown of Kills — Top 10 ───</gold>");
         if (top.isEmpty()) {
-            sender.sendMessage(Text.mm("<gray>  No PvP kills have been recorded yet. "
+            Text.raw(sender, ("<gray>  No PvP kills have been recorded yet. "
                     + "The crown awaits its first killer...</gray>"));
             return;
         }
@@ -64,7 +64,7 @@ public final class CrownsCommand implements CommandExecutor, TabCompleter {
         for (int i = 0; i < top.size(); i++) {
             KillTracker.Entry entry = top.get(i);
             boolean isHolder = holder != null && holder.uuid().equals(entry.uuid());
-            sender.sendMessage(Text.mm("<white>  " + (i + 1) + ". "
+            Text.raw(sender, ("<white>  " + (i + 1) + ". "
                     + (isHolder ? "<gold>👑 " : "") + entry.name()
                     + (isHolder ? "</gold>" : "") + " <gray>—</gray> <gold>" + entry.kills()
                     + "</gold> kill" + (entry.kills() == 1 ? "" : "s") + "</white>"));

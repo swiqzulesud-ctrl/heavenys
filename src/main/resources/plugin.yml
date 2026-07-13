@@ -1,7 +1,7 @@
 name: SMPlugin
 version: '${project.version}'
 main: dev.smplugin.SMPlugin
-api-version: '26.1'
+api-version: '1.21'
 description: Crowns prestige system, builder votes and the Sovereign's Relic boss event.
 authors: [SMP Team]
 

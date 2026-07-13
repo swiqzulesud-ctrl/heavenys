@@ -34,10 +34,10 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length == 0) {
             Text.msg(sender, "<gold>─── ⚔ Sovereign's Relic ⚔ ───</gold>");
-            sender.sendMessage(Text.mm("<white>  /relic summon [now] <gray>— trigger the event "
+            Text.raw(sender, ("<white>  /relic summon [now] <gray>— trigger the event "
                     + "(add 'now' to skip the 10-minute build-up)</gray>"));
-            sender.sendMessage(Text.mm("<white>  /relic log <gray>— last event's participants</gray>"));
-            sender.sendMessage(Text.mm("<gray>  Status: <white>" + plugin.relic().statusLine() + "</white></gray>"));
+            Text.raw(sender, ("<white>  /relic log <gray>— last event's participants</gray>"));
+            Text.raw(sender, ("<gray>  Status: <white>" + plugin.relic().statusLine() + "</white></gray>"));
             return true;
         }
         switch (args[0].toLowerCase()) {
@@ -57,11 +57,11 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
             case "log" -> plugin.relic().lastParticipants(participants -> {
                 Text.msg(sender, "<gold>─── ⚔ Last Guardian Fight ⚔ ───</gold>");
                 if (participants.isEmpty()) {
-                    sender.sendMessage(Text.mm("<gray>  No Guardian fight has been recorded yet.</gray>"));
+                    Text.raw(sender, ("<gray>  No Guardian fight has been recorded yet.</gray>"));
                     return;
                 }
                 for (var participant : participants) {
-                    sender.sendMessage(Text.mm("<white>  " + participant.name() + " <gray>—</gray> <gold>"
+                    Text.raw(sender, ("<white>  " + participant.name() + " <gray>—</gray> <gold>"
                             + String.format("%.1f", participant.damage()) + "</gold> damage dealt</white>"));
                 }
             });

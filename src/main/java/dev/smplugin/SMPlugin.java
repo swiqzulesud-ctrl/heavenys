@@ -15,6 +15,7 @@ import dev.smplugin.relic.RelicListener;
 import dev.smplugin.relic.RelicManager;
 import dev.smplugin.util.ChatInput;
 import dev.smplugin.util.Keys;
+import dev.smplugin.util.Text;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -40,6 +41,7 @@ public final class SMPlugin extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         Keys.init(this);
+        Text.init(this);
 
         database = new Database(this);
         try {
@@ -90,6 +92,7 @@ public final class SMPlugin extends JavaPlugin {
         if (database != null) {
             database.shutdown();
         }
+        Text.shutdown();
         getLogger().info("SMPlugin disabled.");
     }
 

@@ -4,11 +4,11 @@ import dev.smplugin.SMPlugin;
 import dev.smplugin.build.BuildVoteManager;
 import dev.smplugin.util.Items;
 import dev.smplugin.util.Text;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
@@ -81,26 +81,29 @@ public final class VoteGui extends Gui {
     }
 
     private ItemStack entryItem(BuildVoteManager.Submission entry, boolean votedForThis, boolean own) {
-        List<Component> lore = new ArrayList<>();
-        lore.add(Text.mm("<!italic><gray>by <white>" + entry.playerName() + "</white></gray>"));
-        lore.add(Component.empty());
-        lore.add(Text.mm("<!italic><gray>Showcase: <white>" + (int) entry.x() + ", "
+        List<String> lore = new ArrayList<>();
+        lore.add(Text.legacy("<!italic><gray>by <white>" + entry.playerName() + "</white></gray>"));
+        lore.add("");
+        lore.add(Text.legacy("<!italic><gray>Showcase: <white>" + (int) entry.x() + ", "
                 + (int) entry.y() + ", " + (int) entry.z() + "</white> <gray>(" + entry.world() + ")</gray>"));
-        lore.add(Component.empty());
+        lore.add("");
         if (own) {
-            lore.add(Text.mm("<!italic><gray>This is your build — you can't vote for it.</gray>"));
+            lore.add(Text.legacy("<!italic><gray>This is your build — you can't vote for it.</gray>"));
         } else if (votedForThis) {
-            lore.add(Text.mm("<!italic><gold>✔ Your current vote.</gold>"));
+            lore.add(Text.legacy("<!italic><gold>✔ Your current vote.</gold>"));
         } else {
-            lore.add(Text.mm("<!italic><white>Click to vote for this build!</white>"));
+            lore.add(Text.legacy("<!italic><white>Click to vote for this build!</white>"));
         }
 
         ItemStack head = Items.gui(Material.PLAYER_HEAD,
                 "<gold>" + entry.buildName() + "</gold>", lore);
-        head.editMeta(SkullMeta.class,
-                meta -> meta.setOwningPlayer(Bukkit.getOfflinePlayer(entry.uuid())));
-        if (votedForThis) {
-            head.editMeta(meta -> meta.setEnchantmentGlintOverride(true));
+        ItemMeta meta = head.getItemMeta();
+        if (meta instanceof SkullMeta skull) {
+            skull.setOwningPlayer(Bukkit.getOfflinePlayer(entry.uuid()));
+            if (votedForThis) {
+                skull.setEnchantmentGlintOverride(true);
+            }
+            head.setItemMeta(skull);
         }
         return head;
     }

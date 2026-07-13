@@ -80,7 +80,7 @@ public final class Fx {
 
     /** Launches a white celebratory firework (builder-vote winner). */
     public static void whiteFirework(Location loc) {
-        Firework firework = loc.getWorld().spawn(loc, Firework.class, fw -> {
+        loc.getWorld().spawn(loc, Firework.class, fw -> {
             var meta = fw.getFireworkMeta();
             meta.addEffect(FireworkEffect.builder()
                     .with(FireworkEffect.Type.BALL_LARGE)
@@ -92,6 +92,5 @@ public final class Fx {
             meta.setPower(1);
             fw.setFireworkMeta(meta);
         });
-        firework.setShotAtAngle(false);
     }
 }

@@ -1,6 +1,5 @@
 package dev.smplugin.build;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
 import dev.smplugin.SMPlugin;
 import dev.smplugin.data.Database;
 import dev.smplugin.gui.RewardGui;
@@ -16,8 +15,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +28,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -190,32 +191,38 @@ public final class RewardManager implements Listener {
                 return;
             }
             Text.msg(player, "<gray>Looking up <white>" + input + "</white>'s skin...</gray>");
-            // Profile completion hits Mojang's API, so it runs off the main thread.
-            CompletableFuture.supplyAsync(() -> {
-                PlayerProfile profile = Bukkit.createProfile(input);
-                return profile.complete(true) ? profile : null;
-            }).thenAccept(profile -> Bukkit.getScheduler().runTask(plugin, () -> {
-                if (!player.isOnline()) {
-                    return;
-                }
-                if (profile == null) {
-                    Text.msg(player, "<gray>No player named <white>" + input + "</white> exists. "
-                            + "Reopen the chooser with <gold>/build reward</gold>.</gray>");
-                    Fx.deny(player);
-                    return;
-                }
-                if (!hasPendingReward(player.getUniqueId())) {
-                    return; // claimed something else meanwhile
-                }
-                ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-                head.editMeta(SkullMeta.class, meta -> {
-                    meta.setPlayerProfile(profile);
-                    meta.displayName(Text.mm("<!italic><white>" + input + "'s Head</white>"));
-                    meta.lore(Text.lore("<gray>Claimed as a <gold>Builder Vote</gold> trophy.</gray>"));
-                });
-                giveItemReward(player, head, "<gold>" + input + "'s Head</gold>");
-            }));
+            // Profile completion hits Mojang's API; update() runs it async.
+            Bukkit.createPlayerProfile(input).update().whenComplete((profile, error) ->
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (!player.isOnline()) {
+                            return;
+                        }
+                        boolean found = error == null && profile != null
+                                && profile.getUniqueId() != null && !profile.getTextures().isEmpty();
+                        if (!found) {
+                            Text.msg(player, "<gray>No player named <white>" + input + "</white> exists. "
+                                    + "Reopen the chooser with <gold>/build reward</gold>.</gray>");
+                            Fx.deny(player);
+                            return;
+                        }
+                        if (!hasPendingReward(player.getUniqueId())) {
+                            return; // claimed something else meanwhile
+                        }
+                        giveHead(player, input, profile);
+                    }));
         });
+    }
+
+    private void giveHead(Player player, String name, PlayerProfile profile) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta meta = head.getItemMeta();
+        if (meta instanceof SkullMeta skull) {
+            skull.setOwnerProfile(profile);
+            skull.setDisplayName(Text.legacy("<!italic><white>" + name + "'s Head</white>"));
+            skull.setLore(Text.legacyLore("<gray>Claimed as a <gold>Builder Vote</gold> trophy.</gray>"));
+            head.setItemMeta(skull);
+        }
+        giveItemReward(player, head, "<gold>" + name + "'s Head</gold>");
     }
 
     // ------------------------------------------------------------- hearts
@@ -225,23 +232,25 @@ public final class RewardManager implements Listener {
     }
 
     /**
-     * (Re)applies the bonus-heart attribute modifier. Transient modifiers are
-     * used so nothing leaks into the player's NBT — the value is re-applied
-     * from the database on every join.
+     * (Re)applies the bonus-heart attribute modifier. Any previous modifier
+     * carrying our key is stripped first, so the value tracked in the
+     * database is always authoritative (even across restarts, where Spigot
+     * persists attribute modifiers in the player's NBT).
      */
     public void applyHearts(Player player) {
-        AttributeInstance attribute = player.getAttribute(Attribute.MAX_HEALTH);
+        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         if (attribute == null) {
             return;
         }
-        AttributeModifier existing = attribute.getModifier(Keys.BONUS_HEARTS);
-        if (existing != null) {
-            attribute.removeModifier(existing);
+        for (AttributeModifier modifier : new HashSet<>(attribute.getModifiers())) {
+            if (Keys.BONUS_HEARTS.equals(modifier.getKey())) {
+                attribute.removeModifier(modifier);
+            }
         }
         int hearts = bonusHearts(player.getUniqueId());
         if (hearts > 0) {
-            attribute.addTransientModifier(new AttributeModifier(
-                    Keys.BONUS_HEARTS, hearts * 2.0, AttributeModifier.Operation.ADD_NUMBER));
+            attribute.addModifier(new AttributeModifier(Keys.BONUS_HEARTS,
+                    hearts * 2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.ANY));
         }
     }
 }

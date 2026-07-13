@@ -71,7 +71,7 @@ public final class KillTracker implements Listener {
         if (!plugin.getConfig().getBoolean("crowns.enabled", true)) {
             return;
         }
-        Player victim = event.getPlayer();
+        Player victim = event.getEntity();
         Player killer = victim.getKiller();
         if (killer == null || killer.getUniqueId().equals(victim.getUniqueId())) {
             return;
