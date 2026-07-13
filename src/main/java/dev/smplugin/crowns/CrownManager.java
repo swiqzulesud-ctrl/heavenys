@@ -173,6 +173,8 @@ public final class CrownManager {
 
         if (plugin.getConfig().getBoolean("crowns.holder-glow", true)) {
             player.setGlowing(holdsAny);
+        } else if (holdsAny) {
+            player.setGlowing(false); // glow was disabled via reload
         }
 
         if (holdsAny && plugin.getConfig().getBoolean("crowns.hologram", true)) {

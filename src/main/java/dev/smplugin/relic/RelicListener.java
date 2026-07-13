@@ -118,6 +118,17 @@ public final class RelicListener implements Listener {
         }
     }
 
+    /** Sweeps up boss entities orphaned by a crash mid-fight. */
+    @EventHandler
+    public void onChunkLoad(org.bukkit.event.world.ChunkLoadEvent event) {
+        for (Entity entity : event.getChunk().getEntities()) {
+            if ((relic.isGuardian(entity) && !relic.isCurrentGuardian(entity))
+                    || (relic.isGuardianAdd(entity) && !relic.isFightActive())) {
+                entity.remove();
+            }
+        }
+    }
+
     // ------------------------------------------------------------- pick up
 
     /** The scramble is decided: announce whoever grabs the axe. */

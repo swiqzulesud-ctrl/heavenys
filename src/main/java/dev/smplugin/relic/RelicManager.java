@@ -130,6 +130,12 @@ public final class RelicManager {
             return;
         }
 
+        // Failsafe: if the boss entity died without our death handler running
+        // (shouldn't happen, but never leave the event stuck "active").
+        if (guardian != null && guardian.isDead()) {
+            despawnGuardian(true);
+        }
+
         if (spawnAt == 0) {
             return;
         }
@@ -198,7 +204,7 @@ public final class RelicManager {
     }
 
     public boolean isFightActive() {
-        return guardian != null && guardian.isValid();
+        return guardian != null && !guardian.isDead();
     }
 
     private void setRelicExists(boolean exists) {
@@ -233,7 +239,9 @@ public final class RelicManager {
             plugin.getLogger().severe("Relic event aborted: arena world not loaded.");
             return;
         }
-        arena.getChunk().load();
+        // Keep the arena loaded and ticking for the whole fight, even with
+        // nobody nearby — otherwise the boss unloads mid-event.
+        setArenaChunkTickets(arena, true);
 
         var cfg = plugin.getConfig();
         double health = cfg.getDouble("relic.boss.health", 420.0);
@@ -375,7 +383,8 @@ public final class RelicManager {
         World world = center.getWorld();
 
         world.strikeLightningEffect(center);
-        world.spawnParticle(org.bukkit.Particle.FLASH, center.clone().add(0, 1, 0), 2);
+        world.spawnParticle(org.bukkit.Particle.FLASH, center.clone().add(0, 1, 0), 2,
+                0, 0, 0, 0, org.bukkit.Color.WHITE);
         Fx.whiteBurst(center);
         for (Player player : world.getNearbyPlayers(center, 6)) {
             player.damage(aoeDamage, guardian);
@@ -395,6 +404,11 @@ public final class RelicManager {
             Location spot = center.clone().add(
                     ThreadLocalRandom.current().nextDouble(-4, 4), 0,
                     ThreadLocalRandom.current().nextDouble(-4, 4));
+            // Don't spawn adds inside walls: nudge up to open air if needed.
+            for (int lift = 0; lift < 6 && (!spot.getBlock().isPassable()
+                    || !spot.clone().add(0, 1, 0).getBlock().isPassable()); lift++) {
+                spot.add(0, 1, 0);
+            }
             world.spawn(spot, Skeleton.class, add -> {
                 add.customName(Text.mm("<white>Sovereign Echo</white>"));
                 add.getPersistentDataContainer().set(Keys.GUARDIAN_ADD, PersistentDataType.BYTE, (byte) 1);
@@ -445,6 +459,11 @@ public final class RelicManager {
                 && entity.getPersistentDataContainer().has(Keys.GUARDIAN, PersistentDataType.BYTE);
     }
 
+    /** True only for the boss entity of the currently running fight. */
+    public boolean isCurrentGuardian(Entity entity) {
+        return guardian != null && guardian.equals(entity);
+    }
+
     public boolean isGuardianAdd(Entity entity) {
         return entity != null
                 && entity.getPersistentDataContainer().has(Keys.GUARDIAN_ADD, PersistentDataType.BYTE);
@@ -454,7 +473,14 @@ public final class RelicManager {
 
     /** Called by the listener when the Guardian dies. Drops the relic. */
     public void onGuardianDeath(Location deathLocation) {
-        cleanupFight();
+        cleanupFight(false);
+        // Keep the arena loaded for the scramble; release after 5 minutes.
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Location arena = arenaLocation();
+            if (arena != null && !isFightActive()) {
+                setArenaChunkTickets(arena, false);
+            }
+        }, 6000L);
 
         Text.broadcast("<gold>✦</gold> <white>The <gold>Sovereign Guardian</gold> has fallen! The "
                 + "<gold>Crown-Splitter Axe</gold> lies unclaimed in the arena — <bold>run</bold>.</white>");
@@ -489,7 +515,28 @@ public final class RelicManager {
         persistParticipants();
     }
 
-    private void cleanupFight() {
+    /** Adds/removes plugin chunk tickets covering the arena radius. */
+    private void setArenaChunkTickets(Location arena, boolean add) {
+        int chunkRadius = (int) Math.ceil(plugin.getConfig().getDouble("relic.arena.radius", 48) / 16.0) + 1;
+        int centerX = arena.getBlockX() >> 4;
+        int centerZ = arena.getBlockZ() >> 4;
+        World world = arena.getWorld();
+        for (int x = centerX - chunkRadius; x <= centerX + chunkRadius; x++) {
+            for (int z = centerZ - chunkRadius; z <= centerZ + chunkRadius; z++) {
+                if (add) {
+                    world.addPluginChunkTicket(x, z, plugin);
+                } else {
+                    world.removePluginChunkTicket(x, z, plugin);
+                }
+            }
+        }
+    }
+
+    private void cleanupFight(boolean releaseArena) {
+        Location arena = arenaLocation();
+        if (releaseArena && arena != null) {
+            setArenaChunkTickets(arena, false);
+        }
         if (fightTask != null) {
             fightTask.cancel();
             fightTask = null;
@@ -517,7 +564,7 @@ public final class RelicManager {
                 Text.broadcast("<gray>The <gold>Sovereign Guardian</gold> fades back into legend...</gray>");
             }
         }
-        cleanupFight();
+        cleanupFight(true);
     }
 
     private void persistParticipants() {
