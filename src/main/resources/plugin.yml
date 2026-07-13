@@ -1,7 +1,7 @@
 name: SMPlugin
 version: '${project.version}'
 main: dev.smplugin.SMPlugin
-api-version: '1.21'
+api-version: '1.20'
 description: Crowns prestige system, builder votes and the Sovereign's Relic boss event.
 authors: [SMP Team]
 
@@ -19,7 +19,7 @@ commands:
     permission: smplugin.build.use
   relic:
     description: The Sovereign's Relic boss event.
-    usage: /relic <summon|log>
+    usage: /relic <summon [now]|log|reset>
     permission: smplugin.relic.use
   smplugin:
     description: SMPlugin administration.

@@ -13,12 +13,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.EntityRemoveEvent;
-
-import java.util.EnumSet;
-import java.util.Set;
+import org.bukkit.event.entity.ItemDespawnEvent;
 
 /**
  * Event glue for the Sovereign's Relic: participation tracking, the loot-drop
@@ -102,20 +100,30 @@ public final class RelicListener implements Listener {
 
     // ---------------------------------------------------------- relic loss
 
-    /** Removal causes that mean the axe is gone for good (not picked up/unloaded). */
-    private static final Set<EntityRemoveEvent.Cause> DESTRUCTION_CAUSES = EnumSet.of(
-            EntityRemoveEvent.Cause.DEATH,        // lava, fire, cactus, explosions
-            EntityRemoveEvent.Cause.DESPAWN,      // despawn timer (disabled, but just in case)
-            EntityRemoveEvent.Cause.OUT_OF_WORLD, // thrown into the void
-            EntityRemoveEvent.Cause.EXPLODE);
-
+    /** The dropped axe timed out on the ground without anyone claiming it. */
     @EventHandler
-    public void onRelicItemRemoved(EntityRemoveEvent event) {
-        if (event.getEntity() instanceof Item item
-                && DESTRUCTION_CAUSES.contains(event.getCause())
-                && RelicItems.isRelic(item.getItemStack())) {
+    public void onRelicDespawn(ItemDespawnEvent event) {
+        if (RelicItems.isRelic(event.getEntity().getItemStack())) {
             relic.onRelicDestroyed();
         }
+    }
+
+    /**
+     * Lava, fire, cactus, explosions and the void all hurt item entities.
+     * The check runs one tick later: only if the hit actually destroyed the
+     * item does it count as lost.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onRelicItemDamaged(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Item item)
+                || !RelicItems.isRelic(item.getItemStack())) {
+            return;
+        }
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!item.isValid()) {
+                relic.onRelicDestroyed();
+            }
+        });
     }
 
     /** Sweeps up boss entities orphaned by a crash mid-fight. */
@@ -134,13 +142,24 @@ public final class RelicListener implements Listener {
     /** The scramble is decided: announce whoever grabs the axe. */
     @EventHandler(ignoreCancelled = true)
     public void onRelicPickup(EntityPickupItemEvent event) {
-        if (!(event.getEntity() instanceof Player player)
-                || !RelicItems.isRelic(event.getItem().getItemStack())) {
+        if (!RelicItems.isRelic(event.getItem().getItemStack())) {
+            return;
+        }
+        relic.markDropClaimed();
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
         Text.broadcast("<gold>✦</gold> <white><bold>" + player.getName()
                 + "</bold> has claimed the <gold>Crown-Splitter Axe</gold>!</white>");
         Bukkit.getOnlinePlayers().forEach(Fx::fanfare);
         Fx.whiteBurst(player.getLocation());
+    }
+
+    /** A hopper/container swallowed the axe: it still exists, stop watching it. */
+    @EventHandler(ignoreCancelled = true)
+    public void onRelicHopperPickup(org.bukkit.event.inventory.InventoryPickupItemEvent event) {
+        if (RelicItems.isRelic(event.getItem().getItemStack())) {
+            relic.markDropClaimed();
+        }
     }
 }

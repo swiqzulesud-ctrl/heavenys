@@ -73,6 +73,12 @@ public final class RelicManager {
 
     private boolean relicExists;
 
+    // The dropped axe currently lying in the arena (null once picked up or
+    // destroyed). Tracked so silent removals (/kill, the void, mod quirks)
+    // are still detected on the 1.20.1 API, which has no EntityRemoveEvent.
+    private Item trackedDrop;
+    private boolean dropClaimed;
+
     public RelicManager(SMPlugin plugin, Database database) {
         this.plugin = plugin;
         this.database = database;
@@ -216,9 +222,35 @@ public final class RelicManager {
 
     /** Called by the listener when the dropped axe is destroyed or despawns. */
     public void onRelicDestroyed() {
+        if (!relicExists) {
+            return; // already handled (e.g. despawn event + drop tracker)
+        }
+        trackedDrop = null;
         setRelicExists(false);
         Text.broadcast("<white>The <gold>Crown-Splitter Axe</gold> has been lost to the world... "
                 + "the <gold>Sovereign Guardian</gold> may rise again.</white>");
+    }
+
+    /** Called by the listener when any entity picks the dropped axe up. */
+    public void markDropClaimed() {
+        dropClaimed = true;
+        trackedDrop = null;
+    }
+
+    /**
+     * Admin escape hatch: clears the one-copy flag when the axe was lost in a
+     * way the plugin cannot observe (silent removal by a command or mod).
+     * Returns an error string, or null on success.
+     */
+    public String adminResetRelic() {
+        if (!relicExists) {
+            return "The Crown-Splitter Axe is not marked as existing — nothing to reset.";
+        }
+        trackedDrop = null;
+        setRelicExists(false);
+        Text.broadcast("<white>The record of the <gold>Crown-Splitter Axe</gold> has been struck "
+                + "from the annals... the <gold>Sovereign Guardian</gold> may rise again.</white>");
+        return null;
     }
 
     public Location arenaLocation() {
@@ -340,7 +372,7 @@ public final class RelicManager {
     private void updateBossBar(double radius) {
         AttributeInstance max = guardian.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         double progress = max == null ? 0 : guardian.getHealth() / max.getValue();
-        bossBar.setProgress(Math.clamp(progress, 0.0, 1.0));
+        bossBar.setProgress(Math.max(0.0, Math.min(1.0, progress)));
         double visibleRange = Math.max(radius * 2, 96);
         for (Player player : Bukkit.getOnlinePlayers()) {
             boolean near = player.getWorld().equals(guardian.getWorld())
@@ -508,18 +540,34 @@ public final class RelicManager {
         drop.setCustomName(Text.legacy("<gold><bold>✦ Crown-Splitter Axe ✦</bold></gold>"));
         drop.setCustomNameVisible(true);
         setRelicExists(true);
+        trackedDrop = drop;
+        dropClaimed = false;
 
-        // Sky-high END_ROD beam over the drop for ~60s so everyone converges;
-        // the item's age is reset each pass so it can't despawn while marked.
+        // Watch the drop: a sky-high END_ROD beam for the first ~60s (with the
+        // item's age reset so it can't despawn mid-scramble), then a silent
+        // watchdog that notices removals the 1.20.1 API fires no event for.
         final int[] ticks = {0};
         Bukkit.getScheduler().runTaskTimer(plugin, task -> {
             ticks[0] += 10;
-            if (ticks[0] > 1200 || !drop.isValid()) {
+            if (dropClaimed || !relicExists || trackedDrop != drop) {
                 task.cancel();
                 return;
             }
-            drop.setTicksLived(1);
-            Fx.beamTick(drop.getLocation());
+            if (!drop.isValid()) {
+                if (drop.getLocation().getChunk().isLoaded()) {
+                    // Gone from a loaded chunk with no despawn/damage event:
+                    // removed silently (/kill, a mod, ...). The axe is lost.
+                    onRelicDestroyed();
+                } else {
+                    trackedDrop = null; // resting in an unloaded chunk; stop watching
+                }
+                task.cancel();
+                return;
+            }
+            if (ticks[0] <= 1200) {
+                drop.setTicksLived(1);
+                Fx.beamTick(drop.getLocation());
+            }
         }, 10L, 10L);
 
         persistParticipants();

@@ -6,7 +6,9 @@ import dev.smplugin.util.Items;
 import dev.smplugin.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -101,7 +103,9 @@ public final class VoteGui extends Gui {
         if (meta instanceof SkullMeta skull) {
             skull.setOwningPlayer(Bukkit.getOfflinePlayer(entry.uuid()));
             if (votedForThis) {
-                skull.setEnchantmentGlintOverride(true);
+                // 1.20.1 has no glint override: a hidden enchant gives the shimmer.
+                skull.addEnchant(Enchantment.DURABILITY, 1, true);
+                skull.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             head.setItemMeta(skull);
         }

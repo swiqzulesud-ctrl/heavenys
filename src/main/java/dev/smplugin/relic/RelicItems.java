@@ -31,9 +31,11 @@ public final class RelicItems {
                     "<gold>✦</gold> <white>Unbreaking V</white>",
                     "",
                     "<gray><italic>The crown answers to whoever holds the axe.</italic></gray>"));
-            meta.addEnchant(Enchantment.SHARPNESS, 10, true);
-            meta.addEnchant(Enchantment.LOOTING, 4, true);
-            meta.addEnchant(Enchantment.UNBREAKING, 5, true);
+            // 1.20.1 API names: DAMAGE_ALL = Sharpness, LOOT_BONUS_MOBS = Looting,
+            // DURABILITY = Unbreaking.
+            meta.addEnchant(Enchantment.DAMAGE_ALL, 10, true);
+            meta.addEnchant(Enchantment.LOOT_BONUS_MOBS, 4, true);
+            meta.addEnchant(Enchantment.DURABILITY, 5, true);
             meta.getPersistentDataContainer().set(Keys.RELIC_ITEM, PersistentDataType.BYTE, (byte) 1);
             axe.setItemMeta(meta);
         }

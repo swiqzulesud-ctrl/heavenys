@@ -37,6 +37,8 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
             Text.raw(sender, ("<white>  /relic summon [now] <gray>— trigger the event "
                     + "(add 'now' to skip the 10-minute build-up)</gray>"));
             Text.raw(sender, ("<white>  /relic log <gray>— last event's participants</gray>"));
+            Text.raw(sender, ("<white>  /relic reset <gray>— clear the one-copy flag if the axe "
+                    + "was lost without the plugin noticing</gray>"));
             Text.raw(sender, ("<gray>  Status: <white>" + plugin.relic().statusLine() + "</white></gray>"));
             return true;
         }
@@ -54,6 +56,16 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
                     Text.msg(sender, "<white>The <gold>Sovereign Guardian</gold> has been summoned!</white>");
                 }
             }
+            case "reset" -> {
+                String error = plugin.relic().adminResetRelic();
+                if (error != null) {
+                    Text.msg(sender, "<gray>" + error + "</gray>");
+                    if (sender instanceof Player p) Fx.deny(p);
+                } else {
+                    Text.msg(sender, "<white>The relic flag has been cleared — the "
+                            + "<gold>Sovereign Guardian</gold> can be summoned again.</white>");
+                }
+            }
             case "log" -> plugin.relic().lastParticipants(participants -> {
                 Text.msg(sender, "<gold>─── ⚔ Last Guardian Fight ⚔ ───</gold>");
                 if (participants.isEmpty()) {
@@ -65,7 +77,7 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
                             + String.format("%.1f", participant.damage()) + "</gold> damage dealt</white>"));
                 }
             });
-            default -> Text.msg(sender, "<gray>Unknown subcommand. Usage: <gold>/relic <summon [now]|log></gold></gray>");
+            default -> Text.msg(sender, "<gray>Unknown subcommand. Usage: <gold>/relic <summon [now]|log|reset></gold></gray>");
         }
         return true;
     }
@@ -77,7 +89,7 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
             return List.of();
         }
         if (args.length == 1) {
-            return Stream.of("summon", "log").filter(s -> s.startsWith(args[0].toLowerCase())).toList();
+            return Stream.of("summon", "log", "reset").filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("summon")) {
             return List.of("now");

@@ -1,15 +1,16 @@
 # SMPlugin
 
-A white/gold prestige layer for survival SMP servers, built for **Arclight 1.21.1**
-(Forge / NeoForge / Fabric hybrid) on **Java 21**.
+A white/gold prestige layer for survival SMP servers, built for **Arclight 1.20.1**
+("Trials", Forge 47 hybrid) on **Java 17**.
 
 > **Download:** grab the ready-to-use jar from
-> [`dist/SMPlugin-1.0.0-arclight-1.21.1.jar`](dist/SMPlugin-1.0.0-arclight-1.21.1.jar)
+> [`dist/SMPlugin-1.0.0-arclight-1.20.1.jar`](dist/SMPlugin-1.0.0-arclight-1.20.1.jar)
 > and drop it into your server's `plugins/` folder.
 
 Arclight implements the **Spigot API** (not the Paper API), so the plugin targets
-`spigot-api 1.21.1` and ships with the Adventure/MiniMessage library shaded and relocated
-into the jar. It also runs unchanged on plain Spigot/Paper 1.21.1 servers.
+`spigot-api 1.20.1` and ships with the Adventure/MiniMessage library shaded and relocated
+into the jar. It also runs on plain Spigot/Paper 1.20.1, and on newer servers
+(1.20.x–1.21.x) thanks to Bukkit's `api-version: 1.20` compatibility layer.
 
 ## Features
 
@@ -60,13 +61,14 @@ A rare boss event (every 14 days and/or `/relic summon`):
 | `/build reward` | Re-open an unclaimed reward chooser |
 | `/relic summon [now]` | (admin) trigger the Guardian (with or without build-up) |
 | `/relic log` | (admin) last event's participants |
+| `/relic reset` | (admin) clear the one-copy flag if the axe was lost untracked |
 | `/smplugin reload` | Reload `config.yml` |
 
 Permissions: `smplugin.crowns.use/admin`, `smplugin.build.use`, `smplugin.relic.admin`,
 `smplugin.admin` (grants all admin nodes).
 
 ## Tech
-- Spigot API `1.21.1` (Arclight-compatible), Java 21, Maven.
+- Spigot API `1.20.1` (Arclight-compatible), Java 17, Maven.
 - SQLite persistence (kills, crown holders, bonus hearts, vote cycles, relic flag,
   participation logs) — all reads/writes off the main thread.
 - Adventure/MiniMessage for all text, shaded + relocated (`dev.smplugin.libs.kyori`) and
@@ -84,9 +86,11 @@ The jar lands in `target/SMPlugin-1.0.0.jar` (identical to the one in `dist/`). 
 `libraries` mechanism.
 
 ### Verified on Arclight
-Smoke-tested on `arclight-neoforge-1.21.1-1.0.1`: plugin loads/enables, all commands respond,
-the full Sovereign Guardian lifecycle works (summon → fight → relic drop → one-copy lock →
-destruction → re-arm), and shutdown is clean.
+Smoke-tested on `arclight-forge-1.20.1-1.0.6` (Trials, Java 17): plugin loads/enables, all
+commands respond, the full Sovereign Guardian lifecycle works (summon → fight → relic drop →
+one-copy lock → destruction → re-arm, including silent removals caught by the drop watchdog),
+and shutdown is clean. `/relic reset` is available as an admin escape hatch if the axe is ever
+lost in a way the plugin cannot observe.
 
 ## Configuration
 See `src/main/resources/config.yml` — vote cycle lengths, relic schedule, boss stats,
