@@ -1,0 +1,68 @@
+# ------------------------------------------------------------------
+#  SMPlugin configuration
+#  Crowns prestige system, builder vote & the Sovereign's Relic event
+# ------------------------------------------------------------------
+
+storage:
+  # SQLite database file, created inside the plugin's data folder.
+  file: smplugin.db
+
+crowns:
+  enabled: true
+  kills:
+    # true  = only direct player-vs-player kills count.
+    # false = kills where a player caused the death indirectly
+    #         (TNT, pushed into the void, mob-assist, ...) also count.
+    count-only-direct-pvp: true
+  # Give the current crown holders a white glowing outline.
+  holder-glow: true
+  # Show a floating golden crown title above each holder's head.
+  hologram: true
+
+builder-vote:
+  enabled: true
+  # Full length of one vote cycle (results fire every X hours).
+  interval-hours: 96
+  # Nomination window length: /build submit opens this many hours
+  # before the vote window starts.
+  nomination-hours: 24
+  # Vote window length: /build vote is open for the last X hours
+  # of the cycle, right before results.
+  vote-hours: 12
+  # true = players may change their vote while the window is open.
+  allow-revote: true
+  rewards:
+    # Extra hearts gained when picking the heart reward (2 hearts = 4 HP).
+    hearts-per-win: 2
+    # Maximum total bonus hearts a single player can stack across wins.
+    max-bonus-hearts: 10
+
+relic:
+  enabled: true
+  schedule:
+    # false = the Sovereign Guardian only appears via /relic summon.
+    enabled: true
+    # Hours between scheduled appearances (336 h = 14 days).
+    interval-hours: 336
+  arena:
+    world: world
+    x: 0.5
+    y: 80.0
+    z: 0.5
+    # Radius (blocks) around the arena centre used for entry warnings,
+    # participation tracking and boss-bar visibility.
+    radius: 48
+  boss:
+    health: 420.0
+    attack-damage: 18.0
+    knockback-resistance: 1.0
+    movement-speed: 0.33
+    armor: 14.0
+    # Seconds between AOE waves (lightning + summoned adds).
+    aoe-interval-seconds: 18
+    aoe-damage: 7.0
+    adds-per-wave: 3
+    max-adds: 6
+    # Fraction of max health below which the Guardian enrages.
+    enrage-threshold: 0.30
+    enrage-damage-multiplier: 1.5
