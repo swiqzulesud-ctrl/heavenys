@@ -13,11 +13,10 @@
     <description>Crowns prestige system, builder votes and the Sovereign's Relic boss event for a survival SMP.</description>
 
     <properties>
-        <!-- Arclight Trials (Minecraft 1.20.1 / Forge 47) implements the
-             Spigot API and runs on Java 17, so the plugin targets exactly that. -->
-        <java.version>17</java.version>
+        <!-- Spigot 26.1.2 (Minecraft's year-based versioning) requires Java 25. -->
+        <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spigot.version>1.20.1-R0.1-SNAPSHOT</spigot.version>
+        <spigot.version>26.1.2-R0.1-SNAPSHOT</spigot.version>
         <!-- Adventure is shaded (and relocated) because Spigot/Arclight do not
              bundle it the way Paper does. -->
         <adventure.version>4.21.0</adventure.version>
@@ -82,7 +81,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

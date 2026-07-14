@@ -4,6 +4,7 @@ import dev.smplugin.SMPlugin;
 import dev.smplugin.data.Database;
 import dev.smplugin.gui.RewardGui;
 import dev.smplugin.util.Fx;
+import dev.smplugin.util.Keys;
 import dev.smplugin.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -33,14 +35,6 @@ import java.util.stream.Collectors;
  * reward options, and persists/applies permanent bonus hearts.
  */
 public final class RewardManager implements Listener {
-
-    /**
-     * Fixed identity of the bonus-heart attribute modifier (the 1.20.1 API
-     * identifies modifiers by UUID + name rather than NamespacedKey).
-     */
-    private static final UUID HEARTS_MODIFIER_ID =
-            UUID.fromString("a7c9f3e1-5b24-4c6d-9e8a-2f1d0b3c4e5f");
-    private static final String HEARTS_MODIFIER_NAME = "smplugin_bonus_hearts";
 
     private final SMPlugin plugin;
     private final Database database;
@@ -244,20 +238,19 @@ public final class RewardManager implements Listener {
      * persists attribute modifiers in the player's NBT).
      */
     public void applyHearts(Player player) {
-        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        AttributeInstance attribute = player.getAttribute(Attribute.MAX_HEALTH);
         if (attribute == null) {
             return;
         }
         for (AttributeModifier modifier : new HashSet<>(attribute.getModifiers())) {
-            if (HEARTS_MODIFIER_ID.equals(modifier.getUniqueId())
-                    || HEARTS_MODIFIER_NAME.equals(modifier.getName())) {
+            if (Keys.BONUS_HEARTS.equals(modifier.getKey())) {
                 attribute.removeModifier(modifier);
             }
         }
         int hearts = bonusHearts(player.getUniqueId());
         if (hearts > 0) {
-            attribute.addModifier(new AttributeModifier(HEARTS_MODIFIER_ID,
-                    HEARTS_MODIFIER_NAME, hearts * 2.0, AttributeModifier.Operation.ADD_NUMBER));
+            attribute.addModifier(new AttributeModifier(Keys.BONUS_HEARTS,
+                    hearts * 2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.ANY));
         }
     }
 }

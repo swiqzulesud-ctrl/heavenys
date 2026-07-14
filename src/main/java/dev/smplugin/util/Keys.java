@@ -18,6 +18,8 @@ public final class Keys {
     public static NamespacedKey GUARDIAN_ADD;
     /** Tags crown-holder hologram displays for cleanup on restart. */
     public static NamespacedKey CROWN_HOLO;
+    /** Attribute modifier key for builder-vote bonus hearts. */
+    public static NamespacedKey BONUS_HEARTS;
 
     private Keys() {
     }
@@ -28,5 +30,6 @@ public final class Keys {
         GUARDIAN = new NamespacedKey(plugin, "sovereign_guardian");
         GUARDIAN_ADD = new NamespacedKey(plugin, "guardian_add");
         CROWN_HOLO = new NamespacedKey(plugin, "crown_holo");
+        BONUS_HEARTS = new NamespacedKey(plugin, "bonus_hearts");
     }
 }

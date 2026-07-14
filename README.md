@@ -1,16 +1,15 @@
 # SMPlugin
 
-A white/gold prestige layer for survival SMP servers, built for **Arclight 1.20.1**
-("Trials", Forge 47 hybrid) on **Java 17**.
+A white/gold prestige layer for survival SMP servers, built for **Spigot 26.1.2**
+(Minecraft's year-based versioning) on **Java 25**.
 
 > **Download:** grab the ready-to-use jar from
-> [`dist/SMPlugin-1.0.0-arclight-1.20.1.jar`](dist/SMPlugin-1.0.0-arclight-1.20.1.jar)
+> [`dist/SMPlugin-1.0.0-spigot-26.1.2.jar`](dist/SMPlugin-1.0.0-spigot-26.1.2.jar)
 > and drop it into your server's `plugins/` folder.
 
-Arclight implements the **Spigot API** (not the Paper API), so the plugin targets
-`spigot-api 1.20.1` and ships with the Adventure/MiniMessage library shaded and relocated
-into the jar. It also runs on plain Spigot/Paper 1.20.1, and on newer servers
-(1.20.x–1.21.x) thanks to Bukkit's `api-version: 1.20` compatibility layer.
+The plugin targets the plain **Spigot API** (`spigot-api 26.1.2`), with the
+Adventure/MiniMessage library shaded and relocated into the jar, so it runs on Spigot,
+Paper and Spigot-API hybrids (e.g. Arclight) for Minecraft 26.1.x.
 
 ## Features
 
@@ -68,7 +67,7 @@ Permissions: `smplugin.crowns.use/admin`, `smplugin.build.use`, `smplugin.relic.
 `smplugin.admin` (grants all admin nodes).
 
 ## Tech
-- Spigot API `1.20.1` (Arclight-compatible), Java 17, Maven.
+- Spigot API `26.1.2`, Java 25, Maven.
 - SQLite persistence (kills, crown holders, bonus hearts, vote cycles, relic flag,
   participation logs) — all reads/writes off the main thread.
 - Adventure/MiniMessage for all text, shaded + relocated (`dev.smplugin.libs.kyori`) and
@@ -85,12 +84,12 @@ The jar lands in `target/SMPlugin-1.0.0.jar` (identical to the one in `dist/`). 
 `plugins/`; the SQLite driver is pulled automatically at first startup via the plugin
 `libraries` mechanism.
 
-### Verified on Arclight
-Smoke-tested on `arclight-forge-1.20.1-1.0.6` (Trials, Java 17): plugin loads/enables, all
-commands respond, the full Sovereign Guardian lifecycle works (summon → fight → relic drop →
-one-copy lock → destruction → re-arm, including silent removals caught by the drop watchdog),
-and shutdown is clean. `/relic reset` is available as an admin escape hatch if the axe is ever
-lost in a way the plugin cannot observe.
+### Verified on Spigot 26.1.2
+Smoke-tested on a real Spigot 26.1.2 server (built with BuildTools, Java 25): plugin
+loads/enables, all commands respond, the full Sovereign Guardian lifecycle works (summon →
+fight → relic drop → one-copy lock → destruction → re-arm, including silent removals caught
+by the drop watchdog), and shutdown is clean. `/relic reset` is available as an admin escape
+hatch if the axe is ever lost in a way the plugin cannot observe.
 
 ## Configuration
 See `src/main/resources/config.yml` — vote cycle lengths, relic schedule, boss stats,

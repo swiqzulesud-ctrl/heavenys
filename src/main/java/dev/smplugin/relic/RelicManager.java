@@ -288,13 +288,13 @@ public final class RelicManager {
             boss.setCanPickupItems(false);
             boss.getPersistentDataContainer().set(Keys.GUARDIAN, PersistentDataType.BYTE, (byte) 1);
 
-            setAttr(boss, Attribute.GENERIC_MAX_HEALTH, health);
+            setAttr(boss, Attribute.MAX_HEALTH, health);
             boss.setHealth(health);
-            setAttr(boss, Attribute.GENERIC_ATTACK_DAMAGE, cfg.getDouble("relic.boss.attack-damage", 18.0));
-            setAttr(boss, Attribute.GENERIC_KNOCKBACK_RESISTANCE, cfg.getDouble("relic.boss.knockback-resistance", 1.0));
-            setAttr(boss, Attribute.GENERIC_MOVEMENT_SPEED, cfg.getDouble("relic.boss.movement-speed", 0.33));
-            setAttr(boss, Attribute.GENERIC_ARMOR, cfg.getDouble("relic.boss.armor", 14.0));
-            setAttr(boss, Attribute.GENERIC_FOLLOW_RANGE, 64.0);
+            setAttr(boss, Attribute.ATTACK_DAMAGE, cfg.getDouble("relic.boss.attack-damage", 18.0));
+            setAttr(boss, Attribute.KNOCKBACK_RESISTANCE, cfg.getDouble("relic.boss.knockback-resistance", 1.0));
+            setAttr(boss, Attribute.MOVEMENT_SPEED, cfg.getDouble("relic.boss.movement-speed", 0.33));
+            setAttr(boss, Attribute.ARMOR, cfg.getDouble("relic.boss.armor", 14.0));
+            setAttr(boss, Attribute.FOLLOW_RANGE, 64.0);
 
             var equipment = boss.getEquipment();
             if (equipment != null) {
@@ -370,7 +370,7 @@ public final class RelicManager {
     }
 
     private void updateBossBar(double radius) {
-        AttributeInstance max = guardian.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        AttributeInstance max = guardian.getAttribute(Attribute.MAX_HEALTH);
         double progress = max == null ? 0 : guardian.getHealth() / max.getValue();
         bossBar.setProgress(Math.max(0.0, Math.min(1.0, progress)));
         double visibleRange = Math.max(radius * 2, 96);
@@ -419,7 +419,9 @@ public final class RelicManager {
         World world = center.getWorld();
 
         world.strikeLightningEffect(center);
-        world.spawnParticle(org.bukkit.Particle.FLASH, center.clone().add(0, 1, 0), 2);
+        // FLASH requires a Color data value on 26.x.
+        world.spawnParticle(org.bukkit.Particle.FLASH, center.clone().add(0, 1, 0), 2,
+                0, 0, 0, 0, org.bukkit.Color.WHITE);
         Fx.whiteBurst(center);
         for (Entity nearby : world.getNearbyEntities(center, 6, 6, 6)) {
             if (!(nearby instanceof Player player)) {
@@ -455,7 +457,7 @@ public final class RelicManager {
                     equipment.setItemInMainHand(new ItemStack(Material.BOW));
                     equipment.setItemInMainHandDropChance(0f);
                 }
-                setAttr(add, Attribute.GENERIC_MAX_HEALTH, 30.0);
+                setAttr(add, Attribute.MAX_HEALTH, 30.0);
                 add.setHealth(30.0);
             });
             world.spawnParticle(org.bukkit.Particle.CLOUD, spot.add(0, 1, 0), 12, 0.3, 0.5, 0.3, 0.02);
@@ -467,18 +469,18 @@ public final class RelicManager {
             return;
         }
         double threshold = plugin.getConfig().getDouble("relic.boss.enrage-threshold", 0.30);
-        AttributeInstance maxAttr = guardian.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        AttributeInstance maxAttr = guardian.getAttribute(Attribute.MAX_HEALTH);
         double max = maxAttr == null ? 1 : maxAttr.getValue();
         if (guardian.getHealth() / max > threshold) {
             return;
         }
         enraged = true;
         double multiplier = plugin.getConfig().getDouble("relic.boss.enrage-damage-multiplier", 1.5);
-        AttributeInstance damage = guardian.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        AttributeInstance damage = guardian.getAttribute(Attribute.ATTACK_DAMAGE);
         if (damage != null) {
             damage.setBaseValue(damage.getBaseValue() * multiplier);
         }
-        AttributeInstance speed = guardian.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        AttributeInstance speed = guardian.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speed != null) {
             speed.setBaseValue(speed.getBaseValue() * 1.2);
         }
