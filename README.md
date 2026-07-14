@@ -22,7 +22,8 @@ above the holder, tab-list prefix, broadcast + title + sound on every change,
 and a white-glass `/crowns` GUI:
 
 - **Crown of Kills** — auto-tracked PvP kills, recalculated instantly on every kill.
-  `/crowns kills` shows the live top 10.
+  `/crowns kills` shows the live top 10. Every 6 hours (configurable) a **rumour of the
+  holder's approximate position** is broadcast — deliberately fuzzed by up to ~48 blocks.
 - **Crown of Resources** — awarded by community vote on Discord based on storage/base
   screenshots; staff set it with `/crowns setresources <player>` / `/crowns clearresources`.
 - **Crown of the Builder** — won through the recurring in-game builder vote.
@@ -35,20 +36,31 @@ and a white-glass `/crowns` GUI:
 - **Results** — automatic tally, server-wide announcement, white fireworks over the winning
   build, and a winner-only **Choose Your Reward** GUI: +2 max hearts (capped, persistent),
   a beacon, an end crystal, a dragon egg, or any player's head (chat-prompted name lookup).
+  Bonus hearts are applied as a permanent **Health Boost** effect (re-applied on join and
+  respawn), so they work reliably on every server flavour.
 - Empty cycles are announced and roll over cleanly.
 
 ### ⚔ The Sovereign's Relic
 A rare boss event (every 14 days and/or `/relic summon`):
 - Ominous countdown broadcasts at 10 / 5 / 1 minutes before arrival.
-- The Guardian appears at a **random surface spot within ~200 blocks of the world spawn**
+- The boss appears at a **random surface spot within ~200 blocks of the world spawn**
   (radius configurable); its exact coordinates are broadcast in chat the moment it arrives.
-- The **Sovereign Guardian** — a heavily buffed Wither Skeleton (~420 HP, high damage,
-  full knockback resistance, periodic lightning AOE + summoned adds, enrage below 30% HP)
-  with a white boss bar and an END_ROD spiral aura. Balanced for a coordinated group in
-  enchanted Netherite; under-geared players entering the arena get a soft warning.
-- On death it drops the one-of-a-kind **Crown-Splitter Axe** (Sharpness X, Looting IV,
-  Unbreaking V, PDC-tagged) *on the ground* — no auto-assign, pure scramble — under a
-  sky-high particle beam. Only one can exist; if it's destroyed the Guardian may rise again.
+- **Three bosses**, each with its own one-of-a-kind relic (each event picks a random boss
+  whose relic doesn't exist yet; admins can force one with `/relic summon [now] <boss>`):
+  - **Gardien Souverain** (Wither Skeleton) → *Hache Fend-Couronne* (netherite axe:
+    Sharpness VII, Looting IV, Unbreaking V)
+  - **Colosse des Abysses** (Ravager, tankier) → *Plastron du Colosse* (netherite
+    chestplate: Protection VI, Thorns V, Unbreaking V)
+  - **Héraut Voilé** (Evoker, frailer) → *Arc de l'Éclipse* (bow: Power VII, Punch IV,
+    Flame, Unbreaking V)
+- Relic balance is deliberately restrained: **no enchant exceeds vanilla max by more
+  than +2 levels**.
+- All bosses share the fight framework: white boss bar, END_ROD spiral aura, periodic
+  lightning AOE + boss-specific adds, enrage below 30% HP, soft warning for under-geared
+  players. Balanced for a coordinated group in enchanted Netherite.
+- On death the relic drops *on the ground* — no auto-assign, pure scramble — under a
+  sky-high particle beam. Only one copy of each relic can exist; if one is destroyed its
+  boss may rise again.
 - `/relic log` shows the damage leaderboard of the last fight.
 
 ## Commands
@@ -67,9 +79,9 @@ A rare boss event (every 14 days and/or `/relic summon`):
 | `/build startvote` | (admin) open the vote window now |
 | `/build finish` | (admin) tally the votes and announce results now |
 | `/build cancel` | (admin) cancel the current cycle and start a fresh one |
-| `/relic summon [now]` | (admin) trigger the Guardian (with or without build-up) |
+| `/relic summon [now] [boss]` | (admin) trigger a boss (random, or `gardien`/`colosse`/`heraut`) |
 | `/relic log` | (admin) last event's participants |
-| `/relic reset` | (admin) clear the one-copy flag if the axe was lost untracked |
+| `/relic reset [boss\|all]` | (admin) clear one-copy flags if a relic was lost untracked |
 | `/smplugin reload` | Reload `config.yml` |
 
 Permissions: `smplugin.crowns.use/admin`, `smplugin.build.use/admin`, `smplugin.relic.admin`,

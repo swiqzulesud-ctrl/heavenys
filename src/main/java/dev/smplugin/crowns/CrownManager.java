@@ -43,9 +43,13 @@ public final class CrownManager {
         this.database = database;
     }
 
+    /** When the Kill Crown holder's rumoured position was last broadcast. */
+    private long lastPositionBroadcast = System.currentTimeMillis();
+
     /** Loads holders from the database and sets up teams. Called on enable. */
     public void load() {
         setupTeams();
+        startPositionRumours();
         database.querySync(conn -> {
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT crown, uuid, name, since FROM crown_holders");
@@ -142,6 +146,47 @@ public final class CrownManager {
                 ps.executeUpdate();
             }
         });
+    }
+
+    // ---------------------------------------------------- position rumours
+
+    /**
+     * Every {@code crowns.kills.position-broadcast.interval-hours} (6h by
+     * default), broadcasts a deliberately imprecise position of the Kill
+     * Crown holder: each coordinate is offset by up to {@code fuzz} blocks,
+     * so the crown paints a target without giving an exact waypoint.
+     */
+    private void startPositionRumours() {
+        // Minute ticker; the elapsed-time check makes the interval reload-safe.
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            var cfg = plugin.getConfig();
+            if (!cfg.getBoolean("crowns.kills.position-broadcast.enabled", true)) {
+                return;
+            }
+            long intervalMs = Math.max(1, cfg.getLong("crowns.kills.position-broadcast.interval-hours", 6))
+                    * 3_600_000L;
+            long now = System.currentTimeMillis();
+            if (now - lastPositionBroadcast < intervalMs) {
+                return;
+            }
+            Holder holder = holders.get(CrownType.KILLS);
+            if (holder == null) {
+                return;
+            }
+            Player player = Bukkit.getPlayer(holder.uuid());
+            if (player == null) {
+                return; // holder offline: try again next minute until they show up
+            }
+            lastPositionBroadcast = now;
+            int fuzz = Math.max(8, cfg.getInt("crowns.kills.position-broadcast.fuzz", 48));
+            var random = java.util.concurrent.ThreadLocalRandom.current();
+            int x = player.getLocation().getBlockX() + random.nextInt(-fuzz, fuzz + 1);
+            int z = player.getLocation().getBlockZ() + random.nextInt(-fuzz, fuzz + 1);
+            Text.broadcast("<gold>👑</gold> <white>Rumeur : <bold>" + holder.name()
+                    + "</bold>, porteur de la <gold>Couronne du Tueur</gold>, aurait été aperçu "
+                    + "aux environs de <gold>x ≈ " + x + ", z ≈ " + z + "</gold> <gray>("
+                    + player.getWorld().getName() + ")</gray>.</white>");
+        }, 1200L, 1200L);
     }
 
     // --------------------------------------------------------- presentation

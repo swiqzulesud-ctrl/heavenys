@@ -9,8 +9,10 @@ import org.bukkit.NamespacedKey;
  */
 public final class Keys {
 
-    /** Tags the one-of-a-kind Sovereign's Relic item stack. */
+    /** Tags every unique relic item stack (legacy byte flag). */
     public static NamespacedKey RELIC_ITEM;
+    /** Which boss's relic an item stack is (string id). */
+    public static NamespacedKey RELIC_ID;
     /** Tags GUI items so shift-click tricks can never extract them. */
     public static NamespacedKey GUI_ITEM;
     /** Tags the Sovereign Guardian entity and its summoned adds. */
@@ -26,6 +28,7 @@ public final class Keys {
 
     public static void init(SMPlugin plugin) {
         RELIC_ITEM = new NamespacedKey(plugin, "relic_item");
+        RELIC_ID = new NamespacedKey(plugin, "relic_id");
         GUI_ITEM = new NamespacedKey(plugin, "gui_item");
         GUARDIAN = new NamespacedKey(plugin, "sovereign_guardian");
         GUARDIAN_ADD = new NamespacedKey(plugin, "guardian_add");

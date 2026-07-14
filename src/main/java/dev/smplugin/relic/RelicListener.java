@@ -100,11 +100,12 @@ public final class RelicListener implements Listener {
 
     // ---------------------------------------------------------- relic loss
 
-    /** The dropped axe timed out on the ground without anyone claiming it. */
+    /** A dropped relic timed out on the ground without anyone claiming it. */
     @EventHandler
     public void onRelicDespawn(ItemDespawnEvent event) {
-        if (RelicItems.isRelic(event.getEntity().getItemStack())) {
-            relic.onRelicDestroyed();
+        RelicBoss boss = RelicItems.relicBoss(event.getEntity().getItemStack());
+        if (boss != null) {
+            relic.onRelicDestroyed(boss);
         }
     }
 
@@ -115,13 +116,16 @@ public final class RelicListener implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onRelicItemDamaged(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Item item)
-                || !RelicItems.isRelic(item.getItemStack())) {
+        if (!(event.getEntity() instanceof Item item)) {
+            return;
+        }
+        RelicBoss boss = RelicItems.relicBoss(item.getItemStack());
+        if (boss == null) {
             return;
         }
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (!item.isValid()) {
-                relic.onRelicDestroyed();
+                relic.onRelicDestroyed(boss);
             }
         });
     }
@@ -139,27 +143,28 @@ public final class RelicListener implements Listener {
 
     // ------------------------------------------------------------- pick up
 
-    /** The scramble is decided: announce whoever grabs the axe. */
+    /** The scramble is decided: announce whoever grabs the relic. */
     @EventHandler(ignoreCancelled = true)
     public void onRelicPickup(EntityPickupItemEvent event) {
-        if (!RelicItems.isRelic(event.getItem().getItemStack())) {
+        RelicBoss boss = RelicItems.relicBoss(event.getItem().getItemStack());
+        if (boss == null) {
             return;
         }
-        relic.markDropClaimed();
+        relic.markDropClaimed(event.getItem());
         if (!(event.getEntity() instanceof Player player)) {
             return;
         }
         Text.broadcast("<gold>✦</gold> <white><bold>" + player.getName()
-                + "</bold> s'est emparé de la <gold>Hache Fend-Couronne</gold> !</white>");
+                + "</bold> s'est emparé de la relique <gold>" + boss.relicName() + "</gold> !</white>");
         Bukkit.getOnlinePlayers().forEach(Fx::fanfare);
         Fx.whiteBurst(player.getLocation());
     }
 
-    /** A hopper/container swallowed the axe: it still exists, stop watching it. */
+    /** A hopper/container swallowed the relic: it still exists, stop watching it. */
     @EventHandler(ignoreCancelled = true)
     public void onRelicHopperPickup(org.bukkit.event.inventory.InventoryPickupItemEvent event) {
         if (RelicItems.isRelic(event.getItem().getItemStack())) {
-            relic.markDropClaimed();
+            relic.markDropClaimed(event.getItem());
         }
     }
 }

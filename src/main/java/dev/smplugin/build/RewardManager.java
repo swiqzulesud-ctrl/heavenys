@@ -15,8 +15,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.EquipmentSlotGroup;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerProfile;
@@ -234,25 +236,47 @@ public final class RewardManager implements Listener {
     }
 
     /**
-     * (Re)applies the bonus-heart attribute modifier. Any previous modifier
-     * carrying our key is stripped first, so the value tracked in the
-     * database is always authoritative (even across restarts, where Spigot
-     * persists attribute modifiers in the player's NBT).
+     * (Re)applies the bonus hearts as a permanent <b>Health Boost</b> effect
+     * (1 level = 2 hearts). Potion effects vanish on death, so this runs on
+     * join, on respawn and right after claiming the reward. Any leftover
+     * attribute modifier from older plugin versions is stripped first.
      */
     public void applyHearts(Player player) {
+        // Migration: remove the attribute modifier used by older versions.
         AttributeInstance attribute = player.getAttribute(Attribute.MAX_HEALTH);
-        if (attribute == null) {
-            return;
-        }
-        for (AttributeModifier modifier : new HashSet<>(attribute.getModifiers())) {
-            if (Keys.BONUS_HEARTS.equals(modifier.getKey())) {
-                attribute.removeModifier(modifier);
+        if (attribute != null) {
+            for (AttributeModifier modifier : new HashSet<>(attribute.getModifiers())) {
+                if (Keys.BONUS_HEARTS.equals(modifier.getKey())) {
+                    attribute.removeModifier(modifier);
+                }
             }
         }
+
         int hearts = bonusHearts(player.getUniqueId());
-        if (hearts > 0) {
-            attribute.addModifier(new AttributeModifier(Keys.BONUS_HEARTS,
-                    hearts * 2.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.ANY));
+        int amplifier = (int) Math.ceil(hearts / 2.0) - 1; // Health Boost: +2 hearts per level
+        PotionEffect current = player.getPotionEffect(PotionEffectType.HEALTH_BOOST);
+        if (hearts <= 0) {
+            if (current != null && current.getDuration() == PotionEffect.INFINITE_DURATION) {
+                player.removePotionEffect(PotionEffectType.HEALTH_BOOST);
+            }
+            return;
         }
+        if (current == null || current.getAmplifier() != amplifier
+                || current.getDuration() != PotionEffect.INFINITE_DURATION) {
+            player.removePotionEffect(PotionEffectType.HEALTH_BOOST);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST,
+                    PotionEffect.INFINITE_DURATION, amplifier, true, false, false));
+        }
+    }
+
+    /** Potion effects are wiped on death: re-apply the hearts after respawn. */
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (player.isOnline()) {
+                applyHearts(player);
+            }
+        });
     }
 }

@@ -14,6 +14,13 @@ crowns:
     # false = kills where a player caused the death indirectly
     #         (TNT, pushed into the void, mob-assist, ...) also count.
     count-only-direct-pvp: true
+    # Periodically broadcast a rumour of where the Kill Crown holder is.
+    position-broadcast:
+      enabled: true
+      interval-hours: 6
+      # The announced position is offset by up to this many blocks in each
+      # direction, so it is deliberately NOT 100% accurate.
+      fuzz: 48
   # Show a floating golden crown title above each holder's head.
   hologram: true
 
