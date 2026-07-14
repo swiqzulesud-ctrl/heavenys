@@ -43,7 +43,7 @@ import java.util.function.Consumer;
  * <p>Plusieurs boss existent ({@link RelicBoss}) ; chaque événement en tire
  * un au hasard parmi ceux dont la relique n'existe pas encore. Le boss
  * apparaît à un endroit aléatoire de la carte (dans un rayon configurable
- * autour du spawn du monde, ~200 blocs par défaut) et ses coordonnées
+ * autour du spawn du monde, ~5000 blocs par défaut) et ses coordonnées
  * exactes sont annoncées dans le chat au moment de son arrivée.</p>
  *
  * <p>Chaque relique est strictement unique : un indicateur en base de données
@@ -331,14 +331,14 @@ public final class RelicManager {
 
     /**
      * Picks a random surface location within {@code relic.spawn.radius}
-     * blocks (~200 by default) of the world spawn.
+     * blocks (~5000 by default) of the world spawn.
      */
     private Location pickSpawnLocation() {
         World world = spawnWorld();
         if (world == null) {
             return null;
         }
-        double radius = Math.max(16, plugin.getConfig().getDouble("relic.spawn.radius", 200));
+        double radius = Math.max(16, plugin.getConfig().getDouble("relic.spawn.radius", 5000));
         Location center = world.getSpawnLocation();
         double angle = ThreadLocalRandom.current().nextDouble(Math.PI * 2);
         // sqrt keeps the distribution uniform over the disc's area.

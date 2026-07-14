@@ -51,10 +51,10 @@ relic:
     interval-hours: 336
   spawn:
     world: world
-    # The Guardian appears at a random surface spot within roughly this
-    # many blocks of the world spawn. Its exact coordinates are broadcast
-    # in chat the moment it arrives.
-    radius: 200
+    # The boss appears at a random surface spot within roughly this many
+    # blocks of the world spawn. Its exact coordinates are broadcast in
+    # chat the moment it arrives.
+    radius: 5000
     # Radius (blocks) around the boss used for entry warnings,
     # participation tracking and boss-bar visibility.
     fight-radius: 48

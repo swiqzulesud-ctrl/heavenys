@@ -43,7 +43,7 @@ and a white-glass `/crowns` GUI:
 ### ⚔ The Sovereign's Relic
 A rare boss event (every 14 days and/or `/relic summon`):
 - Ominous countdown broadcasts at 10 / 5 / 1 minutes before arrival.
-- The boss appears at a **random surface spot within ~200 blocks of the world spawn**
+- The boss appears at a **random surface spot within ~5000 blocks of the world spawn**
   (radius configurable); its exact coordinates are broadcast in chat the moment it arrives.
 - **Three bosses**, each with its own one-of-a-kind relic (each event picks a random boss
   whose relic doesn't exist yet; admins can force one with `/relic summon [now] <boss>`):
