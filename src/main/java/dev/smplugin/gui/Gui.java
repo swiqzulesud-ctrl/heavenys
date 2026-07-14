@@ -62,7 +62,7 @@ public abstract class Gui implements InventoryHolder {
 
     /** Standard close button (a themed barrier). */
     protected void close(int slot) {
-        set(slot, Items.gui(org.bukkit.Material.BARRIER, "<white>✕ Close", "<gray>Close this menu."),
+        set(slot, Items.gui(org.bukkit.Material.BARRIER, "<white>✕ Fermer", "<gray>Fermer ce menu."),
                 p -> {
                     p.closeInventory();
                     Fx.click(p);

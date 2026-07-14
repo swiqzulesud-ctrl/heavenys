@@ -14,8 +14,8 @@ commands:
     usage: /crowns [kills|setresources <player>|clearresources]
     permission: smplugin.crowns.use
   build:
-    description: Builder vote - submit builds, vote and view results.
-    usage: /build <submit <name>|vote|results|reward>
+    description: Builder vote - submit builds, vote, view results and run the contest.
+    usage: /build <submit <name>|vote|results|reward|startnominations|startvote|finish|cancel>
     permission: smplugin.build.use
   relic:
     description: The Sovereign's Relic boss event.
@@ -32,6 +32,7 @@ permissions:
     default: op
     children:
       smplugin.crowns.admin: true
+      smplugin.build.admin: true
       smplugin.relic.admin: true
   smplugin.crowns.use:
     description: Open the Crowns GUI and leaderboards.
@@ -42,6 +43,9 @@ permissions:
   smplugin.build.use:
     description: Submit builds and vote in the builder vote.
     default: true
+  smplugin.build.admin:
+    description: Start, finish and cancel builder-vote contests on demand.
+    default: op
   smplugin.relic.use:
     description: Base access to /relic (subcommands are admin gated).
     default: true

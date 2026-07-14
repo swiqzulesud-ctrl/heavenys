@@ -27,12 +27,12 @@ public final class SMPluginCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, String[] args) {
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
             plugin.reloadConfig();
-            // Re-apply presentation with fresh config values (glow/hologram toggles).
+            // Re-apply presentation with fresh config values (hologram toggle).
             Bukkit.getOnlinePlayers().forEach(p -> plugin.crowns().applyPresentation(p));
-            Text.msg(sender, "<white>SMPlugin <gold>config.yml</gold> reloaded.</white>");
+            Text.msg(sender, "<white>Configuration <gold>config.yml</gold> de SMPlugin rechargée.</white>");
             return true;
         }
-        Text.msg(sender, "<gray>Usage: <gold>/smplugin reload</gold></gray>");
+        Text.msg(sender, "<gray>Usage : <gold>/smplugin reload</gold></gray>");
         return true;
     }
 

@@ -26,7 +26,7 @@ public final class CrownsGui extends Gui {
     private final KillTracker kills;
 
     public CrownsGui(SMPlugin plugin, CrownManager crowns, KillTracker kills) {
-        super(plugin, 3, "<white>The Three <gold>Crowns</gold>");
+        super(plugin, 3, "<white>Les Trois <gold>Couronnes</gold>");
         this.crowns = crowns;
         this.kills = kills;
     }
@@ -34,13 +34,13 @@ public final class CrownsGui extends Gui {
     @Override
     protected void build(Player viewer) {
         set(11, crownItem(CrownType.KILLS,
-                        "<gray>Top killer: see <gold>/crowns kills</gold> for the top 10.</gray>"),
+                        "<gray>Meilleur tueur : <gold>/crowns kills</gold> pour le top 10.</gray>"),
                 p -> {
                     p.closeInventory();
                     p.performCommand("crowns kills");
                 });
         set(13, crownItem(CrownType.RESOURCES,
-                "<gray>Judged off-platform; presented in-world.</gray>"));
+                "<gray>Jugée hors-jeu ; célébrée en jeu.</gray>"));
         set(15, crownItem(CrownType.BUILDER,
                 "<gray>" + buildPhaseHint() + "</gray>"));
         close(22);
@@ -48,12 +48,13 @@ public final class CrownsGui extends Gui {
 
     private ItemStack crownItem(CrownType type, String footer) {
         List<String> lore = new ArrayList<>();
-        lore.add(Text.legacy("<!italic><gray>Crown of " + type.category() + "</gray>"));
+        lore.add(Text.legacy("<!italic><gray>Domaine : " + type.category() + "</gray>"));
         lore.add("");
         lore.add(Text.legacy("<!italic>" + crowns.holderLineMini(type)));
         CrownManager.Holder holder = crowns.holder(type);
         if (type == CrownType.KILLS && holder != null) {
-            lore.add(Text.legacy("<!italic><gray>PvP kills: <white>" + kills.kills(holder.uuid()) + "</white></gray>"));
+            lore.add(Text.legacy("<!italic><gray>Éliminations JcJ : <white>"
+                    + kills.kills(holder.uuid()) + "</white></gray>"));
         }
         lore.add("");
         for (String line : type.description()) {
@@ -78,9 +79,9 @@ public final class CrownsGui extends Gui {
     private String buildPhaseHint() {
         var votes = plugin.buildVote();
         return switch (votes.phase()) {
-            case WAITING -> "Nominations open in " + Text.duration(votes.secondsUntilNextPhase()) + ".";
-            case NOMINATION -> "Nominations open now — /build submit <name>!";
-            case VOTING -> "Voting open now — /build vote!";
+            case WAITING -> "Candidatures dans " + Text.duration(votes.secondsUntilNextPhase()) + ".";
+            case NOMINATION -> "Candidatures ouvertes — /build submit <nom> !";
+            case VOTING -> "Vote en cours — /build vote !";
         };
     }
 }

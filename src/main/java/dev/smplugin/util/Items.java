@@ -51,7 +51,7 @@ public final class Items {
 
     /** Standard back button. */
     public static ItemStack backButton() {
-        return gui(Material.ARROW, "<white>← Back", "<gray>Return to the previous menu.");
+        return gui(Material.ARROW, "<white>← Retour", "<gray>Revenir au menu précédent.");
     }
 
     /** A player head with the given owner's skin, themed name and lore. */

@@ -46,8 +46,8 @@ public final class ChatInput implements Listener {
         event.setCancelled(true);
         String input = event.getMessage().trim();
         Bukkit.getScheduler().runTask(plugin, () -> {
-            if (input.equalsIgnoreCase("cancel")) {
-                Text.msg(event.getPlayer(), "<gray>Input cancelled.</gray>");
+            if (input.equalsIgnoreCase("cancel") || input.equalsIgnoreCase("annuler")) {
+                Text.msg(event.getPlayer(), "<gray>Saisie annulée.</gray>");
                 return;
             }
             callback.accept(input);

@@ -3,30 +3,30 @@ package dev.smplugin.crowns;
 import org.bukkit.Material;
 
 /**
- * The three permanent crowns of the SMP.
+ * Les trois couronnes permanentes du SMP.
  */
 public enum CrownType {
 
-    KILLS("Kills", "Combat",
-            "killer", "♛ Killer",
+    KILLS("du Tueur", "Combat",
+            "killer", "♛ Tueur",
             Material.IRON_SWORD,
-            "Earned by claiming the most",
-            "player-vs-player kills on the server.",
-            "Recalculated instantly on every duel."),
+            "Gagnée en cumulant le plus de victoires",
+            "joueur contre joueur sur le serveur.",
+            "Recalculée instantanément à chaque duel."),
 
-    RESOURCES("Resources", "Wealth",
-            "magnate", "♛ Magnate",
+    RESOURCES("des Richesses", "Richesse",
+            "magnate", "♛ Magnat",
             Material.GOLD_BLOCK,
-            "Awarded by community vote on Discord",
-            "based on submitted storage/base screenshots.",
-            "Show off your vaults and farms to claim it."),
+            "Décernée par un vote communautaire sur Discord",
+            "sur la base de captures d'écran de vos coffres et bases.",
+            "Exhibez vos richesses pour la revendiquer."),
 
-    BUILDER("the Builder", "Aesthetics",
-            "builder", "♛ Builder",
+    BUILDER("du Bâtisseur", "Esthétique",
+            "builder", "♛ Bâtisseur",
             Material.SCAFFOLDING,
-            "Won through the in-game builder vote",
-            "held every few days. Submit your build",
-            "with /build submit and let the server decide.");
+            "Remportée grâce au vote de construction organisé",
+            "régulièrement. Inscrivez votre création avec",
+            "/build submit et laissez le serveur trancher.");
 
     private final String displayName;
     private final String category;
@@ -45,9 +45,9 @@ public enum CrownType {
         this.description = description;
     }
 
-    /** e.g. "Crown of Kills". */
+    /** ex. « Couronne du Tueur ». */
     public String crownName() {
-        return "Crown of " + displayName;
+        return "Couronne " + displayName;
     }
 
     public String category() {

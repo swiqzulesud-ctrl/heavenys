@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * /relic — admin controls for the Sovereign's Relic event.
+ * /relic — contrôles administrateur de l'événement de la Relique Souveraine.
  */
 public final class RelicCommand implements CommandExecutor, TabCompleter {
 
@@ -28,18 +28,18 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, String[] args) {
         if (!sender.hasPermission("smplugin.relic.admin")) {
-            Text.msg(sender, "<gray>Only the server's stewards may command the Sovereign Guardian.</gray>");
+            Text.msg(sender, "<gray>Seuls les intendants du serveur peuvent commander le Gardien Souverain.</gray>");
             if (sender instanceof Player p) Fx.deny(p);
             return true;
         }
         if (args.length == 0) {
-            Text.msg(sender, "<gold>─── ⚔ Sovereign's Relic ⚔ ───</gold>");
-            Text.raw(sender, ("<white>  /relic summon [now] <gray>— trigger the event "
-                    + "(add 'now' to skip the 10-minute build-up)</gray>"));
-            Text.raw(sender, ("<white>  /relic log <gray>— last event's participants</gray>"));
-            Text.raw(sender, ("<white>  /relic reset <gray>— clear the one-copy flag if the axe "
-                    + "was lost without the plugin noticing</gray>"));
-            Text.raw(sender, ("<gray>  Status: <white>" + plugin.relic().statusLine() + "</white></gray>"));
+            Text.msg(sender, "<gold>─── ⚔ Relique Souveraine ⚔ ───</gold>");
+            Text.raw(sender, "<white>  /relic summon [now] <gray>— déclencher l'événement "
+                    + "(ajoutez « now » pour sauter les 10 minutes de préparation)</gray>");
+            Text.raw(sender, "<white>  /relic log <gray>— les participants du dernier combat</gray>");
+            Text.raw(sender, "<white>  /relic reset <gray>— lever le verrou d'unicité si la hache "
+                    + "a été perdue sans que le plugin le remarque</gray>");
+            Text.raw(sender, "<gray>  Statut : <white>" + plugin.relic().statusLine() + "</white></gray>");
             return true;
         }
         switch (args[0].toLowerCase()) {
@@ -50,10 +50,10 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
                     Text.msg(sender, "<gray>" + error + "</gray>");
                     if (sender instanceof Player p) Fx.deny(p);
                 } else if (!now) {
-                    Text.msg(sender, "<white>The build-up has begun — the <gold>Sovereign Guardian</gold> "
-                            + "arrives in <white>10 minutes</white>.</white>");
+                    Text.msg(sender, "<white>L'éveil a commencé — le <gold>Gardien Souverain</gold> "
+                            + "apparaîtra dans <white>10 minutes</white>, quelque part sur la carte.</white>");
                 } else {
-                    Text.msg(sender, "<white>The <gold>Sovereign Guardian</gold> has been summoned!</white>");
+                    Text.msg(sender, "<white>Le <gold>Gardien Souverain</gold> a été invoqué !</white>");
                 }
             }
             case "reset" -> {
@@ -62,22 +62,23 @@ public final class RelicCommand implements CommandExecutor, TabCompleter {
                     Text.msg(sender, "<gray>" + error + "</gray>");
                     if (sender instanceof Player p) Fx.deny(p);
                 } else {
-                    Text.msg(sender, "<white>The relic flag has been cleared — the "
-                            + "<gold>Sovereign Guardian</gold> can be summoned again.</white>");
+                    Text.msg(sender, "<white>Le verrou de la relique a été levé — le "
+                            + "<gold>Gardien Souverain</gold> peut être invoqué à nouveau.</white>");
                 }
             }
             case "log" -> plugin.relic().lastParticipants(participants -> {
-                Text.msg(sender, "<gold>─── ⚔ Last Guardian Fight ⚔ ───</gold>");
+                Text.msg(sender, "<gold>─── ⚔ Dernier combat du Gardien ⚔ ───</gold>");
                 if (participants.isEmpty()) {
-                    Text.raw(sender, ("<gray>  No Guardian fight has been recorded yet.</gray>"));
+                    Text.raw(sender, "<gray>  Aucun combat de Gardien enregistré pour l'instant.</gray>");
                     return;
                 }
                 for (var participant : participants) {
-                    Text.raw(sender, ("<white>  " + participant.name() + " <gray>—</gray> <gold>"
-                            + String.format("%.1f", participant.damage()) + "</gold> damage dealt</white>"));
+                    Text.raw(sender, "<white>  " + participant.name() + " <gray>—</gray> <gold>"
+                            + String.format("%.1f", participant.damage()) + "</gold> dégâts infligés</white>");
                 }
             });
-            default -> Text.msg(sender, "<gray>Unknown subcommand. Usage: <gold>/relic <summon [now]|log|reset></gold></gray>");
+            default -> Text.msg(sender, "<gray>Sous-commande inconnue. Usage : "
+                    + "<gold>/relic <summon [now]|log|reset></gold></gray>");
         }
         return true;
     }

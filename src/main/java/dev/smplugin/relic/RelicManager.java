@@ -37,13 +37,18 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 /**
- * The Sovereign's Relic event: schedules and runs the Sovereign Guardian boss
- * fight, tracks participation, and drops the unique Crown-Splitter Axe.
+ * L'événement de la Relique Souveraine : programme et anime le combat contre
+ * le Gardien Souverain, suit la participation et fait tomber l'unique
+ * Hache Fend-Couronne.
  *
- * <p>The relic is strictly one-of-a-kind: a flag in the database records
- * whether it currently exists in the world. While it exists, the Guardian
- * cannot be summoned; when the axe is destroyed (despawn, lava, explosion)
- * the flag clears and the event becomes available again.</p>
+ * <p>Le Gardien apparaît à un endroit aléatoire de la carte (dans un rayon
+ * configurable autour du spawn du monde, ~200 blocs par défaut) et ses
+ * coordonnées exactes sont annoncées dans le chat au moment de son arrivée.</p>
+ *
+ * <p>La relique est strictement unique : un indicateur en base de données
+ * enregistre son existence. Tant qu'elle existe, le Gardien ne peut pas être
+ * invoqué ; quand la hache est détruite, l'indicateur s'efface et
+ * l'événement redevient disponible.</p>
  */
 public final class RelicManager {
 
@@ -64,6 +69,8 @@ public final class RelicManager {
     private BossBar bossBar;
     private BukkitTask fightTask;
     private BukkitTask auraTask;
+    /** Where the current (or last) fight takes place; chunk tickets center. */
+    private Location fightCenter;
     private long eventStart;
     private boolean enraged;
     private int addsSpawned;
@@ -73,9 +80,8 @@ public final class RelicManager {
 
     private boolean relicExists;
 
-    // The dropped axe currently lying in the arena (null once picked up or
-    // destroyed). Tracked so silent removals (/kill, the void, mod quirks)
-    // are still detected on the 1.20.1 API, which has no EntityRemoveEvent.
+    // The dropped axe currently lying on the ground (null once picked up or
+    // destroyed). Tracked so silent removals (/kill, mods) are detected too.
     private Item trackedDrop;
     private boolean dropClaimed;
 
@@ -169,10 +175,11 @@ public final class RelicManager {
 
     private void broadcastWarning(long secondsLeft) {
         String when = Text.duration(secondsLeft);
-        Text.broadcast("<gold>⚠</gold> <white>A <gold>Sovereign Guardian</gold> stirs... "
-                + "prepare yourselves. <gray>(arrives in <white>" + when + "</white>)</gray></white>");
-        Text.broadcastTitle("<white>⚠ <gold>A Sovereign Guardian stirs...</gold> ⚠</white>",
-                "<white>Prepare yourselves — <gold>" + when + "</gold> remain" + (secondsLeft == 1 ? "s" : ""));
+        Text.broadcast("<gold>⚠</gold> <white>Un <gold>Gardien Souverain</gold> s'éveille... "
+                + "préparez-vous. <gray>(arrivée dans <white>" + when + "</white> — position révélée "
+                + "à son apparition)</gray></white>");
+        Text.broadcastTitle("<white>⚠ <gold>Un Gardien Souverain s'éveille...</gold> ⚠</white>",
+                "<white>Préparez-vous — il reste <gold>" + when + "</gold>");
         Bukkit.getOnlinePlayers().forEach(Fx::ominous);
     }
 
@@ -182,21 +189,21 @@ public final class RelicManager {
      */
     public String summon(boolean immediate) {
         if (!plugin.getConfig().getBoolean("relic.enabled", true)) {
-            return "The Sovereign's Relic event is disabled in the config.";
+            return "L'événement de la Relique Souveraine est désactivé dans la configuration.";
         }
         if (relicExists) {
-            return "The Crown-Splitter Axe already exists in the world — only one may exist. "
-                    + "The Guardian cannot rise until it is destroyed.";
+            return "La Hache Fend-Couronne existe déjà — il ne peut y en avoir qu'une. "
+                    + "Le Gardien ne peut renaître tant qu'elle n'est pas détruite.";
         }
         if (isFightActive()) {
-            return "The Sovereign Guardian is already walking the arena.";
+            return "Le Gardien Souverain arpente déjà le monde.";
         }
         if (spawnAt != 0) {
-            return "A Guardian is already on its way — arrival in "
+            return "Un Gardien est déjà en route — arrivée dans "
                     + Text.duration((spawnAt - System.currentTimeMillis()) / 1000) + ".";
         }
-        if (arenaLocation() == null) {
-            return "The arena world in config.yml (relic.arena.world) is not loaded.";
+        if (spawnWorld() == null) {
+            return "Le monde configuré (relic.spawn.world) n'est pas chargé.";
         }
         if (immediate) {
             spawnGuardian();
@@ -227,8 +234,8 @@ public final class RelicManager {
         }
         trackedDrop = null;
         setRelicExists(false);
-        Text.broadcast("<white>The <gold>Crown-Splitter Axe</gold> has been lost to the world... "
-                + "the <gold>Sovereign Guardian</gold> may rise again.</white>");
+        Text.broadcast("<white>La <gold>Hache Fend-Couronne</gold> a été perdue à jamais... "
+                + "le <gold>Gardien Souverain</gold> peut renaître.</white>");
     }
 
     /** Called by the listener when any entity picks the dropped axe up. */
@@ -244,44 +251,60 @@ public final class RelicManager {
      */
     public String adminResetRelic() {
         if (!relicExists) {
-            return "The Crown-Splitter Axe is not marked as existing — nothing to reset.";
+            return "La Hache Fend-Couronne n'est pas marquée comme existante — rien à réinitialiser.";
         }
         trackedDrop = null;
         setRelicExists(false);
-        Text.broadcast("<white>The record of the <gold>Crown-Splitter Axe</gold> has been struck "
-                + "from the annals... the <gold>Sovereign Guardian</gold> may rise again.</white>");
+        Text.broadcast("<white>La trace de la <gold>Hache Fend-Couronne</gold> a été effacée des "
+                + "annales... le <gold>Gardien Souverain</gold> peut renaître.</white>");
         return null;
     }
 
-    public Location arenaLocation() {
-        var cfg = plugin.getConfig();
-        World world = Bukkit.getWorld(cfg.getString("relic.arena.world", "world"));
+    // ---------------------------------------------------------- spawn point
+
+    private World spawnWorld() {
+        return Bukkit.getWorld(plugin.getConfig().getString("relic.spawn.world", "world"));
+    }
+
+    /**
+     * Picks a random surface location within {@code relic.spawn.radius}
+     * blocks (~200 by default) of the world spawn.
+     */
+    private Location pickSpawnLocation() {
+        World world = spawnWorld();
         if (world == null) {
             return null;
         }
-        return new Location(world,
-                cfg.getDouble("relic.arena.x", 0.5),
-                cfg.getDouble("relic.arena.y", 80),
-                cfg.getDouble("relic.arena.z", 0.5));
+        double radius = Math.max(16, plugin.getConfig().getDouble("relic.spawn.radius", 200));
+        Location center = world.getSpawnLocation();
+        double angle = ThreadLocalRandom.current().nextDouble(Math.PI * 2);
+        // sqrt keeps the distribution uniform over the disc's area.
+        double distance = Math.sqrt(ThreadLocalRandom.current().nextDouble()) * radius;
+        int x = center.getBlockX() + (int) Math.round(Math.cos(angle) * distance);
+        int z = center.getBlockZ() + (int) Math.round(Math.sin(angle) * distance);
+        world.getChunkAt(x >> 4, z >> 4).load();
+        int y = world.getHighestBlockYAt(x, z) + 1;
+        return new Location(world, x + 0.5, y, z + 0.5);
     }
 
     // ------------------------------------------------------------ the boss
 
     private void spawnGuardian() {
-        Location arena = arenaLocation();
-        if (arena == null) {
-            plugin.getLogger().severe("Relic event aborted: arena world not loaded.");
+        Location spot = pickSpawnLocation();
+        if (spot == null) {
+            plugin.getLogger().severe("Événement de la relique annulé : le monde d'apparition n'est pas chargé.");
             return;
         }
-        // Keep the arena loaded and ticking for the whole fight, even with
-        // nobody nearby — otherwise the boss unloads mid-event.
-        setArenaChunkTickets(arena, true);
+        fightCenter = spot.clone();
+        // Keep the fight area loaded and ticking for the whole fight, even
+        // with nobody nearby — otherwise the boss unloads mid-event.
+        setFightChunkTickets(fightCenter, true);
 
         var cfg = plugin.getConfig();
         double health = cfg.getDouble("relic.boss.health", 420.0);
 
-        guardian = arena.getWorld().spawn(arena, WitherSkeleton.class, boss -> {
-            boss.setCustomName(Text.legacy("<white>Sovereign <gold>Guardian</gold></white>"));
+        guardian = spot.getWorld().spawn(spot, WitherSkeleton.class, boss -> {
+            boss.setCustomName(Text.legacy("<white>Gardien <gold>Souverain</gold></white>"));
             boss.setCustomNameVisible(false);
             boss.setPersistent(true);
             boss.setRemoveWhenFarAway(false);
@@ -312,19 +335,22 @@ public final class RelicManager {
         participantNames.clear();
         gearWarned.clear();
 
-        bossBar = Bukkit.createBossBar(Text.legacy("<white><bold>Sovereign Guardian</bold></white>"),
+        bossBar = Bukkit.createBossBar(Text.legacy("<white><bold>Gardien Souverain</bold></white>"),
                 BarColor.WHITE, BarStyle.SEGMENTED_10);
 
-        // Arrival fanfare.
-        Text.broadcast("<gold>⚠</gold> <white>The <gold>Sovereign Guardian</gold> has risen at "
-                + "<white>" + arena.getBlockX() + ", " + arena.getBlockY() + ", " + arena.getBlockZ()
-                + "</white>! Full Netherite is strongly advised.</white>");
-        Text.broadcastTitle("<gold><bold>THE SOVEREIGN GUARDIAN</bold></gold>", "<white>has risen. Claim the relic — if you dare.");
+        // Arrival fanfare — the exact coordinates go out in chat.
+        Text.broadcast("<gold>⚠</gold> <white>Le <gold>Gardien Souverain</gold> est apparu en "
+                + "<gold>" + spot.getBlockX() + ", " + spot.getBlockY() + ", " + spot.getBlockZ()
+                + "</gold> <gray>(" + spot.getWorld().getName() + ")</gray> ! "
+                + "Le Netherite complet est fortement conseillé.</white>");
+        Text.broadcastTitle("<gold><bold>LE GARDIEN SOUVERAIN</bold></gold>",
+                "<white>est apparu en <gold>" + spot.getBlockX() + ", " + spot.getBlockZ()
+                        + "</gold> — réclamez la relique, si vous l'osez.");
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_WITHER_SPAWN, 1f, 0.6f);
         }
-        arena.getWorld().strikeLightningEffect(arena);
-        Fx.whiteBurst(arena);
+        spot.getWorld().strikeLightningEffect(spot);
+        Fx.whiteBurst(spot);
 
         startFightTasks();
     }
@@ -336,9 +362,12 @@ public final class RelicManager {
         }
     }
 
+    private double fightRadius() {
+        return plugin.getConfig().getDouble("relic.spawn.fight-radius", 48);
+    }
+
     private void startFightTasks() {
         int aoeInterval = Math.max(4, plugin.getConfig().getInt("relic.boss.aoe-interval-seconds", 18));
-        double radius = plugin.getConfig().getDouble("relic.arena.radius", 48);
 
         // Main fight loop (1s): boss bar, viewers, gear warnings, AOE timer, enrage.
         final int[] seconds = {0};
@@ -347,8 +376,8 @@ public final class RelicManager {
                 return; // death handler / failsafe tears everything down
             }
             seconds[0]++;
-            updateBossBar(radius);
-            warnUnderGeared(radius);
+            updateBossBar(fightRadius());
+            warnUnderGeared(fightRadius());
             if (seconds[0] % aoeInterval == 0) {
                 aoeWave();
             }
@@ -385,7 +414,7 @@ public final class RelicManager {
         }
     }
 
-    /** Soft warning (never a block) for players entering without full Netherite. */
+    /** Soft warning (never a block) for players approaching without full Netherite. */
     private void warnUnderGeared(double radius) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!player.getWorld().equals(guardian.getWorld())
@@ -395,9 +424,9 @@ public final class RelicManager {
                 continue;
             }
             gearWarned.add(player.getUniqueId());
-            Text.msg(player, "<gold>⚠</gold> <white>You are entering the Guardian's arena without full "
-                    + "<gold>Netherite</gold>. It will not show mercy — proceed at your own risk.</white>");
-            Text.title(player, "<gold>⚠</gold>", "<white>You are not geared for this fight.");
+            Text.msg(player, "<gold>⚠</gold> <white>Vous approchez du Gardien sans armure en "
+                    + "<gold>Netherite</gold> complète. Il sera sans pitié — à vos risques et périls.</white>");
+            Text.title(player, "<gold>⚠</gold>", "<white>Vous n'êtes pas équipé pour ce combat.");
             Fx.ominous(player);
         }
     }
@@ -430,7 +459,7 @@ public final class RelicManager {
             player.damage(aoeDamage, guardian);
             player.setVelocity(player.getLocation().toVector().subtract(center.toVector())
                     .normalize().multiply(0.8).setY(0.4));
-            Text.actionBar(player, "<gold>⚠ The Guardian's wrath washes over you!</gold>");
+            Text.actionBar(player, "<gold>⚠ La fureur du Gardien s'abat sur vous !</gold>");
         }
 
         // Summon minor adds up to the configured ceiling.
@@ -450,7 +479,7 @@ public final class RelicManager {
                 spot.add(0, 1, 0);
             }
             world.spawn(spot, Skeleton.class, add -> {
-                add.setCustomName(Text.legacy("<white>Sovereign Echo</white>"));
+                add.setCustomName(Text.legacy("<white>Écho Souverain</white>"));
                 add.getPersistentDataContainer().set(Keys.GUARDIAN_ADD, PersistentDataType.BYTE, (byte) 1);
                 var equipment = add.getEquipment();
                 if (equipment != null) {
@@ -484,8 +513,9 @@ public final class RelicManager {
         if (speed != null) {
             speed.setBaseValue(speed.getBaseValue() * 1.2);
         }
-        bossBar.setTitle(Text.legacy("<gold><bold>Sovereign Guardian</bold> — ENRAGED</gold>"));
-        Text.broadcast("<gold>⚠</gold> <white>The <gold>Sovereign Guardian</gold> is wounded... and <bold>enraged</bold>!</white>");
+        bossBar.setTitle(Text.legacy("<gold><bold>Gardien Souverain</bold> — ENRAGÉ</gold>"));
+        Text.broadcast("<gold>⚠</gold> <white>Le <gold>Gardien Souverain</gold> est blessé... "
+                + "et <bold>enragé</bold> !</white>");
         guardian.getWorld().playSound(guardian.getLocation(), org.bukkit.Sound.ENTITY_WITHER_AMBIENT, 2f, 0.5f);
         Fx.whiteBurst(guardian.getLocation());
     }
@@ -518,18 +548,20 @@ public final class RelicManager {
     /** Called by the listener when the Guardian dies. Drops the relic. */
     public void onGuardianDeath(Location deathLocation) {
         cleanupFight(false);
-        // Keep the arena loaded for the scramble; release after 5 minutes.
+        // Keep the fight area loaded for the scramble; release after 5 minutes.
+        Location ticketCenter = fightCenter;
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            Location arena = arenaLocation();
-            if (arena != null && !isFightActive()) {
-                setArenaChunkTickets(arena, false);
+            if (ticketCenter != null && !isFightActive()) {
+                setFightChunkTickets(ticketCenter, false);
             }
         }, 6000L);
 
-        Text.broadcast("<gold>✦</gold> <white>The <gold>Sovereign Guardian</gold> has fallen! The "
-                + "<gold>Crown-Splitter Axe</gold> lies unclaimed in the arena — <bold>run</bold>.</white>");
-        Text.broadcastTitle("<white>THE GUARDIAN <gold>HAS FALLEN</gold></white>",
-                "<white>The Crown-Splitter Axe awaits its owner...");
+        Text.broadcast("<gold>✦</gold> <white>Le <gold>Gardien Souverain</gold> est tombé ! La "
+                + "<gold>Hache Fend-Couronne</gold> gît sans maître en <gold>"
+                + deathLocation.getBlockX() + ", " + deathLocation.getBlockY() + ", "
+                + deathLocation.getBlockZ() + "</gold> — <bold>courez</bold>.</white>");
+        Text.broadcastTitle("<white>LE GARDIEN <gold>EST TOMBÉ</gold></white>",
+                "<white>La Hache Fend-Couronne attend son propriétaire...");
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_WITHER_DEATH, 1f, 0.7f);
             player.playSound(player.getLocation(), org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
@@ -539,7 +571,7 @@ public final class RelicManager {
         World world = deathLocation.getWorld();
         Item drop = world.dropItemNaturally(deathLocation.clone().add(0, 0.5, 0), RelicItems.createRelic());
         drop.setGlowing(true);
-        drop.setCustomName(Text.legacy("<gold><bold>✦ Crown-Splitter Axe ✦</bold></gold>"));
+        drop.setCustomName(Text.legacy("<gold><bold>✦ Hache Fend-Couronne ✦</bold></gold>"));
         drop.setCustomNameVisible(true);
         setRelicExists(true);
         trackedDrop = drop;
@@ -547,7 +579,7 @@ public final class RelicManager {
 
         // Watch the drop: a sky-high END_ROD beam for the first ~60s (with the
         // item's age reset so it can't despawn mid-scramble), then a silent
-        // watchdog that notices removals the 1.20.1 API fires no event for.
+        // watchdog that notices removals no event is fired for.
         final int[] ticks = {0};
         Bukkit.getScheduler().runTaskTimer(plugin, task -> {
             ticks[0] += 10;
@@ -575,12 +607,12 @@ public final class RelicManager {
         persistParticipants();
     }
 
-    /** Adds/removes plugin chunk tickets covering the arena radius. */
-    private void setArenaChunkTickets(Location arena, boolean add) {
-        int chunkRadius = (int) Math.ceil(plugin.getConfig().getDouble("relic.arena.radius", 48) / 16.0) + 1;
-        int centerX = arena.getBlockX() >> 4;
-        int centerZ = arena.getBlockZ() >> 4;
-        World world = arena.getWorld();
+    /** Adds/removes plugin chunk tickets covering the fight radius. */
+    private void setFightChunkTickets(Location center, boolean add) {
+        int chunkRadius = (int) Math.ceil(fightRadius() / 16.0) + 1;
+        int centerX = center.getBlockX() >> 4;
+        int centerZ = center.getBlockZ() >> 4;
+        World world = center.getWorld();
         for (int x = centerX - chunkRadius; x <= centerX + chunkRadius; x++) {
             for (int z = centerZ - chunkRadius; z <= centerZ + chunkRadius; z++) {
                 if (add) {
@@ -592,10 +624,9 @@ public final class RelicManager {
         }
     }
 
-    private void cleanupFight(boolean releaseArena) {
-        Location arena = arenaLocation();
-        if (releaseArena && arena != null) {
-            setArenaChunkTickets(arena, false);
+    private void cleanupFight(boolean releaseArea) {
+        if (releaseArea && fightCenter != null) {
+            setFightChunkTickets(fightCenter, false);
         }
         if (fightTask != null) {
             fightTask.cancel();
@@ -621,7 +652,7 @@ public final class RelicManager {
                     .forEach(Entity::remove);
             guardian.remove();
             if (announce) {
-                Text.broadcast("<gray>The <gold>Sovereign Guardian</gold> fades back into legend...</gray>");
+                Text.broadcast("<gray>Le <gold>Gardien Souverain</gold> retourne à la légende...</gray>");
             }
         }
         cleanupFight(true);
@@ -667,18 +698,19 @@ public final class RelicManager {
     /** Status line for admins. */
     public String statusLine() {
         if (isFightActive()) {
-            return "The Sovereign Guardian is fighting right now.";
+            return "Le Gardien Souverain est en plein combat.";
         }
         if (spawnAt != 0) {
-            return "A Guardian arrives in " + Text.duration((spawnAt - System.currentTimeMillis()) / 1000) + ".";
+            return "Un Gardien arrive dans " + Text.duration((spawnAt - System.currentTimeMillis()) / 1000) + ".";
         }
         if (relicExists) {
-            return "The Crown-Splitter Axe exists in the world; the Guardian sleeps until it is destroyed.";
+            return "La Hache Fend-Couronne existe quelque part ; le Gardien sommeille "
+                    + "tant qu'elle n'est pas détruite.";
         }
         if (scheduleEnabled() && nextScheduledSpawn > 0) {
-            return "Next scheduled appearance in "
+            return "Prochaine apparition programmée dans "
                     + Text.duration((nextScheduledSpawn - System.currentTimeMillis()) / 1000) + ".";
         }
-        return "No event scheduled. Use /relic summon to trigger one.";
+        return "Aucun événement programmé. Utilisez /relic summon pour en déclencher un.";
     }
 }

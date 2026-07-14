@@ -171,24 +171,98 @@ public final class BuildVoteManager {
 
     private void announcePhase(Phase from, Phase to) {
         if (to == Phase.NOMINATION) {
-            Text.broadcast("<white>The <gold>Builder Vote</gold> nominations are open! Stand by your build and use "
-                    + "<gold>/build submit <name></gold> within the next <white>"
-                    + Text.duration(secondsUntilNextPhase()) + "</white>.</white>");
-            Text.broadcastTitle("<gold>✦ Builder Vote ✦</gold>", "<white>Nominations are open — /build submit");
+            Text.broadcast("<white>Les candidatures du <gold>Vote de Construction</gold> sont ouvertes ! "
+                    + "Placez-vous devant votre création et utilisez <gold>/build submit <nom></gold> "
+                    + "dans les prochaines <white>" + Text.duration(secondsUntilNextPhase()) + "</white>.</white>");
+            Text.broadcastTitle("<gold>✦ Vote de Construction ✦</gold>",
+                    "<white>Candidatures ouvertes — /build submit");
             Bukkit.getOnlinePlayers().forEach(Fx::fanfare);
         } else if (to == Phase.VOTING) {
             if (submissions.isEmpty()) {
-                Text.broadcast("<gray>No builds were submitted this cycle — the <gold>Builder Vote</gold> "
-                        + "is skipped and rolls over to the next cycle.</gray>");
+                Text.broadcast("<gray>Aucune construction n'a été proposée ce cycle — le <gold>Vote de "
+                        + "Construction</gold> est reporté au prochain cycle.</gray>");
                 startNewCycle(System.currentTimeMillis());
                 return;
             }
-            Text.broadcast("<white>The <gold>Builder Vote</gold> is open! <white>" + submissions.size()
-                    + "</white> build" + (submissions.size() == 1 ? "" : "s") + " compete for the crown. Cast your vote with "
-                    + "<gold>/build vote</gold> — closes in <white>" + Text.duration(secondsUntilNextPhase()) + "</white>.</white>");
-            Text.broadcastTitle("<gold>✦ Builder Vote ✦</gold>", "<white>Voting is open — /build vote");
+            Text.broadcast("<white>Le <gold>Vote de Construction</gold> est ouvert ! <white>" + submissions.size()
+                    + "</white> construction" + (submissions.size() == 1 ? "" : "s") + " se disputent la couronne. "
+                    + "Votez avec <gold>/build vote</gold> — clôture dans <white>"
+                    + Text.duration(secondsUntilNextPhase()) + "</white>.</white>");
+            Text.broadcastTitle("<gold>✦ Vote de Construction ✦</gold>", "<white>Le vote est ouvert — /build vote");
             Bukkit.getOnlinePlayers().forEach(Fx::fanfare);
         }
+    }
+
+    // ------------------------------------------------------- admin controls
+
+    private void persistCycleStart() {
+        long start = cycleStart;
+        database.runAsync(conn -> Database.setMeta(conn, "build_cycle_start", String.valueOf(start)));
+    }
+
+    /**
+     * Admin: opens the nomination window immediately (the vote window follows
+     * after the configured nomination length). Returns an error, or null.
+     */
+    public String forceNominations() {
+        if (!plugin.getConfig().getBoolean("builder-vote.enabled", true)) {
+            return "Le vote de construction est désactivé dans la configuration.";
+        }
+        if (phase == Phase.NOMINATION) {
+            return "Les candidatures sont déjà ouvertes.";
+        }
+        if (phase == Phase.VOTING) {
+            return "Le vote est déjà en cours — clôturez-le d'abord avec /build finish.";
+        }
+        // Shift the cycle clock so the nomination window starts right now.
+        cycleStart = System.currentTimeMillis()
+                - (hoursMs("builder-vote.interval-hours", 96)
+                - hoursMs("builder-vote.nomination-hours", 24)
+                - hoursMs("builder-vote.vote-hours", 12));
+        persistCycleStart();
+        Phase old = phase;
+        phase = Phase.NOMINATION;
+        announcePhase(old, Phase.NOMINATION);
+        return null;
+    }
+
+    /** Admin: opens the vote window immediately. Returns an error, or null. */
+    public String forceVote() {
+        if (!plugin.getConfig().getBoolean("builder-vote.enabled", true)) {
+            return "Le vote de construction est désactivé dans la configuration.";
+        }
+        if (phase == Phase.VOTING) {
+            return "Le vote est déjà en cours.";
+        }
+        if (submissions.isEmpty()) {
+            return "Aucune construction n'a été proposée — ouvrez d'abord les candidatures "
+                    + "avec /build startnominations.";
+        }
+        // Shift the cycle clock so the vote window starts right now.
+        cycleStart = System.currentTimeMillis()
+                - (hoursMs("builder-vote.interval-hours", 96)
+                - hoursMs("builder-vote.vote-hours", 12));
+        persistCycleStart();
+        Phase old = phase;
+        phase = Phase.VOTING;
+        announcePhase(old, Phase.VOTING);
+        return null;
+    }
+
+    /** Admin: tallies the votes and ends the cycle immediately. Returns an error, or null. */
+    public String forceFinish() {
+        if (phase != Phase.VOTING) {
+            return "Aucun vote en cours à clôturer — ouvrez-en un avec /build startvote.";
+        }
+        finishCycle();
+        return null;
+    }
+
+    /** Admin: throws the current cycle away and starts a fresh one. */
+    public void cancelCycle() {
+        Text.broadcast("<gray>Le cycle actuel du <gold>Vote de Construction</gold> a été annulé "
+                + "par un administrateur. Un nouveau cycle démarre.</gray>");
+        startNewCycle(System.currentTimeMillis());
     }
 
     // ------------------------------------------------------------ actions
@@ -196,23 +270,23 @@ public final class BuildVoteManager {
     /** Handles /build submit. */
     public void submit(Player player, String buildName) {
         if (!plugin.getConfig().getBoolean("builder-vote.enabled", true)) {
-            Text.msg(player, "<gray>The builder vote is currently disabled.</gray>");
+            Text.msg(player, "<gray>Le vote de construction est désactivé pour le moment.</gray>");
             Fx.deny(player);
             return;
         }
         if (phase != Phase.NOMINATION) {
             if (phase == Phase.VOTING) {
-                Text.msg(player, "<gray>Nominations have closed — voting is already underway! "
-                        + "Use <gold>/build vote</gold>.</gray>");
+                Text.msg(player, "<gray>Les candidatures sont closes — le vote a déjà commencé ! "
+                        + "Utilisez <gold>/build vote</gold>.</gray>");
             } else {
-                Text.msg(player, "<gray>Nominations aren't open yet. The window opens in <white>"
+                Text.msg(player, "<gray>Les candidatures ne sont pas encore ouvertes. Elles ouvrent dans <white>"
                         + Text.duration((nominationOpensAt() - System.currentTimeMillis()) / 1000) + "</white>.</gray>");
             }
             Fx.deny(player);
             return;
         }
         if (buildName.length() > 32) {
-            Text.msg(player, "<gray>Build names are limited to <white>32</white> characters.</gray>");
+            Text.msg(player, "<gray>Le nom d'une construction est limité à <white>32</white> caractères.</gray>");
             Fx.deny(player);
             return;
         }
@@ -243,9 +317,10 @@ public final class BuildVoteManager {
         });
 
         Text.msg(player, replacing
-                ? "<white>Your entry was updated to <gold>" + buildName + "</gold> at your current spot.</white>"
-                : "<white>Your build <gold>" + buildName + "</gold> is entered into the vote! "
-                        + "This spot is saved as its showcase point.</white>");
+                ? "<white>Votre candidature a été mise à jour : <gold>" + buildName
+                        + "</gold>, à votre position actuelle.</white>"
+                : "<white>Votre construction <gold>" + buildName + "</gold> est inscrite au vote ! "
+                        + "Cet endroit devient son point de présentation.</white>");
         Fx.success(player);
         Fx.whiteBurst(player.getLocation());
     }
@@ -253,30 +328,31 @@ public final class BuildVoteManager {
     /** Handles a vote cast from the GUI. Returns true when the vote counted. */
     public boolean vote(Player voter, UUID target) {
         if (phase != Phase.VOTING) {
-            Text.msg(voter, "<gray>The voting window isn't open right now.</gray>");
+            Text.msg(voter, "<gray>La fenêtre de vote n'est pas ouverte actuellement.</gray>");
             Fx.deny(voter);
             return false;
         }
         Submission submission = submissions.get(target);
         if (submission == null) {
-            Text.msg(voter, "<gray>That build is no longer in the running.</gray>");
+            Text.msg(voter, "<gray>Cette construction n'est plus en lice.</gray>");
             Fx.deny(voter);
             return false;
         }
         if (voter.getUniqueId().equals(target)) {
-            Text.msg(voter, "<gray>You can't vote for your own build — let your work speak for itself!</gray>");
+            Text.msg(voter, "<gray>Impossible de voter pour votre propre construction — laissez "
+                    + "votre œuvre parler d'elle-même !</gray>");
             Fx.deny(voter);
             return false;
         }
         UUID previous = votes.get(voter.getUniqueId());
         if (previous != null) {
             if (previous.equals(target)) {
-                Text.msg(voter, "<gray>You already voted for this build.</gray>");
+                Text.msg(voter, "<gray>Vous avez déjà voté pour cette construction.</gray>");
                 Fx.deny(voter);
                 return false;
             }
             if (!plugin.getConfig().getBoolean("builder-vote.allow-revote", true)) {
-                Text.msg(voter, "<gray>You already cast your vote this cycle — it cannot be changed.</gray>");
+                Text.msg(voter, "<gray>Vous avez déjà voté ce cycle — votre choix est définitif.</gray>");
                 Fx.deny(voter);
                 return false;
             }
@@ -296,8 +372,8 @@ public final class BuildVoteManager {
             }
         });
 
-        Text.msg(voter, "<white>Vote " + (previous != null ? "changed to" : "cast for") + " <gold>"
-                + submission.buildName() + "</gold> by <white>" + submission.playerName() + "</white>.</white>");
+        Text.msg(voter, "<white>Vote " + (previous != null ? "modifié pour" : "enregistré pour") + " <gold>"
+                + submission.buildName() + "</gold> de <white>" + submission.playerName() + "</white>.</white>");
         Fx.success(voter);
         return true;
     }
@@ -319,8 +395,8 @@ public final class BuildVoteManager {
     /** Tallies votes, crowns the winner and rolls into the next cycle. */
     private void finishCycle() {
         if (submissions.isEmpty()) {
-            Text.broadcast("<gray>No builds were submitted this cycle — the <gold>Builder Vote</gold> "
-                    + "is skipped and rolls over to the next cycle.</gray>");
+            Text.broadcast("<gray>Aucune construction n'a été proposée ce cycle — le <gold>Vote de "
+                    + "Construction</gold> est reporté au prochain cycle.</gray>");
             startNewCycle(System.currentTimeMillis());
             return;
         }
@@ -331,11 +407,11 @@ public final class BuildVoteManager {
                 .orElseThrow();
         int winnerVotes = voteCount(winner.uuid());
 
-        Text.broadcast("<gold>✦</gold> <white>The <gold>Builder Vote</gold> has ended! <bold>"
-                + winner.playerName() + "</bold>'s <gold>" + winner.buildName() + "</gold> wins with <white>"
-                + winnerVotes + "</white> vote" + (winnerVotes == 1 ? "" : "s") + "!</white>");
+        Text.broadcast("<gold>✦</gold> <white>Le <gold>Vote de Construction</gold> est terminé ! <gold>"
+                + winner.buildName() + "</gold> de <bold>" + winner.playerName() + "</bold> l'emporte avec <white>"
+                + winnerVotes + "</white> voix !</white>");
         Text.broadcastTitle("<gold>✦ " + winner.playerName() + " ✦</gold>",
-                "<white>wins the Builder Vote with <gold>" + winner.buildName());
+                "<white>remporte le Vote de Construction avec <gold>" + winner.buildName());
         Bukkit.getOnlinePlayers().forEach(Fx::fanfare);
 
         // White fireworks over the winning build's showcase point.

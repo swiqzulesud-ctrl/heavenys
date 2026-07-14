@@ -14,8 +14,6 @@ crowns:
     # false = kills where a player caused the death indirectly
     #         (TNT, pushed into the void, mob-assist, ...) also count.
     count-only-direct-pvp: true
-  # Give the current crown holders a white glowing outline.
-  holder-glow: true
   # Show a floating golden crown title above each holder's head.
   hologram: true
 
@@ -44,14 +42,15 @@ relic:
     enabled: true
     # Hours between scheduled appearances (336 h = 14 days).
     interval-hours: 336
-  arena:
+  spawn:
     world: world
-    x: 0.5
-    y: 80.0
-    z: 0.5
-    # Radius (blocks) around the arena centre used for entry warnings,
+    # The Guardian appears at a random surface spot within roughly this
+    # many blocks of the world spawn. Its exact coordinates are broadcast
+    # in chat the moment it arrives.
+    radius: 200
+    # Radius (blocks) around the boss used for entry warnings,
     # participation tracking and boss-bar visibility.
-    radius: 48
+    fight-radius: 48
   boss:
     health: 420.0
     attack-damage: 18.0

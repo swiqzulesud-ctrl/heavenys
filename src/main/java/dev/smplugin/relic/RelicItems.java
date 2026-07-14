@@ -9,28 +9,28 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 /**
- * Builds and recognises the one-of-a-kind relic item, the Crown-Splitter Axe.
+ * Construit et reconnaît l'objet-relique unique : la Hache Fend-Couronne.
  */
 public final class RelicItems {
 
     private RelicItems() {
     }
 
-    /** Creates the unique Crown-Splitter Axe (Sharpness X, Looting IV, Unbreaking V). */
+    /** Crée l'unique Hache Fend-Couronne (Tranchant X, Butin IV, Solidité V). */
     public static ItemStack createRelic() {
         ItemStack axe = new ItemStack(Material.NETHERITE_AXE);
         ItemMeta meta = axe.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(Text.legacy("<!italic><gold><bold>Crown-Splitter Axe</bold></gold>"));
+            meta.setDisplayName(Text.legacy("<!italic><gold><bold>Hache Fend-Couronne</bold></gold>"));
             meta.setLore(Text.legacyLore(
-                    "<white>Forged in the fall of the Sovereign Guardian.</white>",
-                    "<gray>Only one may ever exist.</gray>",
+                    "<white>Forgée dans la chute du Gardien Souverain.</white>",
+                    "<gray>Il ne peut en exister qu'une seule.</gray>",
                     "",
-                    "<gold>✦</gold> <white>Sharpness X</white>",
-                    "<gold>✦</gold> <white>Looting IV</white>",
-                    "<gold>✦</gold> <white>Unbreaking V</white>",
+                    "<gold>✦</gold> <white>Tranchant X</white>",
+                    "<gold>✦</gold> <white>Butin IV</white>",
+                    "<gold>✦</gold> <white>Solidité V</white>",
                     "",
-                    "<gray><italic>The crown answers to whoever holds the axe.</italic></gray>"));
+                    "<gray><italic>La couronne obéit à qui tient la hache.</italic></gray>"));
             meta.addEnchant(Enchantment.SHARPNESS, 10, true);
             meta.addEnchant(Enchantment.LOOTING, 4, true);
             meta.addEnchant(Enchantment.UNBREAKING, 5, true);

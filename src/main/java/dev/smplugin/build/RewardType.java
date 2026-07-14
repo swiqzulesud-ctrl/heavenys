@@ -3,29 +3,29 @@ package dev.smplugin.build;
 import org.bukkit.Material;
 
 /**
- * The five rewards a builder-vote winner may choose from.
+ * Les cinq récompenses parmi lesquelles le gagnant du vote peut choisir.
  */
 public enum RewardType {
 
-    HEARTS(Material.GOLDEN_APPLE, "+2 Max Hearts",
-            "Permanently gain two extra hearts.",
-            "Stacks across wins, up to a server cap."),
+    HEARTS(Material.GOLDEN_APPLE, "+2 Cœurs Max",
+            "Gagnez définitivement deux cœurs supplémentaires.",
+            "Cumulable à chaque victoire, dans la limite du serveur."),
 
-    BEACON(Material.BEACON, "A Beacon",
-            "A full beacon, ready to crown",
-            "your base with light and power."),
+    BEACON(Material.BEACON, "Une Balise",
+            "Une balise complète, prête à couronner",
+            "votre base de lumière et de puissance."),
 
-    END_CRYSTAL(Material.END_CRYSTAL, "An End Crystal",
-            "A pristine end crystal —",
-            "decoration or destruction, your call."),
+    END_CRYSTAL(Material.END_CRYSTAL, "Un Cristal de l'End",
+            "Un cristal de l'End immaculé —",
+            "décoration ou destruction, à vous de voir."),
 
-    DRAGON_EGG(Material.DRAGON_EGG, "A Dragon Egg",
-            "The rarest trophy in the game,",
-            "without touching the End."),
+    DRAGON_EGG(Material.DRAGON_EGG, "Un Œuf de Dragon",
+            "Le trophée le plus rare du jeu,",
+            "sans mettre un pied dans l'End."),
 
-    PLAYER_HEAD(Material.PLAYER_HEAD, "A Player Head",
-            "The head of any player you name.",
-            "You'll be asked to type the name in chat.");
+    PLAYER_HEAD(Material.PLAYER_HEAD, "Une Tête de Joueur",
+            "La tête de n'importe quel joueur.",
+            "Son nom vous sera demandé dans le chat.");
 
     private final Material icon;
     private final String displayName;

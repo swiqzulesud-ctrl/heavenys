@@ -150,7 +150,7 @@ public final class RelicListener implements Listener {
             return;
         }
         Text.broadcast("<gold>✦</gold> <white><bold>" + player.getName()
-                + "</bold> has claimed the <gold>Crown-Splitter Axe</gold>!</white>");
+                + "</bold> s'est emparé de la <gold>Hache Fend-Couronne</gold> !</white>");
         Bukkit.getOnlinePlayers().forEach(Fx::fanfare);
         Fx.whiteBurst(player.getLocation());
     }

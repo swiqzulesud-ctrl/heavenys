@@ -109,19 +109,19 @@ public final class Text {
         return out;
     }
 
-    /** Formats a duration in seconds as a compact human string, e.g. "1d 3h 20m". */
+    /** Formats a duration in seconds as a compact human string, e.g. "1j 3h 20min". */
     public static String duration(long seconds) {
         if (seconds <= 0) {
-            return "moments";
+            return "quelques instants";
         }
         long days = seconds / 86_400;
         long hours = (seconds % 86_400) / 3_600;
         long minutes = (seconds % 3_600) / 60;
         long secs = seconds % 60;
         StringBuilder sb = new StringBuilder();
-        if (days > 0) sb.append(days).append("d ");
+        if (days > 0) sb.append(days).append("j ");
         if (hours > 0) sb.append(hours).append("h ");
-        if (minutes > 0) sb.append(minutes).append("m ");
+        if (minutes > 0) sb.append(minutes).append("min ");
         if (sb.isEmpty()) sb.append(secs).append("s");
         return sb.toString().trim();
     }

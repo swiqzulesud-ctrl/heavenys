@@ -78,7 +78,7 @@ public final class SMPlugin extends JavaPlugin {
         register("relic", new RelicCommand(this));
         register("smplugin", new SMPluginCommand(this));
 
-        getLogger().info("SMPlugin enabled — the Crowns await their holders.");
+        getLogger().info("SMPlugin activé — les Couronnes attendent leurs prétendants.");
     }
 
     @Override
@@ -93,7 +93,7 @@ public final class SMPlugin extends JavaPlugin {
             database.shutdown();
         }
         Text.shutdown();
-        getLogger().info("SMPlugin disabled.");
+        getLogger().info("SMPlugin désactivé.");
     }
 
     private <T extends CommandExecutor & TabCompleter> void register(String name, T handler) {

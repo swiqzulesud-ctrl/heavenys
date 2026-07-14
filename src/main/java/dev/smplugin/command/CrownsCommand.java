@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * /crowns — main GUI, kill leaderboard and Resource Crown administration.
+ * /crowns — menu principal, classement des éliminations et administration
+ * de la Couronne des Richesses.
  */
 public final class CrownsCommand implements CommandExecutor, TabCompleter {
 
@@ -34,8 +35,8 @@ public final class CrownsCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, String[] args) {
         if (args.length == 0) {
             if (!(sender instanceof Player player)) {
-                Text.msg(sender, "<gray>The Crowns menu can only be opened in-game. "
-                        + "Try <gold>/crowns kills</gold> from the console.</gray>");
+                Text.msg(sender, "<gray>Le menu des Couronnes ne peut être ouvert qu'en jeu. "
+                        + "Essayez <gold>/crowns kills</gold> depuis la console.</gray>");
                 return true;
             }
             new CrownsGui(plugin, plugin.crowns(), plugin.kills()).open(player);
@@ -46,28 +47,28 @@ public final class CrownsCommand implements CommandExecutor, TabCompleter {
             case "kills" -> showKillLeaderboard(sender);
             case "setresources" -> setResources(sender, args);
             case "clearresources" -> clearResources(sender);
-            default -> Text.msg(sender, "<gray>Unknown subcommand. Usage: <gold>/crowns "
-                    + "[kills|setresources <player>|clearresources]</gold></gray>");
+            default -> Text.msg(sender, "<gray>Sous-commande inconnue. Usage : <gold>/crowns "
+                    + "[kills|setresources <joueur>|clearresources]</gold></gray>");
         }
         return true;
     }
 
     private void showKillLeaderboard(CommandSender sender) {
         List<KillTracker.Entry> top = plugin.kills().top(10);
-        Text.msg(sender, "<gold>─── 👑 Crown of Kills — Top 10 ───</gold>");
+        Text.msg(sender, "<gold>─── 👑 Couronne du Tueur — Top 10 ───</gold>");
         if (top.isEmpty()) {
-            Text.raw(sender, ("<gray>  No PvP kills have been recorded yet. "
-                    + "The crown awaits its first killer...</gray>"));
+            Text.raw(sender, "<gray>  Aucune victoire JcJ enregistrée pour l'instant. "
+                    + "La couronne attend son premier tueur...</gray>");
             return;
         }
         var holder = plugin.crowns().holder(CrownType.KILLS);
         for (int i = 0; i < top.size(); i++) {
             KillTracker.Entry entry = top.get(i);
             boolean isHolder = holder != null && holder.uuid().equals(entry.uuid());
-            Text.raw(sender, ("<white>  " + (i + 1) + ". "
+            Text.raw(sender, "<white>  " + (i + 1) + ". "
                     + (isHolder ? "<gold>👑 " : "") + entry.name()
                     + (isHolder ? "</gold>" : "") + " <gray>—</gray> <gold>" + entry.kills()
-                    + "</gold> kill" + (entry.kills() == 1 ? "" : "s") + "</white>"));
+                    + "</gold> élimination" + (entry.kills() == 1 ? "" : "s") + "</white>");
         }
     }
 
@@ -77,18 +78,20 @@ public final class CrownsCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2) {
-            Text.msg(sender, "<gray>Usage: <gold>/crowns setresources <player></gold></gray>");
+            Text.msg(sender, "<gray>Usage : <gold>/crowns setresources <joueur></gold></gray>");
             return;
         }
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         if (!target.hasPlayedBefore() && !target.isOnline()) {
-            Text.msg(sender, "<gray>No player named <white>" + args[1] + "</white> has ever joined this server.</gray>");
+            Text.msg(sender, "<gray>Aucun joueur nommé <white>" + args[1]
+                    + "</white> n'a jamais rejoint ce serveur.</gray>");
             if (sender instanceof Player p) Fx.deny(p);
             return;
         }
         String name = target.getName() == null ? args[1] : target.getName();
         plugin.crowns().setHolder(CrownType.RESOURCES, target.getUniqueId(), name, true);
-        Text.msg(sender, "<white>The <gold>Crown of Resources</gold> now rests on <gold>" + name + "</gold>.</white>");
+        Text.msg(sender, "<white>La <gold>Couronne des Richesses</gold> orne désormais <gold>"
+                + name + "</gold>.</white>");
     }
 
     private void clearResources(CommandSender sender) {
@@ -97,15 +100,15 @@ public final class CrownsCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (plugin.crowns().holder(CrownType.RESOURCES) == null) {
-            Text.msg(sender, "<gray>The Crown of Resources is already unclaimed.</gray>");
+            Text.msg(sender, "<gray>La Couronne des Richesses est déjà sans prétendant.</gray>");
             return;
         }
         plugin.crowns().setHolder(CrownType.RESOURCES, null, null, true);
-        Text.msg(sender, "<white>The <gold>Crown of Resources</gold> has been cleared.</white>");
+        Text.msg(sender, "<white>La <gold>Couronne des Richesses</gold> a été retirée.</white>");
     }
 
     private void noPermission(CommandSender sender) {
-        Text.msg(sender, "<gray>You don't have permission to manage the Crown of Resources.</gray>");
+        Text.msg(sender, "<gray>Vous n'avez pas la permission de gérer la Couronne des Richesses.</gray>");
         if (sender instanceof Player p) Fx.deny(p);
     }
 

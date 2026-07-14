@@ -21,7 +21,7 @@ public final class RewardGui extends Gui {
     private final RewardManager rewards;
 
     public RewardGui(SMPlugin plugin, RewardManager rewards) {
-        super(plugin, 3, "<white>Choose Your <gold>Reward</gold>");
+        super(plugin, 3, "<white>Choisissez votre <gold>Récompense</gold>");
         this.rewards = rewards;
     }
 
@@ -47,10 +47,11 @@ public final class RewardGui extends Gui {
         if (type == RewardType.HEARTS) {
             int current = rewards.bonusHearts(viewer.getUniqueId());
             int cap = plugin.getConfig().getInt("builder-vote.rewards.max-bonus-hearts", 10);
-            lore.add(Text.legacy("<!italic><gray>Your bonus hearts: <white>" + current + "</white>/<white>" + cap + "</white></gray>"));
+            lore.add(Text.legacy("<!italic><gray>Vos cœurs bonus : <white>" + current
+                    + "</white>/<white>" + cap + "</white></gray>"));
             lore.add("");
         }
-        lore.add(Text.legacy("<!italic><white>Click to claim — one reward per win!</white>"));
+        lore.add(Text.legacy("<!italic><white>Cliquez pour réclamer — une seule récompense par victoire !</white>"));
         return Items.gui(type.icon(), "<gold>✦ " + type.displayName() + "</gold>", lore);
     }
 }

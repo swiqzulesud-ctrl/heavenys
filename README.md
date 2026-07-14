@@ -11,11 +11,14 @@ The plugin targets the plain **Spigot API** (`spigot-api 26.1.2`), with the
 Adventure/MiniMessage library shaded and relocated into the jar, so it runs on Spigot,
 Paper and Spigot-API hybrids (e.g. Arclight) for Minecraft 26.1.x.
 
+**All in-game text is in French** (messages, GUIs, item names, boss bar, broadcasts);
+command names stay in English (`/crowns`, `/build`, `/relic`).
+
 ## Features
 
 ### 👑 The Three Crowns
 Three permanent, simultaneous crowns with full in-game presentation — golden crown hologram
-above the holder, white glow, tab-list prefix, broadcast + title + sound on every change,
+above the holder, tab-list prefix, broadcast + title + sound on every change,
 and a white-glass `/crowns` GUI:
 
 - **Crown of Kills** — auto-tracked PvP kills, recalculated instantly on every kill.
@@ -37,6 +40,8 @@ and a white-glass `/crowns` GUI:
 ### ⚔ The Sovereign's Relic
 A rare boss event (every 14 days and/or `/relic summon`):
 - Ominous countdown broadcasts at 10 / 5 / 1 minutes before arrival.
+- The Guardian appears at a **random surface spot within ~200 blocks of the world spawn**
+  (radius configurable); its exact coordinates are broadcast in chat the moment it arrives.
 - The **Sovereign Guardian** — a heavily buffed Wither Skeleton (~420 HP, high damage,
   full knockback resistance, periodic lightning AOE + summoned adds, enrage below 30% HP)
   with a white boss bar and an END_ROD spiral aura. Balanced for a coordinated group in
@@ -58,12 +63,16 @@ A rare boss event (every 14 days and/or `/relic summon`):
 | `/build vote` | Open the voting GUI |
 | `/build results` | Show last cycle's results |
 | `/build reward` | Re-open an unclaimed reward chooser |
+| `/build startnominations` | (admin) open the nomination window now |
+| `/build startvote` | (admin) open the vote window now |
+| `/build finish` | (admin) tally the votes and announce results now |
+| `/build cancel` | (admin) cancel the current cycle and start a fresh one |
 | `/relic summon [now]` | (admin) trigger the Guardian (with or without build-up) |
 | `/relic log` | (admin) last event's participants |
 | `/relic reset` | (admin) clear the one-copy flag if the axe was lost untracked |
 | `/smplugin reload` | Reload `config.yml` |
 
-Permissions: `smplugin.crowns.use/admin`, `smplugin.build.use`, `smplugin.relic.admin`,
+Permissions: `smplugin.crowns.use/admin`, `smplugin.build.use/admin`, `smplugin.relic.admin`,
 `smplugin.admin` (grants all admin nodes).
 
 ## Tech
@@ -93,4 +102,5 @@ hatch if the axe is ever lost in a way the plugin cannot observe.
 
 ## Configuration
 See `src/main/resources/config.yml` — vote cycle lengths, relic schedule, boss stats,
-max-heart cap, arena coordinates and per-feature toggles are all exposed.
+max-heart cap, the random-spawn world/radius (`relic.spawn`) and per-feature toggles are
+all exposed.

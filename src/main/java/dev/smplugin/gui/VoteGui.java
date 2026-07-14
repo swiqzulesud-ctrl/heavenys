@@ -32,7 +32,7 @@ public final class VoteGui extends Gui {
     private final int page;
 
     public VoteGui(SMPlugin plugin, BuildVoteManager votes, int page) {
-        super(plugin, 6, "<white>Builder Vote <gray>— Cast Your Vote</gray>");
+        super(plugin, 6, "<white>Vote de Construction <gray>— Votez</gray>");
         this.votes = votes;
         this.page = page;
     }
@@ -62,19 +62,20 @@ public final class VoteGui extends Gui {
         }
 
         // Info banner (white banner = the vote's standard).
-        set(4, Items.gui(Material.WHITE_BANNER, "<gold>✦ Builder Vote ✦</gold>",
-                "<white>" + entries.size() + " build" + (entries.size() == 1 ? "" : "s") + " compete this cycle.</white>",
-                "<gray>Voting closes in <white>" + Text.duration(votes.secondsUntilNextPhase()) + "</white>.</gray>",
+        set(4, Items.gui(Material.WHITE_BANNER, "<gold>✦ Vote de Construction ✦</gold>",
+                "<white>" + entries.size() + " construction" + (entries.size() == 1 ? "" : "s")
+                        + " en lice ce cycle.</white>",
+                "<gray>Clôture du vote dans <white>" + Text.duration(votes.secondsUntilNextPhase()) + "</white>.</gray>",
                 "",
-                "<gray>Click a build to cast your vote.</gray>",
-                "<gray>You cannot vote for your own build.</gray>"));
+                "<gray>Cliquez sur une construction pour voter.</gray>",
+                "<gray>Impossible de voter pour la vôtre.</gray>"));
 
         if (current > 0) {
-            set(48, Items.gui(Material.ARROW, "<white>← Previous Page"),
+            set(48, Items.gui(Material.ARROW, "<white>← Page précédente"),
                     p -> new VoteGui(plugin, votes, current - 1).open(p));
         }
         if (current < pages - 1) {
-            set(50, Items.gui(Material.ARROW, "<white>Next Page →"),
+            set(50, Items.gui(Material.ARROW, "<white>Page suivante →"),
                     p -> new VoteGui(plugin, votes, current + 1).open(p));
         }
         close(49);
@@ -82,17 +83,17 @@ public final class VoteGui extends Gui {
 
     private ItemStack entryItem(BuildVoteManager.Submission entry, boolean votedForThis, boolean own) {
         List<String> lore = new ArrayList<>();
-        lore.add(Text.legacy("<!italic><gray>by <white>" + entry.playerName() + "</white></gray>"));
+        lore.add(Text.legacy("<!italic><gray>par <white>" + entry.playerName() + "</white></gray>"));
         lore.add("");
-        lore.add(Text.legacy("<!italic><gray>Showcase: <white>" + (int) entry.x() + ", "
+        lore.add(Text.legacy("<!italic><gray>Présentation : <white>" + (int) entry.x() + ", "
                 + (int) entry.y() + ", " + (int) entry.z() + "</white> <gray>(" + entry.world() + ")</gray>"));
         lore.add("");
         if (own) {
-            lore.add(Text.legacy("<!italic><gray>This is your build — you can't vote for it.</gray>"));
+            lore.add(Text.legacy("<!italic><gray>C'est votre construction — impossible de voter pour elle.</gray>"));
         } else if (votedForThis) {
-            lore.add(Text.legacy("<!italic><gold>✔ Your current vote.</gold>"));
+            lore.add(Text.legacy("<!italic><gold>✔ Votre vote actuel.</gold>"));
         } else {
-            lore.add(Text.legacy("<!italic><white>Click to vote for this build!</white>"));
+            lore.add(Text.legacy("<!italic><white>Cliquez pour voter pour cette construction !</white>"));
         }
 
         ItemStack head = Items.gui(Material.PLAYER_HEAD,

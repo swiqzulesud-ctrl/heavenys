@@ -64,15 +64,10 @@ public final class CrownManager {
         Bukkit.getOnlinePlayers().forEach(this::applyPresentation);
     }
 
-    /** Removes holograms and glow. Called on disable and before reload. */
+    /** Removes holograms. Called on disable and before reload. */
     public void unload() {
         holograms.values().forEach(TextDisplay::remove);
         holograms.clear();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (isHolder(player.getUniqueId())) {
-                player.setGlowing(false);
-            }
-        }
     }
 
     public Holder holder(CrownType type) {
@@ -121,16 +116,16 @@ public final class CrownManager {
                 Fx.whiteBurst(nextPlayer.getLocation());
             }
             if (announce) {
-                Text.broadcast("<gold>👑</gold> <white><bold>" + name + "</bold> is now wearing the <gold>"
-                        + type.crownName() + "</gold>!</white>");
+                Text.broadcast("<gold>👑</gold> <white><bold>" + name + "</bold> porte désormais la <gold>"
+                        + type.crownName() + "</gold> !</white>");
                 Text.broadcastTitle(
                         "<gold>👑 " + type.crownName() + "</gold>",
-                        "<white>" + name + " <gray>claims the throne of <white>" + type.category());
+                        "<white>" + name + " <gray>s'empare du trône : <white>" + type.category());
                 Bukkit.getOnlinePlayers().forEach(Fx::fanfare);
             }
         } else if (announce) {
-            Text.broadcast("<white>The <gold>" + type.crownName()
-                    + "</gold> sits unclaimed once more.</white>");
+            Text.broadcast("<white>La <gold>" + type.crownName()
+                    + "</gold> est de nouveau sans prétendant.</white>");
         }
     }
 
@@ -168,12 +163,6 @@ public final class CrownManager {
             } else {
                 team.removeEntry(player.getName());
             }
-        }
-
-        if (plugin.getConfig().getBoolean("crowns.holder-glow", true)) {
-            player.setGlowing(holdsAny);
-        } else if (holdsAny) {
-            player.setGlowing(false); // glow was disabled via reload
         }
 
         if (holdsAny && plugin.getConfig().getBoolean("crowns.hologram", true)) {
@@ -239,9 +228,9 @@ public final class CrownManager {
     public String holderLineMini(CrownType type) {
         Holder holder = holders.get(type);
         if (holder == null) {
-            return "<gray>Currently <white>unclaimed</white>.</gray>";
+            return "<gray>Actuellement <white>sans prétendant</white>.</gray>";
         }
-        return "<gray>Held by <white><bold>" + holder.name() + "</bold></white> for <white>"
+        return "<gray>Portée par <white><bold>" + holder.name() + "</bold></white> depuis <white>"
                 + Text.duration((System.currentTimeMillis() - holder.since()) / 1000) + "</white>.</gray>";
     }
 }

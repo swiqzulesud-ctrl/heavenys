@@ -81,7 +81,8 @@ public final class RewardManager implements Listener {
         persistPending();
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
-            Text.msg(player, "<white>You won the <gold>Builder Vote</gold>! Choose your prize...</white>");
+            Text.msg(player, "<white>Vous avez remporté le <gold>Vote de Construction</gold> ! "
+                    + "Choisissez votre récompense...</white>");
             // Small delay so the win fanfare lands before the GUI opens.
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (player.isOnline()) {
@@ -108,8 +109,8 @@ public final class RewardManager implements Listener {
         if (hasPendingReward(player.getUniqueId())) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (player.isOnline()) {
-                    Text.msg(player, "<white>Your <gold>Builder Vote</gold> reward is waiting! "
-                            + "Use <gold>/build reward</gold> to choose it.</white>");
+                    Text.msg(player, "<white>Votre récompense du <gold>Vote de Construction</gold> vous "
+                            + "attend ! Utilisez <gold>/build reward</gold> pour la choisir.</white>");
                     Fx.fanfare(player);
                 }
             }, 40L);
@@ -124,15 +125,15 @@ public final class RewardManager implements Listener {
      */
     public void choose(Player player, RewardType type) {
         if (!hasPendingReward(player.getUniqueId())) {
-            Text.msg(player, "<gray>You have no unclaimed Builder Vote reward.</gray>");
+            Text.msg(player, "<gray>Vous n'avez aucune récompense de Vote de Construction à réclamer.</gray>");
             Fx.deny(player);
             return;
         }
         switch (type) {
             case HEARTS -> chooseHearts(player);
-            case BEACON -> giveItemReward(player, new ItemStack(Material.BEACON), "a <gold>Beacon</gold>");
-            case END_CRYSTAL -> giveItemReward(player, new ItemStack(Material.END_CRYSTAL), "an <gold>End Crystal</gold>");
-            case DRAGON_EGG -> giveItemReward(player, new ItemStack(Material.DRAGON_EGG), "a <gold>Dragon Egg</gold>");
+            case BEACON -> giveItemReward(player, new ItemStack(Material.BEACON), "une <gold>Balise</gold>");
+            case END_CRYSTAL -> giveItemReward(player, new ItemStack(Material.END_CRYSTAL), "un <gold>Cristal de l'End</gold>");
+            case DRAGON_EGG -> giveItemReward(player, new ItemStack(Material.DRAGON_EGG), "un <gold>Œuf de Dragon</gold>");
             case PLAYER_HEAD -> chooseHead(player);
         }
     }
@@ -142,8 +143,8 @@ public final class RewardManager implements Listener {
         int cap = plugin.getConfig().getInt("builder-vote.rewards.max-bonus-hearts", 10);
         int current = bonusHearts.getOrDefault(player.getUniqueId(), 0);
         if (current >= cap) {
-            Text.msg(player, "<gray>You've already reached the maximum of <white>" + cap
-                    + "</white> bonus hearts — pick a different reward.</gray>");
+            Text.msg(player, "<gray>Vous avez déjà atteint le maximum de <white>" + cap
+                    + "</white> cœurs bonus — choisissez une autre récompense.</gray>");
             Fx.deny(player);
             Bukkit.getScheduler().runTaskLater(plugin, () -> new RewardGui(plugin, this).open(player), 20L);
             return;
@@ -162,8 +163,8 @@ public final class RewardManager implements Listener {
         });
         applyHearts(player);
         clearPending(player.getUniqueId());
-        Text.msg(player, "<white>Your heart swells! You now have <gold>+" + updated
-                + " bonus heart" + (updated == 1 ? "" : "s") + "</gold> permanently.</white>");
+        Text.msg(player, "<white>Votre cœur s'emplit de vigueur ! Vous disposez désormais de <gold>+"
+                + updated + " cœur" + (updated == 1 ? "" : "s") + " bonus</gold> de façon permanente.</white>");
         Fx.success(player);
         Fx.whiteBurst(player.getLocation());
     }
@@ -173,24 +174,25 @@ public final class RewardManager implements Listener {
         var leftover = player.getInventory().addItem(item);
         boolean dropped = !leftover.isEmpty();
         leftover.values().forEach(rest -> player.getWorld().dropItemNaturally(player.getLocation(), rest));
-        Text.msg(player, "<white>You received " + describedAs + " for winning the Builder Vote."
-                + (dropped ? " <gray>(your inventory was full, so it was dropped at your feet)</gray>" : "") + "</white>");
+        Text.msg(player, "<white>Vous avez reçu " + describedAs + " pour votre victoire au Vote de Construction."
+                + (dropped ? " <gray>(votre inventaire était plein, la récompense a été déposée à vos pieds)</gray>" : "")
+                + "</white>");
         Fx.success(player);
         Fx.whiteBurst(player.getLocation());
     }
 
     private void chooseHead(Player player) {
         player.closeInventory();
-        Text.msg(player, "<white>Type the <gold>name of the player</gold> whose head you want in chat, "
-                + "or type <gray>cancel</gray> to pick a different reward.</white>");
+        Text.msg(player, "<white>Tapez dans le chat le <gold>nom du joueur</gold> dont vous voulez la tête, "
+                + "ou tapez <gray>annuler</gray> pour choisir une autre récompense.</white>");
         plugin.chatInput().await(player, input -> {
             if (!input.matches("[a-zA-Z0-9_]{1,16}")) {
-                Text.msg(player, "<gray>'" + input + "' isn't a valid Minecraft name. "
-                        + "Reopen the chooser with <gold>/build reward</gold>.</gray>");
+                Text.msg(player, "<gray>« " + input + " » n'est pas un pseudonyme Minecraft valide. "
+                        + "Rouvrez le menu avec <gold>/build reward</gold>.</gray>");
                 Fx.deny(player);
                 return;
             }
-            Text.msg(player, "<gray>Looking up <white>" + input + "</white>'s skin...</gray>");
+            Text.msg(player, "<gray>Recherche du skin de <white>" + input + "</white>...</gray>");
             // Profile completion hits Mojang's API; update() runs it async.
             Bukkit.createPlayerProfile(input).update().whenComplete((profile, error) ->
                     Bukkit.getScheduler().runTask(plugin, () -> {
@@ -200,8 +202,8 @@ public final class RewardManager implements Listener {
                         boolean found = error == null && profile != null
                                 && profile.getUniqueId() != null && !profile.getTextures().isEmpty();
                         if (!found) {
-                            Text.msg(player, "<gray>No player named <white>" + input + "</white> exists. "
-                                    + "Reopen the chooser with <gold>/build reward</gold>.</gray>");
+                            Text.msg(player, "<gray>Aucun joueur nommé <white>" + input + "</white> n'existe. "
+                                    + "Rouvrez le menu avec <gold>/build reward</gold>.</gray>");
                             Fx.deny(player);
                             return;
                         }
@@ -218,11 +220,11 @@ public final class RewardManager implements Listener {
         ItemMeta meta = head.getItemMeta();
         if (meta instanceof SkullMeta skull) {
             skull.setOwnerProfile(profile);
-            skull.setDisplayName(Text.legacy("<!italic><white>" + name + "'s Head</white>"));
-            skull.setLore(Text.legacyLore("<gray>Claimed as a <gold>Builder Vote</gold> trophy.</gray>"));
+            skull.setDisplayName(Text.legacy("<!italic><white>Tête de " + name + "</white>"));
+            skull.setLore(Text.legacyLore("<gray>Trophée du <gold>Vote de Construction</gold>.</gray>"));
             head.setItemMeta(skull);
         }
-        giveItemReward(player, head, "<gold>" + name + "'s Head</gold>");
+        giveItemReward(player, head, "la <gold>Tête de " + name + "</gold>");
     }
 
     // ------------------------------------------------------------- hearts

@@ -20,9 +20,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * /build — submit builds, open the vote menu, view results, claim rewards.
+ * /build — soumettre des constructions, voter, consulter les résultats,
+ * réclamer sa récompense, et (admin) piloter le concours à la demande.
  */
 public final class BuildCommand implements CommandExecutor, TabCompleter {
+
+    private static final String ADMIN_PERMISSION = "smplugin.build.admin";
 
     private final SMPlugin plugin;
 
@@ -42,35 +45,87 @@ public final class BuildCommand implements CommandExecutor, TabCompleter {
             case "vote" -> vote(sender);
             case "results" -> results(sender);
             case "reward" -> reward(sender);
+            case "startnominations", "start" -> adminAction(sender, () -> {
+                String error = plugin.buildVote().forceNominations();
+                if (error != null) {
+                    deny(sender, error);
+                } else {
+                    Text.msg(sender, "<white>Les candidatures du <gold>Vote de Construction</gold> "
+                            + "sont désormais ouvertes.</white>");
+                }
+            });
+            case "startvote" -> adminAction(sender, () -> {
+                String error = plugin.buildVote().forceVote();
+                if (error != null) {
+                    deny(sender, error);
+                } else {
+                    Text.msg(sender, "<white>La phase de <gold>vote</gold> est désormais ouverte.</white>");
+                }
+            });
+            case "finish" -> adminAction(sender, () -> {
+                String error = plugin.buildVote().forceFinish();
+                if (error != null) {
+                    deny(sender, error);
+                } else {
+                    Text.msg(sender, "<white>Le vote a été clôturé et les résultats annoncés.</white>");
+                }
+            });
+            case "cancel" -> adminAction(sender, () -> {
+                plugin.buildVote().cancelCycle();
+                Text.msg(sender, "<white>Le cycle en cours a été annulé ; un nouveau cycle démarre.</white>");
+            });
             default -> sendHelp(sender);
         }
         return true;
     }
 
+    private void adminAction(CommandSender sender, Runnable action) {
+        if (!sender.hasPermission(ADMIN_PERMISSION)) {
+            deny(sender, "Vous n'avez pas la permission de piloter le Vote de Construction.");
+            return;
+        }
+        action.run();
+    }
+
+    private void deny(CommandSender sender, String message) {
+        Text.msg(sender, "<gray>" + message + "</gray>");
+        if (sender instanceof Player p) {
+            Fx.deny(p);
+        }
+    }
+
     private void sendHelp(CommandSender sender) {
         BuildVoteManager votes = plugin.buildVote();
-        Text.msg(sender, "<gold>─── ✦ Builder Vote ✦ ───</gold>");
-        Text.raw(sender, ("<white>  /build submit <name> <gray>— enter your build (stand next to it)</gray>"));
-        Text.raw(sender, ("<white>  /build vote <gray>— open the voting menu</gray>"));
-        Text.raw(sender, ("<white>  /build results <gray>— last cycle's winner</gray>"));
-        Text.raw(sender, ("<white>  /build reward <gray>— claim an unclaimed win reward</gray>"));
+        Text.msg(sender, "<gold>─── ✦ Vote de Construction ✦ ───</gold>");
+        Text.raw(sender, "<white>  /build submit <nom> <gray>— inscrire votre construction (placez-vous devant)</gray>");
+        Text.raw(sender, "<white>  /build vote <gray>— ouvrir le menu de vote</gray>");
+        Text.raw(sender, "<white>  /build results <gray>— le gagnant du dernier cycle</gray>");
+        Text.raw(sender, "<white>  /build reward <gray>— réclamer une récompense en attente</gray>");
+        if (sender.hasPermission(ADMIN_PERMISSION)) {
+            Text.raw(sender, "<white>  /build startnominations <gray>— (admin) ouvrir les candidatures maintenant</gray>");
+            Text.raw(sender, "<white>  /build startvote <gray>— (admin) ouvrir le vote maintenant</gray>");
+            Text.raw(sender, "<white>  /build finish <gray>— (admin) clôturer le vote et annoncer les résultats</gray>");
+            Text.raw(sender, "<white>  /build cancel <gray>— (admin) annuler le cycle en cours</gray>");
+        }
         String phase = switch (votes.phase()) {
-            case WAITING -> "Nominations open in <white>" + Text.duration(votes.secondsUntilNextPhase()) + "</white>.";
-            case NOMINATION -> "Nominations are <white>open now</white> for another <white>"
-                    + Text.duration(votes.secondsUntilNextPhase()) + "</white>!";
-            case VOTING -> "Voting is <white>open now</white> for another <white>"
-                    + Text.duration(votes.secondsUntilNextPhase()) + "</white>!";
+            case WAITING -> "Candidatures dans <white>" + Text.duration(votes.secondsUntilNextPhase()) + "</white>.";
+            case NOMINATION -> "Candidatures <white>ouvertes</white> pendant encore <white>"
+                    + Text.duration(votes.secondsUntilNextPhase()) + "</white> !";
+            case VOTING -> "Vote <white>en cours</white> pendant encore <white>"
+                    + Text.duration(votes.secondsUntilNextPhase()) + "</white> !";
         };
-        Text.raw(sender, ("<gray>  Current phase: " + phase + "</gray>"));
+        Text.raw(sender, "<gray>  Phase actuelle : " + phase + "</gray>");
     }
 
     private void submit(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            Text.msg(sender, "<gray>Builds can only be submitted in-game, standing near the build.</gray>");
+            Text.msg(sender, "<gray>Les constructions ne peuvent être inscrites qu'en jeu, "
+                    + "près de la construction.</gray>");
             return;
         }
         if (args.length < 2) {
-            Text.msg(player, "<gray>Usage: <gold>/build submit <name></gold> — stand near your build first!</gray>");
+            Text.msg(player, "<gray>Usage : <gold>/build submit <nom></gold> — placez-vous d'abord "
+                    + "près de votre construction !</gray>");
             Fx.deny(player);
             return;
         }
@@ -80,24 +135,24 @@ public final class BuildCommand implements CommandExecutor, TabCompleter {
 
     private void vote(CommandSender sender) {
         if (!(sender instanceof Player player)) {
-            Text.msg(sender, "<gray>Voting happens in-game through the vote menu.</gray>");
+            Text.msg(sender, "<gray>Le vote se déroule en jeu, via le menu de vote.</gray>");
             return;
         }
         BuildVoteManager votes = plugin.buildVote();
         if (votes.phase() != BuildVoteManager.Phase.VOTING) {
             if (votes.phase() == BuildVoteManager.Phase.NOMINATION) {
-                Text.msg(player, "<gray>Voting hasn't started yet — nominations are still open for <white>"
-                        + Text.duration(votes.secondsUntilNextPhase()) + "</white>. "
-                        + "Submit yours with <gold>/build submit <name></gold>!</gray>");
+                Text.msg(player, "<gray>Le vote n'a pas encore commencé — les candidatures restent ouvertes "
+                        + "pendant <white>" + Text.duration(votes.secondsUntilNextPhase()) + "</white>. "
+                        + "Inscrivez la vôtre avec <gold>/build submit <nom></gold> !</gray>");
             } else {
-                Text.msg(player, "<gray>There's no vote running right now. The next cycle progresses in <white>"
+                Text.msg(player, "<gray>Aucun vote en cours pour le moment. Le cycle avance dans <white>"
                         + Text.duration(votes.secondsUntilNextPhase()) + "</white>.</gray>");
             }
             Fx.deny(player);
             return;
         }
         if (votes.submissions().isEmpty()) {
-            Text.msg(player, "<gray>No builds were submitted this cycle — there's nothing to vote on.</gray>");
+            Text.msg(player, "<gray>Aucune construction n'a été proposée ce cycle — il n'y a rien à voter.</gray>");
             Fx.deny(player);
             return;
         }
@@ -107,26 +162,28 @@ public final class BuildCommand implements CommandExecutor, TabCompleter {
     private void results(CommandSender sender) {
         plugin.buildVote().lastResult(result -> {
             if (result == null) {
-                Text.msg(sender, "<gray>No builder vote has finished yet — history starts with the first winner!</gray>");
+                Text.msg(sender, "<gray>Aucun vote de construction ne s'est encore achevé — l'histoire "
+                        + "commence avec le premier gagnant !</gray>");
                 return;
             }
-            String when = DateTimeFormatter.ofPattern("MMM d, yyyy")
+            String when = DateTimeFormatter.ofPattern("d MMM yyyy")
                     .withZone(ZoneId.systemDefault())
                     .format(Instant.ofEpochMilli(result.finished()));
-            Text.msg(sender, "<gold>─── ✦ Last Builder Vote ✦ ───</gold>");
-            Text.raw(sender, ("<white>  Winner: <gold>" + result.winnerName() + "</gold>"));
-            Text.raw(sender, ("<white>  Build: <gold>" + result.buildName() + "</gold>"));
-            Text.raw(sender, ("<white>  Votes: <gold>" + result.votes() + "</gold> <gray>(" + when + ")</gray>"));
+            Text.msg(sender, "<gold>─── ✦ Dernier Vote de Construction ✦ ───</gold>");
+            Text.raw(sender, "<white>  Gagnant : <gold>" + result.winnerName() + "</gold>");
+            Text.raw(sender, "<white>  Construction : <gold>" + result.buildName() + "</gold>");
+            Text.raw(sender, "<white>  Voix : <gold>" + result.votes() + "</gold> <gray>(" + when + ")</gray>");
         });
     }
 
     private void reward(CommandSender sender) {
         if (!(sender instanceof Player player)) {
-            Text.msg(sender, "<gray>Rewards can only be claimed in-game.</gray>");
+            Text.msg(sender, "<gray>Les récompenses ne peuvent être réclamées qu'en jeu.</gray>");
             return;
         }
         if (!plugin.rewards().hasPendingReward(player.getUniqueId())) {
-            Text.msg(player, "<gray>You have no unclaimed Builder Vote reward. Win the next vote!</gray>");
+            Text.msg(player, "<gray>Vous n'avez aucune récompense à réclamer. "
+                    + "Remportez le prochain vote !</gray>");
             Fx.deny(player);
             return;
         }
@@ -137,8 +194,11 @@ public final class BuildCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                       @NotNull String label, String[] args) {
         if (args.length == 1) {
-            return Stream.of("submit", "vote", "results", "reward")
-                    .filter(s -> s.startsWith(args[0].toLowerCase())).toList();
+            Stream<String> subs = sender.hasPermission(ADMIN_PERMISSION)
+                    ? Stream.of("submit", "vote", "results", "reward",
+                            "startnominations", "startvote", "finish", "cancel")
+                    : Stream.of("submit", "vote", "results", "reward");
+            return subs.filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         }
         return List.of();
     }
