@@ -1,0 +1,54 @@
+name: SMPlugin
+version: '${project.version}'
+main: dev.smplugin.SMPlugin
+api-version: '26.1'
+description: Crowns prestige system, builder votes and the Sovereign's Relic boss event.
+authors: [SMP Team]
+
+libraries:
+  - org.xerial:sqlite-jdbc:3.53.2.0
+
+commands:
+  crowns:
+    description: View the three Crowns, leaderboards and admin controls.
+    usage: /crowns [kills|setresources <player>|clearresources]
+    permission: smplugin.crowns.use
+  build:
+    description: Builder vote - submit builds, vote, view results and run the contest.
+    usage: /build <submit <name>|vote|results|reward|startnominations|startvote|finish|cancel>
+    permission: smplugin.build.use
+  relic:
+    description: The Sovereign's Relic boss event.
+    usage: /relic <summon [now]|log|reset>
+    permission: smplugin.relic.use
+  smplugin:
+    description: SMPlugin administration.
+    usage: /smplugin reload
+    permission: smplugin.admin
+
+permissions:
+  smplugin.admin:
+    description: Full administrative access to SMPlugin.
+    default: op
+    children:
+      smplugin.crowns.admin: true
+      smplugin.build.admin: true
+      smplugin.relic.admin: true
+  smplugin.crowns.use:
+    description: Open the Crowns GUI and leaderboards.
+    default: true
+  smplugin.crowns.admin:
+    description: Manage the Crown of Resources.
+    default: op
+  smplugin.build.use:
+    description: Submit builds and vote in the builder vote.
+    default: true
+  smplugin.build.admin:
+    description: Start, finish and cancel builder-vote contests on demand.
+    default: op
+  smplugin.relic.use:
+    description: Base access to /relic (subcommands are admin gated).
+    default: true
+  smplugin.relic.admin:
+    description: Summon the Sovereign Guardian and view participation logs.
+    default: op
