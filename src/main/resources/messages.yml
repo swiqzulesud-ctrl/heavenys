@@ -1,0 +1,161 @@
+# ------------------------------------------------------------------
+#  HeavenEssentials - messages.yml
+#
+#  Every message uses the MiniMessage format:
+#    https://docs.advntr.dev/minimessage/format.html
+#
+#  Heaven palette:
+#    soft white  : #EAF6FF
+#    gold        : #FFD966
+#    light blue  : #9BDCFF
+#    soft cyan   : #A7F0EA
+#
+#  <prefix> is replaced with general.prefix.
+#  Setting any message to an empty string ('') disables it.
+# ------------------------------------------------------------------
+
+general:
+  prefix: '<bold><gradient:#FFE9A8:#FFD24C>☁ Heaven</gradient></bold> <color:#9BDCFF>│</color> '
+  no-permission: '<prefix><color:#EAF6FF>You lack the <color:#FFD966>permission</color> to do that.</color>'
+  players-only: '<prefix><color:#EAF6FF>Only <color:#9BDCFF>players</color> may use this command.</color>'
+  player-not-found: '<prefix><color:#EAF6FF>No player named <color:#FFD966><name></color> is online.</color>'
+  invalid-usage: '<prefix><color:#EAF6FF>Usage: <color:#A7F0EA><usage></color></color>'
+  invalid-number: '<prefix><color:#EAF6FF><input> <color:#9BDCFF>is not a valid number.</color></color>'
+  reloaded: '<prefix><color:#EAF6FF>Configuration and messages <color:#FFD966>reloaded</color> successfully.</color>'
+
+lifesteal:
+  # Sent to the killer when they steal hearts.  <hearts>, <victim>
+  gain: '<prefix><color:#EAF6FF>You claimed <color:#FFD966><hearts> ❤</color> from <color:#9BDCFF><victim></color>.</color>'
+  # Sent to the victim when they lose hearts.  <hearts>, <killer>
+  lose: '<prefix><color:#EAF6FF><color:#9BDCFF><killer></color> claimed <color:#FFD966><hearts> ❤</color> from you.</color>'
+  # Sent to the killer when they are already at the maximum.  <max>
+  max-reached: '<prefix><color:#EAF6FF>You are already at the heavenly limit of <color:#FFD966><max> ❤</color>.</color>'
+  # Sent to the killer when the victim was already at the minimum.  <victim>
+  victim-at-minimum: '<prefix><color:#EAF6FF><color:#9BDCFF><victim></color> had nothing left to give.</color>'
+  # Broadcast in chat when an admin changes the maximum hearts.  <max>
+  max-updated: '<prefix><color:#EAF6FF>Maximum hearts set to <color:#FFD966><max> ❤</color>.</color>'
+  gui:
+    title: '<color:#3E6E8E>☁ Heaven <color:#8C6F1F>│</color> Lifesteal Settings</color>'
+    info-name: '<color:#FFD966>❤ Maximum Hearts: <white><max></white></color>'
+    info-lore:
+      - '<color:#9BDCFF>The highest number of hearts</color>'
+      - '<color:#9BDCFF>any player can reach.</color>'
+      - ''
+      - '<color:#A7F0EA>Changes save instantly and players</color>'
+      - '<color:#A7F0EA>above the limit are clamped.</color>'
+    header-name: '<color:#FFD966>☁ Heaven Lifesteal</color>'
+    header-lore:
+      - '<color:#9BDCFF>Slay another player to steal</color>'
+      - '<color:#9BDCFF>a heart from them.</color>'
+    decrease-one-name: '<color:#9BDCFF>− Decrease by 1</color>'
+    decrease-five-name: '<color:#9BDCFF>− Decrease by 5</color>'
+    increase-one-name: '<color:#FFD966>+ Increase by 1</color>'
+    increase-five-name: '<color:#FFD966>+ Increase by 5</color>'
+    button-lore:
+      - '<color:#A7F0EA>Click to adjust the</color>'
+      - '<color:#A7F0EA>maximum hearts.</color>'
+    close-name: '<color:#EAF6FF>✕ Close</color>'
+
+commands:
+  gamemode:
+    changed-self: '<prefix><color:#EAF6FF>Game mode set to <color:#FFD966><mode></color>.</color>'
+    changed-other: '<prefix><color:#EAF6FF>Set <color:#9BDCFF><target></color>''s game mode to <color:#FFD966><mode></color>.</color>'
+    changed-by: '<prefix><color:#EAF6FF>Your game mode was set to <color:#FFD966><mode></color>.</color>'
+    invalid-mode: '<prefix><color:#EAF6FF><color:#FFD966><mode></color> is not a valid game mode.</color>'
+  fly:
+    enabled-self: '<prefix><color:#EAF6FF>Flight <color:#FFD966>enabled</color> — spread your wings.</color>'
+    disabled-self: '<prefix><color:#EAF6FF>Flight <color:#9BDCFF>disabled</color>.</color>'
+    enabled-other: '<prefix><color:#EAF6FF>Flight <color:#FFD966>enabled</color> for <color:#9BDCFF><target></color>.</color>'
+    disabled-other: '<prefix><color:#EAF6FF>Flight <color:#9BDCFF>disabled</color> for <color:#9BDCFF><target></color>.</color>'
+    enabled-by: '<prefix><color:#EAF6FF>Your flight was <color:#FFD966>enabled</color>.</color>'
+    disabled-by: '<prefix><color:#EAF6FF>Your flight was <color:#9BDCFF>disabled</color>.</color>'
+  heal:
+    healed-self: '<prefix><color:#EAF6FF>You have been <color:#FFD966>healed</color> by the light.</color>'
+    healed-other: '<prefix><color:#EAF6FF>You healed <color:#9BDCFF><target></color>.</color>'
+    healed-by: '<prefix><color:#EAF6FF>You were <color:#FFD966>healed</color> by the light.</color>'
+  feed:
+    fed-self: '<prefix><color:#EAF6FF>Your hunger has been <color:#FFD966>satisfied</color>.</color>'
+    fed-other: '<prefix><color:#EAF6FF>You fed <color:#9BDCFF><target></color>.</color>'
+    fed-by: '<prefix><color:#EAF6FF>Your hunger was <color:#FFD966>satisfied</color>.</color>'
+  god:
+    enabled-self: '<prefix><color:#EAF6FF>God mode <color:#FFD966>enabled</color> — you are untouchable.</color>'
+    disabled-self: '<prefix><color:#EAF6FF>God mode <color:#9BDCFF>disabled</color>.</color>'
+    enabled-other: '<prefix><color:#EAF6FF>God mode <color:#FFD966>enabled</color> for <color:#9BDCFF><target></color>.</color>'
+    disabled-other: '<prefix><color:#EAF6FF>God mode <color:#9BDCFF>disabled</color> for <color:#9BDCFF><target></color>.</color>'
+    enabled-by: '<prefix><color:#EAF6FF>God mode was <color:#FFD966>enabled</color> for you.</color>'
+    disabled-by: '<prefix><color:#EAF6FF>God mode was <color:#9BDCFF>disabled</color> for you.</color>'
+  speed:
+    set-self: '<prefix><color:#EAF6FF>Your <color:#A7F0EA><type></color> speed is now <color:#FFD966><speed></color>.</color>'
+    set-other: '<prefix><color:#EAF6FF>Set <color:#9BDCFF><target></color>''s <color:#A7F0EA><type></color> speed to <color:#FFD966><speed></color>.</color>'
+    set-by: '<prefix><color:#EAF6FF>Your <color:#A7F0EA><type></color> speed was set to <color:#FFD966><speed></color>.</color>'
+    invalid: '<prefix><color:#EAF6FF>Speed must be a whole number between <color:#FFD966>1</color> and <color:#FFD966>10</color>.</color>'
+    type-walk: 'walk'
+    type-fly: 'fly'
+  tp:
+    teleported: '<prefix><color:#EAF6FF>Whisked away to <color:#9BDCFF><target></color>.</color>'
+    teleported-other: '<prefix><color:#EAF6FF>Teleported <color:#9BDCFF><player></color> to <color:#9BDCFF><target></color>.</color>'
+    cannot-self: '<prefix><color:#EAF6FF>You cannot teleport to <color:#FFD966>yourself</color>.</color>'
+  tphere:
+    teleported: '<prefix><color:#EAF6FF>Summoned <color:#9BDCFF><target></color> to you.</color>'
+    notify: '<prefix><color:#EAF6FF>You were summoned by <color:#9BDCFF><player></color>.</color>'
+    cannot-self: '<prefix><color:#EAF6FF>You cannot summon <color:#FFD966>yourself</color>.</color>'
+  tpall:
+    teleported: '<prefix><color:#EAF6FF>Summoned <color:#FFD966><count></color> player(s) to you.</color>'
+    notify: '<prefix><color:#EAF6FF>Everyone was summoned by <color:#9BDCFF><player></color>.</color>'
+    nobody: '<prefix><color:#EAF6FF>There is nobody else to summon.</color>'
+  spawn:
+    teleported: '<prefix><color:#EAF6FF>Returned to <color:#FFD966>spawn</color>.</color>'
+    teleported-other: '<prefix><color:#EAF6FF>Sent <color:#9BDCFF><target></color> to spawn.</color>'
+    teleported-by: '<prefix><color:#EAF6FF>You were sent to <color:#FFD966>spawn</color>.</color>'
+    not-set: '<prefix><color:#EAF6FF>No spawn has been set yet. Use <color:#A7F0EA>/setspawn</color> first.</color>'
+  setspawn:
+    set: '<prefix><color:#EAF6FF>Spawn set in <color:#9BDCFF><world></color> at <color:#FFD966><x>, <y>, <z></color>.</color>'
+  back:
+    teleported: '<prefix><color:#EAF6FF>Returned to your <color:#FFD966>previous location</color>.</color>'
+    none: '<prefix><color:#EAF6FF>There is no location to return to.</color>'
+  invsee:
+    opened: '<prefix><color:#EAF6FF>Viewing <color:#9BDCFF><target></color>''s inventory.</color>'
+    cannot-self: '<prefix><color:#EAF6FF>You cannot inspect your <color:#FFD966>own</color> inventory.</color>'
+  enderchest:
+    opened-self: '<prefix><color:#EAF6FF>Opening your <color:#FFD966>ender chest</color>.</color>'
+    opened-other: '<prefix><color:#EAF6FF>Opening <color:#9BDCFF><target></color>''s ender chest.</color>'
+  clear:
+    cleared-self: '<prefix><color:#EAF6FF>Your inventory has been <color:#FFD966>cleared</color>.</color>'
+    cleared-other: '<prefix><color:#EAF6FF>Cleared <color:#9BDCFF><target></color>''s inventory.</color>'
+    cleared-by: '<prefix><color:#EAF6FF>Your inventory was <color:#FFD966>cleared</color>.</color>'
+  repair:
+    repaired-hand: '<prefix><color:#EAF6FF>Your item has been <color:#FFD966>restored</color>.</color>'
+    repaired-all: '<prefix><color:#EAF6FF>Repaired <color:#FFD966><count></color> item(s) in your inventory.</color>'
+    nothing: '<prefix><color:#EAF6FF>There is nothing to repair.</color>'
+  workbench:
+    opened: '<prefix><color:#EAF6FF>Opening a <color:#FFD966>crafting table</color>.</color>'
+  anvil:
+    opened: '<prefix><color:#EAF6FF>Opening an <color:#FFD966>anvil</color>.</color>'
+  hat:
+    equipped: '<prefix><color:#EAF6FF>Enjoy your new <color:#FFD966>hat</color>!</color>'
+    no-item: '<prefix><color:#EAF6FF>Hold an item in your <color:#9BDCFF>main hand</color> first.</color>'
+  top:
+    teleported: '<prefix><color:#EAF6FF>Ascended to the <color:#FFD966>top</color>.</color>'
+  bottom:
+    teleported: '<prefix><color:#EAF6FF>Descended to the <color:#FFD966>bottom</color>.</color>'
+    none: '<prefix><color:#EAF6FF>No safe spot was found below you.</color>'
+  time:
+    day: '<prefix><color:#EAF6FF>The sun rises over <color:#9BDCFF><world></color>.</color>'
+    night: '<prefix><color:#EAF6FF>Night falls over <color:#9BDCFF><world></color>.</color>'
+  weather:
+    sun: '<prefix><color:#EAF6FF>The skies clear over <color:#9BDCFF><world></color>.</color>'
+    rain: '<prefix><color:#EAF6FF>Rain begins to fall over <color:#9BDCFF><world></color>.</color>'
+  broadcast:
+    # <message> is parsed as MiniMessage, so staff can use colors inside it.
+    format: '<newline><color:#FFD966>☁ Announcement</color> <color:#9BDCFF>│</color> <color:#EAF6FF><message></color><newline>'
+  msg:
+    format-to: '<color:#FFD966>✉ You <color:#9BDCFF>→</color> <target></color> <color:#9BDCFF>│</color> <color:#EAF6FF><message></color>'
+    format-from: '<color:#FFD966>✉ <player> <color:#9BDCFF>→</color> You</color> <color:#9BDCFF>│</color> <color:#EAF6FF><message></color>'
+    cannot-self: '<prefix><color:#EAF6FF>You cannot message <color:#FFD966>yourself</color>.</color>'
+    ignored: '<prefix><color:#EAF6FF><color:#9BDCFF><target></color> is not accepting your messages.</color>'
+  reply:
+    none: '<prefix><color:#EAF6FF>There is nobody to reply to.</color>'
+  ignore:
+    added: '<prefix><color:#EAF6FF>You are now <color:#FFD966>ignoring</color> <color:#9BDCFF><target></color>.</color>'
+    removed: '<prefix><color:#EAF6FF>You are no longer ignoring <color:#9BDCFF><target></color>.</color>'
+    cannot-self: '<prefix><color:#EAF6FF>You cannot ignore <color:#FFD966>yourself</color>.</color>'

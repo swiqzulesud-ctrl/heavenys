@@ -1,0 +1,18 @@
+# ------------------------------------------------------------------
+#  HeavenEssentials - data.yml
+#
+#  Runtime data storage. This file is managed automatically by the
+#  plugin - manual edits are only picked up after a server restart
+#  or /heartsteal reload.
+#
+#  Layout:
+#    spawn:            the global spawn point set with /setspawn
+#    players:
+#      <uuid>:
+#        hearts: <int> stored Lifesteal hearts for that player
+#    ignores:
+#      <uuid>: [list of ignored uuids]
+# ------------------------------------------------------------------
+
+players: {}
+ignores: {}
