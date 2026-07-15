@@ -1,0 +1,26 @@
+# ------------------------------------------------------------------
+#  HeavenEssentials - config.yml
+#
+#  Main configuration for the Lifesteal system. All chat messages,
+#  GUI titles and item names live in messages.yml.
+# ------------------------------------------------------------------
+
+lifesteal:
+  # Master switch for the Lifesteal system. When disabled, deaths never
+  # transfer hearts, but stored heart values are still applied to players.
+  enabled: true
+
+  # Hearts a brand new player starts with. 1 heart = 2 health points.
+  default-hearts: 10
+
+  # The absolute minimum number of hearts a player can be reduced to.
+  # A victim at this value loses nothing when killed.
+  min-hearts: 1
+
+  # The maximum number of hearts a player can reach. This value is also
+  # editable in-game through the /heartsteal admin GUI. When it is
+  # lowered, every player above the new maximum is clamped automatically.
+  max-hearts: 20
+
+  # How many hearts are transferred from the victim to the killer per kill.
+  hearts-per-kill: 1

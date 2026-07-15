@@ -1,0 +1,280 @@
+name: HeavenEssentials
+version: '1.0.0'
+main: dev.heaven.essentials.HeavenEssentials
+api-version: '26.2'
+description: A Heaven-themed Lifesteal system combined with a lightweight Essentials-style command suite.
+author: Heaven
+
+commands:
+  heartsteal:
+    description: Open the Lifesteal admin GUI or reload the plugin configuration.
+    usage: /heartsteal [reload]
+    aliases: [hs, lifesteal]
+  gm:
+    description: Change your own or another player's game mode.
+    usage: /gm <0|1|2|3|survival|creative|adventure|spectator> [player]
+    aliases: [gamemode]
+  fly:
+    description: Toggle flight for yourself or another player.
+    usage: /fly [player]
+  heal:
+    description: Restore full health for yourself or another player.
+    usage: /heal [player]
+  feed:
+    description: Restore full hunger for yourself or another player.
+    usage: /feed [player]
+  god:
+    description: Toggle invulnerability for yourself or another player.
+    usage: /god [player]
+  speed:
+    description: Set walk or fly speed for yourself or another player.
+    usage: /speed <1-10> [player]
+  tp:
+    description: Teleport to a player, or teleport a player to another player.
+    usage: /tp <target> | /tp <player> <target>
+  tphere:
+    description: Teleport a player to you.
+    usage: /tphere <player>
+    aliases: [tph]
+  tpall:
+    description: Teleport every online player to you.
+    usage: /tpall
+  spawn:
+    description: Teleport to the global spawn point.
+    usage: /spawn [player]
+  setspawn:
+    description: Set the global spawn point at your current location.
+    usage: /setspawn
+  back:
+    description: Return to your previous location.
+    usage: /back
+  invsee:
+    description: View another player's inventory.
+    usage: /invsee <player>
+    aliases: [inv]
+  enderchest:
+    description: Open your own or another player's ender chest.
+    usage: /enderchest [player]
+    aliases: [ec, echest]
+  clear:
+    description: Clear your own or another player's inventory.
+    usage: /clear [player]
+    aliases: [ci, clearinventory]
+  repair:
+    description: Repair the item in your hand or your whole inventory.
+    usage: /repair [all]
+    aliases: [fix]
+  workbench:
+    description: Open a portable crafting table.
+    usage: /workbench
+    aliases: [wb, craft]
+  anvil:
+    description: Open a portable anvil.
+    usage: /anvil
+  hat:
+    description: Wear the item in your main hand as a hat.
+    usage: /hat
+  top:
+    description: Teleport to the highest block at your position.
+    usage: /top
+  bottom:
+    description: Teleport to the lowest safe block at your position.
+    usage: /bottom
+  day:
+    description: Set the time of your world to day.
+    usage: /day
+  night:
+    description: Set the time of your world to night.
+    usage: /night
+  sun:
+    description: Clear the weather in your world.
+    usage: /sun
+  rain:
+    description: Start rain in your world.
+    usage: /rain
+  broadcast:
+    description: Broadcast a message to the whole server.
+    usage: /broadcast <message>
+    aliases: [bc]
+  msg:
+    description: Send a private message to a player.
+    usage: /msg <player> <message>
+    aliases: [tell, w, whisper, message]
+  reply:
+    description: Reply to the last private message you received or sent.
+    usage: /reply <message>
+    aliases: [r]
+  ignore:
+    description: Toggle ignoring private messages from a player.
+    usage: /ignore <player>
+    aliases: [unignore]
+
+permissions:
+  heaven.*:
+    description: Grants access to every HeavenEssentials feature.
+    default: op
+    children:
+      heaven.admin: true
+      heaven.command.gamemode: true
+      heaven.command.gamemode.others: true
+      heaven.command.fly: true
+      heaven.command.fly.others: true
+      heaven.command.heal: true
+      heaven.command.heal.others: true
+      heaven.command.feed: true
+      heaven.command.feed.others: true
+      heaven.command.god: true
+      heaven.command.god.others: true
+      heaven.command.speed: true
+      heaven.command.speed.others: true
+      heaven.command.tp: true
+      heaven.command.tp.others: true
+      heaven.command.tphere: true
+      heaven.command.tpall: true
+      heaven.command.spawn: true
+      heaven.command.spawn.others: true
+      heaven.command.setspawn: true
+      heaven.command.back: true
+      heaven.command.invsee: true
+      heaven.command.enderchest: true
+      heaven.command.enderchest.others: true
+      heaven.command.clear: true
+      heaven.command.clear.others: true
+      heaven.command.repair: true
+      heaven.command.repair.all: true
+      heaven.command.workbench: true
+      heaven.command.anvil: true
+      heaven.command.hat: true
+      heaven.command.top: true
+      heaven.command.bottom: true
+      heaven.command.day: true
+      heaven.command.night: true
+      heaven.command.sun: true
+      heaven.command.rain: true
+      heaven.command.broadcast: true
+      heaven.command.msg: true
+      heaven.command.reply: true
+      heaven.command.ignore: true
+  heaven.admin:
+    description: Access to the Lifesteal admin GUI and /heartsteal reload.
+    default: op
+  heaven.command.gamemode:
+    description: Access to /gm.
+    default: op
+  heaven.command.gamemode.others:
+    description: Change another player's game mode.
+    default: op
+  heaven.command.fly:
+    description: Access to /fly.
+    default: op
+  heaven.command.fly.others:
+    description: Toggle flight for another player.
+    default: op
+  heaven.command.heal:
+    description: Access to /heal.
+    default: op
+  heaven.command.heal.others:
+    description: Heal another player.
+    default: op
+  heaven.command.feed:
+    description: Access to /feed.
+    default: op
+  heaven.command.feed.others:
+    description: Feed another player.
+    default: op
+  heaven.command.god:
+    description: Access to /god.
+    default: op
+  heaven.command.god.others:
+    description: Toggle god mode for another player.
+    default: op
+  heaven.command.speed:
+    description: Access to /speed.
+    default: op
+  heaven.command.speed.others:
+    description: Set another player's speed.
+    default: op
+  heaven.command.tp:
+    description: Access to /tp.
+    default: op
+  heaven.command.tp.others:
+    description: Teleport one player to another player.
+    default: op
+  heaven.command.tphere:
+    description: Access to /tphere.
+    default: op
+  heaven.command.tpall:
+    description: Access to /tpall.
+    default: op
+  heaven.command.spawn:
+    description: Access to /spawn.
+    default: true
+  heaven.command.spawn.others:
+    description: Send another player to spawn.
+    default: op
+  heaven.command.setspawn:
+    description: Access to /setspawn.
+    default: op
+  heaven.command.back:
+    description: Access to /back.
+    default: op
+  heaven.command.invsee:
+    description: Access to /invsee.
+    default: op
+  heaven.command.enderchest:
+    description: Access to /enderchest.
+    default: op
+  heaven.command.enderchest.others:
+    description: Open another player's ender chest.
+    default: op
+  heaven.command.clear:
+    description: Access to /clear.
+    default: op
+  heaven.command.clear.others:
+    description: Clear another player's inventory.
+    default: op
+  heaven.command.repair:
+    description: Access to /repair.
+    default: op
+  heaven.command.repair.all:
+    description: Repair every item in your inventory.
+    default: op
+  heaven.command.workbench:
+    description: Access to /workbench.
+    default: op
+  heaven.command.anvil:
+    description: Access to /anvil.
+    default: op
+  heaven.command.hat:
+    description: Access to /hat.
+    default: op
+  heaven.command.top:
+    description: Access to /top.
+    default: op
+  heaven.command.bottom:
+    description: Access to /bottom.
+    default: op
+  heaven.command.day:
+    description: Access to /day.
+    default: op
+  heaven.command.night:
+    description: Access to /night.
+    default: op
+  heaven.command.sun:
+    description: Access to /sun.
+    default: op
+  heaven.command.rain:
+    description: Access to /rain.
+    default: op
+  heaven.command.broadcast:
+    description: Access to /broadcast.
+    default: op
+  heaven.command.msg:
+    description: Access to /msg.
+    default: true
+  heaven.command.reply:
+    description: Access to /reply.
+    default: true
+  heaven.command.ignore:
+    description: Access to /ignore.
+    default: true
