@@ -10,6 +10,8 @@ mvn clean package
 
 The plugin jar is produced at `target/HeavenEssentials-1.0.0.jar`.
 
+The source code only uses Java 21 language features, but the Paper 26.2 API (and the Paper 26.2 server itself) is compiled for Java 25, so building requires JDK 25 (`maven.compiler.release` is set to 25 accordingly).
+
 ## Lifesteal
 
 - Killing another **player** transfers one heart (2 health) from the victim to the killer.
