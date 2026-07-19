@@ -1,0 +1,166 @@
+# ============================================================
+#  HeavenEssentials - Messages
+#  Every message uses MiniMessage: https://docs.advntr.dev/minimessage/
+#  Heaven palette -> white, gold, light blue (#8ECAE6), soft cyan (#A6F1E0)
+# ============================================================
+
+# Prefix injected wherever <prefix> is used, and prepended to prefixed messages.
+prefix: "<gradient:#FFFFFF:#FFD700><bold>Heaven</bold></gradient> <white>»</white> "
+
+general:
+  no-permission: "<prefix><#FF9AA2>You do not have permission to do that.</#FF9AA2>"
+  player-only: "<prefix><#FF9AA2>Only players can use this command.</#FF9AA2>"
+  unknown-player: "<prefix><#FF9AA2>Player <white><target></white> could not be found.</#FF9AA2>"
+  invalid-usage: "<prefix><#8ECAE6>Usage: <white><usage></white></#8ECAE6>"
+  invalid-number: "<prefix><#FF9AA2><white><input></white> is not a valid number.</#FF9AA2>"
+  reload-success: "<prefix><#A6F1E0>Configuration reloaded successfully.</#A6F1E0>"
+
+lifesteal:
+  # <victim> the killed player, <hearts> current hearts of the killer
+  gained: "<prefix><gold>+1 Heart!</gold> <white>You stole a heart from</white> <#8ECAE6><victim></#8ECAE6><white>. You now have</white> <gold><hearts></gold> <white>hearts.</white>"
+  # <killer> the killer, <hearts> current hearts of the victim
+  lost: "<prefix><#FF9AA2>-1 Heart!</#FF9AA2> <white><killer> stole one of your hearts. You now have</white> <gold><hearts></gold> <white>hearts.</white>"
+  at-maximum: "<prefix><#A6F1E0>You slew</#A6F1E0> <#8ECAE6><victim></#8ECAE6> <#A6F1E0>but are already at the maximum hearts.</#A6F1E0>"
+
+admin:
+  # <max> the new maximum
+  max-updated: "<prefix><#A6F1E0>Maximum hearts set to</#A6F1E0> <gold><max></gold><#A6F1E0>.</#A6F1E0>"
+  max-limit-reached-high: "<prefix><#FF9AA2>The maximum hearts cannot be raised any higher.</#FF9AA2>"
+  max-limit-reached-low: "<prefix><#FF9AA2>The maximum hearts cannot be lowered any further.</#FF9AA2>"
+  clamp-announce: "<prefix><#8ECAE6>Maximum lowered to</#8ECAE6> <gold><max></gold><#8ECAE6> - affected players were clamped.</#8ECAE6>"
+
+gui:
+  title: "<gradient:#FFFFFF:#8ECAE6:#FFD700>Heaven Lifesteal</gradient>"
+  max-hearts-name: "<gold><bold>Maximum Hearts</bold></gold>"
+  max-hearts-lore:
+    - "<white>Current maximum:</white> <gold><max></gold> <white>hearts</white>"
+    - ""
+    - "<#A6F1E0>This is the highest number of hearts</#A6F1E0>"
+    - "<#A6F1E0>any player may reach.</#A6F1E0>"
+  increase-name: "<#A6F1E0><bold>Increase</bold></#A6F1E0>"
+  increase-lore:
+    - "<white>Left-Click:</white> <#8ECAE6>+1 heart</#8ECAE6>"
+    - "<white>Shift-Click:</white> <#8ECAE6>+5 hearts</#8ECAE6>"
+  decrease-name: "<#FF9AA2><bold>Decrease</bold></#FF9AA2>"
+  decrease-lore:
+    - "<white>Left-Click:</white> <#FF9AA2>-1 heart</#FF9AA2>"
+    - "<white>Shift-Click:</white> <#FF9AA2>-5 hearts</#FF9AA2>"
+  info-name: "<gradient:#FFFFFF:#FFD700><bold>Heaven Lifesteal</bold></gradient>"
+  info-lore:
+    - "<#8ECAE6>Adjust the server-wide maximum hearts.</#8ECAE6>"
+    - "<#8ECAE6>Changes are saved instantly.</#8ECAE6>"
+
+gamemode:
+  changed: "<prefix><white>Your game mode is now</white> <gold><gamemode></gold><white>.</white>"
+  changed-other: "<prefix><white>Set</white> <#8ECAE6><target></#8ECAE6> <white>game mode to</white> <gold><gamemode></gold><white>.</white>"
+  by-other: "<prefix><white>Your game mode was set to</white> <gold><gamemode></gold> <white>by</white> <#8ECAE6><sender></#8ECAE6><white>.</white>"
+  invalid: "<prefix><#FF9AA2>Unknown game mode <white><input></white>. Use 0-3 or survival/creative/adventure/spectator.</#FF9AA2>"
+
+fly:
+  enabled: "<prefix><#A6F1E0>Flight enabled.</#A6F1E0>"
+  disabled: "<prefix><#8ECAE6>Flight disabled.</#8ECAE6>"
+  enabled-other: "<prefix><#A6F1E0>Enabled flight for</#A6F1E0> <#8ECAE6><target></#8ECAE6><#A6F1E0>.</#A6F1E0>"
+  disabled-other: "<prefix><#8ECAE6>Disabled flight for</#8ECAE6> <#8ECAE6><target></#8ECAE6><#8ECAE6>.</#8ECAE6>"
+  by-other: "<prefix><white>Your flight was toggled by</white> <#8ECAE6><sender></#8ECAE6><white>.</white>"
+
+heal:
+  self: "<prefix><#A6F1E0>You have been fully healed.</#A6F1E0>"
+  other: "<prefix><#A6F1E0>Healed</#A6F1E0> <#8ECAE6><target></#8ECAE6><#A6F1E0>.</#A6F1E0>"
+  by-other: "<prefix><#A6F1E0>You were healed by</#A6F1E0> <#8ECAE6><sender></#8ECAE6><#A6F1E0>.</#A6F1E0>"
+
+feed:
+  self: "<prefix><#A6F1E0>Your hunger has been satisfied.</#A6F1E0>"
+  other: "<prefix><#A6F1E0>Fed</#A6F1E0> <#8ECAE6><target></#8ECAE6><#A6F1E0>.</#A6F1E0>"
+  by-other: "<prefix><#A6F1E0>You were fed by</#A6F1E0> <#8ECAE6><sender></#8ECAE6><#A6F1E0>.</#A6F1E0>"
+
+god:
+  enabled: "<prefix><gold>God mode enabled.</gold>"
+  disabled: "<prefix><#8ECAE6>God mode disabled.</#8ECAE6>"
+  enabled-other: "<prefix><gold>Enabled god mode for</gold> <#8ECAE6><target></#8ECAE6><gold>.</gold>"
+  disabled-other: "<prefix><#8ECAE6>Disabled god mode for</#8ECAE6> <#8ECAE6><target></#8ECAE6><#8ECAE6>.</#8ECAE6>"
+  by-other: "<prefix><white>Your god mode was toggled by</white> <#8ECAE6><sender></#8ECAE6><white>.</white>"
+
+speed:
+  set: "<prefix><white>Speed set to</white> <gold><speed></gold><white>.</white>"
+  set-other: "<prefix><white>Set</white> <#8ECAE6><target></#8ECAE6> <white>speed to</white> <gold><speed></gold><white>.</white>"
+  invalid: "<prefix><#FF9AA2>Speed must be a number between <white>1</white> and <white>10</white>.</#FF9AA2>"
+
+tp:
+  to-player: "<prefix><white>Teleported you to</white> <#8ECAE6><target></#8ECAE6><white>.</white>"
+  player-to: "<prefix><white>Teleported</white> <#8ECAE6><player></#8ECAE6> <white>to</white> <#8ECAE6><target></#8ECAE6><white>.</white>"
+
+tphere:
+  success: "<prefix><white>Teleported</white> <#8ECAE6><target></#8ECAE6> <white>to you.</white>"
+  notify: "<prefix><white>You were teleported to</white> <#8ECAE6><sender></#8ECAE6><white>.</white>"
+
+tpall:
+  success: "<prefix><#A6F1E0>Teleported</#A6F1E0> <gold><count></gold> <#A6F1E0>players to you.</#A6F1E0>"
+  notify: "<prefix><white>You were teleported to</white> <#8ECAE6><sender></#8ECAE6><white>.</white>"
+
+spawn:
+  teleported: "<prefix><#A6F1E0>Welcome to spawn.</#A6F1E0>"
+  teleported-other: "<prefix><#A6F1E0>Sent</#A6F1E0> <#8ECAE6><target></#8ECAE6> <#A6F1E0>to spawn.</#A6F1E0>"
+  not-set: "<prefix><#FF9AA2>The spawn has not been set yet. Use /setspawn.</#FF9AA2>"
+
+setspawn:
+  success: "<prefix><#A6F1E0>Spawn set to your current location.</#A6F1E0>"
+
+invsee:
+  opening: "<prefix><white>Viewing the inventory of</white> <#8ECAE6><target></#8ECAE6><white>.</white>"
+  self-error: "<prefix><#FF9AA2>You cannot view your own inventory this way.</#FF9AA2>"
+
+enderchest:
+  opening-self: "<prefix><white>Opening your ender chest.</white>"
+  opening-other: "<prefix><white>Opening the ender chest of</white> <#8ECAE6><target></#8ECAE6><white>.</white>"
+
+clear:
+  self: "<prefix><#A6F1E0>Your inventory has been cleared.</#A6F1E0>"
+  other: "<prefix><#A6F1E0>Cleared the inventory of</#A6F1E0> <#8ECAE6><target></#8ECAE6><#A6F1E0>.</#A6F1E0>"
+  by-other: "<prefix><#8ECAE6>Your inventory was cleared by</#8ECAE6> <#8ECAE6><sender></#8ECAE6><#8ECAE6>.</#8ECAE6>"
+
+repair:
+  hand: "<prefix><#A6F1E0>Repaired the item in your hand.</#A6F1E0>"
+  all: "<prefix><#A6F1E0>Repaired all items in your inventory.</#A6F1E0>"
+  nothing: "<prefix><#FF9AA2>There is nothing in your hand to repair.</#FF9AA2>"
+
+workbench:
+  opening: "<prefix><white>Opening a crafting table.</white>"
+
+anvil:
+  opening: "<prefix><white>Opening an anvil.</white>"
+  unsupported: "<prefix><#FF9AA2>This server build cannot open a virtual anvil. Use a placed anvil instead.</#FF9AA2>"
+
+hat:
+  success: "<prefix><gold>Fashionable!</gold> <white>The item is now your hat.</white>"
+  no-item: "<prefix><#FF9AA2>Hold an item to wear it as a hat.</#FF9AA2>"
+
+top:
+  success: "<prefix><#A6F1E0>Teleported to the highest block.</#A6F1E0>"
+  none: "<prefix><#FF9AA2>There is no block above you.</#FF9AA2>"
+
+bottom:
+  success: "<prefix><#A6F1E0>Teleported to the lowest safe block.</#A6F1E0>"
+  none: "<prefix><#FF9AA2>There is no safe block below you.</#FF9AA2>"
+
+time:
+  day: "<prefix><gold>Set the time to day.</gold>"
+  night: "<prefix><#8ECAE6>Set the time to night.</#8ECAE6>"
+
+weather:
+  sun: "<prefix><gold>The skies have cleared.</gold>"
+  rain: "<prefix><#8ECAE6>Rain has begun to fall.</#8ECAE6>"
+
+broadcast:
+  format: "<newline><gradient:#FFFFFF:#FFD700><bold>Broadcast</bold></gradient> <white>»</white> <white><message></white><newline>"
+
+msg:
+  to-sender: "<white>You</white> <gray>-></gray> <#8ECAE6><target></#8ECAE6><white>:</white> <#A6F1E0><message></#A6F1E0>"
+  to-target: "<#8ECAE6><sender></#8ECAE6> <gray>-></gray> <white>You</white><white>:</white> <#A6F1E0><message></#A6F1E0>"
+  no-reply-target: "<prefix><#FF9AA2>You have no one to reply to.</#FF9AA2>"
+  self-error: "<prefix><#FF9AA2>You cannot message yourself.</#FF9AA2>"
+  ignored: "<prefix><#FF9AA2><target> is ignoring your messages.</#FF9AA2>"
+
+ignore:
+  added: "<prefix><#8ECAE6>You are now ignoring</#8ECAE6> <white><target></white><#8ECAE6>.</#8ECAE6>"
+  removed: "<prefix><#A6F1E0>You are no longer ignoring</#A6F1E0> <white><target></white><#A6F1E0>.</#A6F1E0>"
+  self-error: "<prefix><#FF9AA2>You cannot ignore yourself.</#FF9AA2>"
