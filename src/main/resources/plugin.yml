@@ -55,10 +55,6 @@ commands:
     description: Set the server spawn to your current location.
     usage: /setspawn
     permission: heaven.setspawn
-  back:
-    description: Return to your previous location.
-    usage: /back
-    permission: heaven.back
   invsee:
     description: View another player's inventory.
     usage: /invsee <player>
@@ -191,9 +187,6 @@ permissions:
   heaven.setspawn:
     description: Allows setting the spawn.
     default: op
-  heaven.back:
-    description: Allows returning to a previous location.
-    default: true
   heaven.invsee:
     description: Allows viewing player inventories.
     default: op

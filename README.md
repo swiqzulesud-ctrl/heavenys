@@ -22,7 +22,7 @@ every message is written in MiniMessage and fully configurable in `messages.yml`
 
 ### Commands
 `/gm`, `/fly`, `/heal`, `/feed`, `/god`, `/speed`, `/tp`, `/tphere`, `/tpall`,
-`/spawn`, `/setspawn`, `/back`, `/invsee`, `/enderchest` (`/ec`), `/clear`, `/repair`,
+`/spawn`, `/setspawn`, `/invsee`, `/enderchest` (`/ec`), `/clear`, `/repair`,
 `/workbench` (`/wb`, `/craft`), `/anvil`, `/hat`, `/top`, `/bottom`, `/day`, `/night`,
 `/sun`, `/rain`, `/broadcast` (`/bc`), `/msg` (`/tell`, `/w`), `/reply` (`/r`), `/ignore`.
 

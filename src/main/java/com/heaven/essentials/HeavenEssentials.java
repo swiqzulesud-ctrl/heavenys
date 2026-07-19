@@ -2,7 +2,6 @@ package com.heaven.essentials;
 
 import com.heaven.essentials.command.HeavenCommand;
 import com.heaven.essentials.command.commands.AnvilCommand;
-import com.heaven.essentials.command.commands.BackCommand;
 import com.heaven.essentials.command.commands.BottomCommand;
 import com.heaven.essentials.command.commands.BroadcastCommand;
 import com.heaven.essentials.command.commands.ClearCommand;
@@ -32,12 +31,10 @@ import com.heaven.essentials.command.commands.WorkbenchCommand;
 import com.heaven.essentials.config.ConfigManager;
 import com.heaven.essentials.config.Messages;
 import com.heaven.essentials.hearts.HeartManager;
-import com.heaven.essentials.listeners.BackListener;
 import com.heaven.essentials.listeners.ConnectionListener;
 import com.heaven.essentials.listeners.GodListener;
 import com.heaven.essentials.listeners.LifestealListener;
 import com.heaven.essentials.listeners.MenuListener;
-import com.heaven.essentials.managers.BackManager;
 import com.heaven.essentials.managers.ChatService;
 import com.heaven.essentials.managers.GodManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -59,7 +56,6 @@ public final class HeavenEssentials extends JavaPlugin {
     private ConfigManager configManager;
     private Messages messages;
     private HeartManager heartManager;
-    private BackManager backManager;
     private GodManager godManager;
     private ChatService chatService;
 
@@ -73,7 +69,6 @@ public final class HeavenEssentials extends JavaPlugin {
         this.messages = new Messages(this);
         this.heartManager = new HeartManager(this);
         this.heartManager.load();
-        this.backManager = new BackManager();
         this.godManager = new GodManager();
         this.chatService = new ChatService();
 
@@ -114,7 +109,6 @@ public final class HeavenEssentials extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new LifestealListener(this), this);
         pm.registerEvents(new ConnectionListener(this), this);
-        pm.registerEvents(new BackListener(this), this);
         pm.registerEvents(new GodListener(this), this);
         pm.registerEvents(new MenuListener(this), this);
     }
@@ -132,7 +126,6 @@ public final class HeavenEssentials extends JavaPlugin {
         bind("tpall", new TpAllCommand(this));
         bind("spawn", new SpawnCommand(this));
         bind("setspawn", new SetSpawnCommand(this));
-        bind("back", new BackCommand(this));
         bind("invsee", new InvseeCommand(this));
         bind("enderchest", new EnderchestCommand(this));
         bind("clear", new ClearCommand(this));
@@ -185,10 +178,6 @@ public final class HeavenEssentials extends JavaPlugin {
 
     public HeartManager hearts() {
         return heartManager;
-    }
-
-    public BackManager back() {
-        return backManager;
     }
 
     public GodManager god() {

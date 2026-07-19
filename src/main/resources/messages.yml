@@ -105,10 +105,6 @@ spawn:
 setspawn:
   success: "<prefix><#A6F1E0>Spawn set to your current location.</#A6F1E0>"
 
-back:
-  success: "<prefix><#A6F1E0>Returned to your previous location.</#A6F1E0>"
-  none: "<prefix><#FF9AA2>You have no previous location to return to.</#FF9AA2>"
-
 invsee:
   opening: "<prefix><white>Viewing the inventory of</white> <#8ECAE6><target></#8ECAE6><white>.</white>"
   self-error: "<prefix><#FF9AA2>You cannot view your own inventory this way.</#FF9AA2>"
