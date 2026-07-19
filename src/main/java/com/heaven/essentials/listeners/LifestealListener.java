@@ -76,9 +76,9 @@ public final class LifestealListener implements Listener {
         if (!plugin.configs().areEffectsEnabled()) {
             return;
         }
-        killer.playSound(Sound.sound(Key.key("minecraft:entity.player.levelup"),
+        plugin.audiences().player(killer).playSound(Sound.sound(Key.key("minecraft:entity.player.levelup"),
                 Sound.Source.PLAYER, 0.7f, 1.4f));
-        victim.playSound(Sound.sound(Key.key("minecraft:entity.wither.hurt"),
+        plugin.audiences().player(victim).playSound(Sound.sound(Key.key("minecraft:entity.wither.hurt"),
                 Sound.Source.PLAYER, 0.5f, 1.2f));
     }
 }

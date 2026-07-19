@@ -132,6 +132,7 @@ workbench:
 
 anvil:
   opening: "<prefix><white>Opening an anvil.</white>"
+  unsupported: "<prefix><#FF9AA2>This server build cannot open a virtual anvil. Use a placed anvil instead.</#FF9AA2>"
 
 hat:
   success: "<prefix><gold>Fashionable!</gold> <white>The item is now your hat.</white>"

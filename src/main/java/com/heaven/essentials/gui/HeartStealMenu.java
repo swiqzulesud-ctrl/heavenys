@@ -2,7 +2,6 @@ package com.heaven.essentials.gui;
 
 import com.heaven.essentials.HeavenEssentials;
 import com.heaven.essentials.config.Messages;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -17,7 +16,9 @@ import java.util.List;
  * The Heaven-themed Lifesteal admin GUI opened with {@code /heartsteal}.
  *
  * <p>Implements {@link InventoryHolder} so click events can be routed back to
- * this menu type safely (rather than matching on the fragile inventory title).</p>
+ * this menu type safely (rather than matching on the fragile inventory title).
+ * Titles and item text are rendered from MiniMessage and serialised to legacy
+ * (§) strings, because Spigot's inventory/item APIs are string-based.</p>
  */
 public final class HeartStealMenu implements InventoryHolder {
 
@@ -32,7 +33,7 @@ public final class HeartStealMenu implements InventoryHolder {
 
     public HeartStealMenu(HeavenEssentials plugin) {
         this.plugin = plugin;
-        Component title = plugin.messages().render("gui.title");
+        String title = plugin.messages().legacy("gui.title");
         this.inventory = plugin.getServer().createInventory(this, SIZE, title);
         render();
     }
@@ -41,7 +42,7 @@ public final class HeartStealMenu implements InventoryHolder {
     public void render() {
         inventory.clear();
 
-        ItemStack filler = simpleItem(Material.LIGHT_BLUE_STAINED_GLASS_PANE, Component.empty());
+        ItemStack filler = named(Material.LIGHT_BLUE_STAINED_GLASS_PANE, " ", List.of());
         for (int slot = 0; slot < SIZE; slot++) {
             inventory.setItem(slot, filler);
         }
@@ -51,25 +52,26 @@ public final class HeartStealMenu implements InventoryHolder {
 
         inventory.setItem(INFO_SLOT, named(
                 Material.PAPER,
-                messages.render("gui.info-name"),
-                messages.renderList("gui.info-lore")));
+                messages.legacy("gui.info-name"),
+                messages.renderListLegacy("gui.info-lore")));
 
         inventory.setItem(DECREASE_SLOT, named(
                 Material.RED_DYE,
-                messages.render("gui.decrease-name"),
-                messages.renderList("gui.decrease-lore")));
+                messages.legacy("gui.decrease-name"),
+                messages.renderListLegacy("gui.decrease-lore")));
 
         ItemStack display = named(
                 Material.NETHER_STAR,
-                messages.render("gui.max-hearts-name"),
-                messages.renderList("gui.max-hearts-lore", Messages.ph("max", String.valueOf(max))));
+                messages.legacy("gui.max-hearts-name"),
+                messages.renderListLegacy("gui.max-hearts-lore",
+                        Messages.ph("max", String.valueOf(max))));
         display.setAmount(Math.max(1, Math.min(max, 64)));
         inventory.setItem(DISPLAY_SLOT, display);
 
         inventory.setItem(INCREASE_SLOT, named(
                 Material.LIME_DYE,
-                messages.render("gui.increase-name"),
-                messages.renderList("gui.increase-lore")));
+                messages.legacy("gui.increase-name"),
+                messages.renderListLegacy("gui.increase-lore")));
     }
 
     public void open(Player player) {
@@ -81,19 +83,13 @@ public final class HeartStealMenu implements InventoryHolder {
         return inventory;
     }
 
-    private ItemStack simpleItem(Material material, Component name) {
-        return named(material, name, List.of());
-    }
-
-    private ItemStack named(Material material, Component name, List<Component> lore) {
+    private ItemStack named(Material material, String name, List<String> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(name.decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
+            meta.setDisplayName(name);
             if (!lore.isEmpty()) {
-                meta.lore(lore.stream()
-                        .map(line -> line.decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false))
-                        .toList());
+                meta.setLore(lore);
             }
             meta.addItemFlags(ItemFlag.values());
             item.setItemMeta(meta);

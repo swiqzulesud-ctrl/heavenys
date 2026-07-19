@@ -19,6 +19,6 @@ public final class BroadcastCommand extends HeavenCommand {
             return;
         }
         String message = String.join(" ", args);
-        plugin.getServer().broadcast(messages.render("broadcast.format", Messages.ph("message", message)));
+        plugin.audiences().all().sendMessage(messages.render("broadcast.format", Messages.ph("message", message)));
     }
 }

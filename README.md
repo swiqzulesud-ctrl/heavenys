@@ -1,9 +1,9 @@
 # HeavenEssentials
 
-A **production-ready Minecraft Paper 1.26.2 plugin** that combines a **Lifesteal**
-system with a lightweight **Essentials**-style command suite. Built with **Java 21**
-and **Maven**, using modern Paper APIs, **Adventure + MiniMessage**, clean OOP
-architecture, and no deprecated APIs.
+A **production-ready Minecraft Spigot 1.26.2 plugin** (also runs on Paper) that combines
+a **Lifesteal** system with a lightweight **Essentials**-style command suite. Built with
+**Java 21** and **Maven**, using the Spigot API and **Adventure + MiniMessage** (shaded
+and relocated into the jar), clean OOP architecture, and no deprecated gameplay APIs.
 
 Everything is **Heaven-themed** — elegant white, gold, light blue and soft cyan — and
 every message is written in MiniMessage and fully configurable in `messages.yml`.
@@ -35,16 +35,17 @@ appropriate (guarded by `*.others` permissions).
 
 ## Building
 
-Requires **JDK 25** to build (Paper 1.26.2 ships Java 25 bytecode) while the plugin
-itself targets Java 21. See [`AGENTS.md`](AGENTS.md) for details.
+Requires **JDK 25** to build (the Spigot 1.26.2 API is Java 25 bytecode) while the plugin
+itself targets Java 21. The build shades Adventure + MiniMessage into the jar. See
+[`AGENTS.md`](AGENTS.md) for details.
 
 ```bash
 export JAVA_HOME=/path/to/jdk-25
 mvn clean package
 ```
 
-The compiled plugin is produced at `target/HeavenEssentials-1.0.0.jar`. Drop it into
-your Paper server's `plugins/` folder.
+The compiled plugin is produced at `target/HeavenEssentials-1.0.0.jar` (a copy is committed
+to `dist/`). Drop it into your Spigot (or Paper) server's `plugins/` folder.
 
 ## Configuration
 

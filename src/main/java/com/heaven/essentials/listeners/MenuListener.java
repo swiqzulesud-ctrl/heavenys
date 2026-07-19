@@ -85,6 +85,7 @@ public final class MenuListener implements Listener {
 
         menu.render();
         messages.send(player, "admin.max-updated", Messages.ph("max", String.valueOf(applied)));
-        player.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.MASTER, 0.6f, 1.5f));
+        plugin.audiences().player(player).playSound(Sound.sound(Key.key("minecraft:ui.button.click"),
+                Sound.Source.MASTER, 0.6f, 1.5f));
     }
 }

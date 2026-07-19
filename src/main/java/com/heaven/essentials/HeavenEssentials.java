@@ -40,6 +40,7 @@ import com.heaven.essentials.listeners.MenuListener;
 import com.heaven.essentials.managers.BackManager;
 import com.heaven.essentials.managers.ChatService;
 import com.heaven.essentials.managers.GodManager;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -54,6 +55,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class HeavenEssentials extends JavaPlugin {
 
+    private BukkitAudiences audiences;
     private ConfigManager configManager;
     private Messages messages;
     private HeartManager heartManager;
@@ -63,6 +65,9 @@ public final class HeavenEssentials extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // Adventure bridge (Spigot does not ship Adventure natively).
+        this.audiences = BukkitAudiences.create(this);
+
         // Managers (order matters: config -> messages -> hearts).
         this.configManager = new ConfigManager(this);
         this.messages = new Messages(this);
@@ -87,6 +92,10 @@ public final class HeavenEssentials extends JavaPlugin {
     public void onDisable() {
         if (heartManager != null) {
             heartManager.saveSync();
+        }
+        if (audiences != null) {
+            audiences.close();
+            audiences = null;
         }
         getLogger().info("HeavenEssentials has been disabled. Player hearts saved.");
     }
@@ -161,6 +170,10 @@ public final class HeavenEssentials extends JavaPlugin {
     // ---------------------------------------------------------------------
     //  Manager accessors
     // ---------------------------------------------------------------------
+
+    public BukkitAudiences audiences() {
+        return audiences;
+    }
 
     public ConfigManager configs() {
         return configManager;

@@ -4,8 +4,7 @@ main: com.heaven.essentials.HeavenEssentials
 api-version: "1.26"
 author: Heaven
 description: ${project.description}
-website: https://papermc.io/
-folia-supported: false
+website: https://www.spigotmc.org/
 
 commands:
   heartsteal:

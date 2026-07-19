@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -23,6 +24,12 @@ import java.util.List;
  * than throwing, so a malformed config never crashes a command.
  */
 public final class Messages {
+
+    /** Legacy (§) serializer with hex support, for inventory titles and item text on Spigot. */
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.builder()
+            .hexColors()
+            .useUnusualXRepeatedCharacterHexFormat()
+            .build();
 
     private final HeavenEssentials plugin;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
@@ -93,7 +100,27 @@ public final class Messages {
         if (raw != null && raw.isEmpty()) {
             return;
         }
-        recipient.sendMessage(render(path, resolvers));
+        plugin.audiences().sender(recipient).sendMessage(render(path, resolvers));
+    }
+
+    /** Renders a message path to a legacy (§) string, for APIs that only accept strings. */
+    public String legacy(String path, TagResolver... resolvers) {
+        return LEGACY.serialize(render(path, resolvers));
+    }
+
+    /** Renders a list path to legacy (§) strings (e.g. item lore on Spigot). */
+    public List<String> renderListLegacy(String path, TagResolver... resolvers) {
+        List<Component> components = renderList(path, resolvers);
+        List<String> out = new ArrayList<>(components.size());
+        for (Component component : components) {
+            out.add(LEGACY.serialize(component));
+        }
+        return out;
+    }
+
+    /** Serialises a component to a legacy (§) string. */
+    public String toLegacy(Component component) {
+        return LEGACY.serialize(component);
     }
 
     public String rawPrefix() {
