@@ -1,0 +1,6 @@
+# ============================================================
+#  HeavenEssentials - Player Data (managed automatically)
+#  Do not edit while the server is running. Hearts are keyed
+#  by player UUID and updated whenever they change.
+# ============================================================
+players: {}

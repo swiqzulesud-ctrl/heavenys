@@ -1,0 +1,33 @@
+# ============================================================
+#  HeavenEssentials - Configuration
+#  Lifesteal + lightweight Essentials for Paper 1.26.2
+# ============================================================
+
+hearts:
+  # Hearts a brand new player starts with (1 heart = 2 health).
+  default: 10
+  # Maximum hearts a player may ever reach. Editable in-game via /heartsteal.
+  maximum: 20
+  # Minimum hearts a player may ever drop to. Players can never go below this.
+  minimum: 1
+
+lifesteal:
+  # Hearts transferred from the victim to the killer on a player kill.
+  hearts-per-kill: 1
+  # Play a subtle sound/effect feedback to the killer and victim.
+  effects: true
+
+# The global server spawn. Managed automatically by /setspawn.
+# Leave 'world' empty until a spawn has been set.
+spawn:
+  world: ""
+  x: 0.0
+  y: 0.0
+  z: 0.0
+  yaw: 0.0
+  pitch: 0.0
+
+settings:
+  # When true, broadcasts a message to admins if the maximum is lowered and
+  # players are clamped down to the new maximum.
+  announce-clamp: true

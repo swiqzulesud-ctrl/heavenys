@@ -1,0 +1,245 @@
+name: ${project.name}
+version: ${project.version}
+main: com.heaven.essentials.HeavenEssentials
+api-version: "1.26"
+author: Heaven
+description: ${project.description}
+website: https://papermc.io/
+folia-supported: false
+
+commands:
+  heartsteal:
+    description: Open the HeavenEssentials Lifesteal admin GUI or reload the plugin.
+    usage: /heartsteal [reload]
+    permission: plugin.admin
+  gm:
+    description: Change the game mode of yourself or another player.
+    usage: /gm <0|1|2|3|survival|creative|adventure|spectator> [player]
+    permission: heaven.gamemode
+  fly:
+    description: Toggle flight for yourself or another player.
+    usage: /fly [player]
+    permission: heaven.fly
+  heal:
+    description: Fully heal yourself or another player.
+    usage: /heal [player]
+    permission: heaven.heal
+  feed:
+    description: Refill the hunger of yourself or another player.
+    usage: /feed [player]
+    permission: heaven.feed
+  god:
+    description: Toggle god mode (invulnerability).
+    usage: /god [player]
+    permission: heaven.god
+  speed:
+    description: Change walk/fly speed.
+    usage: /speed <1-10> [player]
+    permission: heaven.speed
+  tp:
+    description: Teleport to a player, or a player to another player.
+    usage: /tp <player> [target]
+    permission: heaven.tp
+  tphere:
+    description: Teleport a player to you.
+    usage: /tphere <player>
+    permission: heaven.tphere
+  tpall:
+    description: Teleport all online players to you.
+    usage: /tpall
+    permission: heaven.tpall
+  spawn:
+    description: Teleport to the server spawn.
+    usage: /spawn [player]
+    permission: heaven.spawn
+  setspawn:
+    description: Set the server spawn to your current location.
+    usage: /setspawn
+    permission: heaven.setspawn
+  back:
+    description: Return to your previous location.
+    usage: /back
+    permission: heaven.back
+  invsee:
+    description: View another player's inventory.
+    usage: /invsee <player>
+    permission: heaven.invsee
+  enderchest:
+    description: Open an ender chest.
+    usage: /enderchest [player]
+    aliases: [ec]
+    permission: heaven.enderchest
+  clear:
+    description: Clear the inventory of yourself or another player.
+    usage: /clear [player]
+    permission: heaven.clear
+  repair:
+    description: Repair the item in your hand or your whole inventory.
+    usage: /repair [all]
+    permission: heaven.repair
+  workbench:
+    description: Open a crafting table.
+    usage: /workbench
+    aliases: [wb, craft]
+    permission: heaven.workbench
+  anvil:
+    description: Open an anvil.
+    usage: /anvil
+    permission: heaven.anvil
+  hat:
+    description: Wear the item in your hand as a hat.
+    usage: /hat
+    permission: heaven.hat
+  top:
+    description: Teleport to the highest block above you.
+    usage: /top
+    permission: heaven.top
+  bottom:
+    description: Teleport to the lowest safe block below you.
+    usage: /bottom
+    permission: heaven.bottom
+  day:
+    description: Set the time to day.
+    usage: /day
+    permission: heaven.time
+  night:
+    description: Set the time to night.
+    usage: /night
+    permission: heaven.time
+  sun:
+    description: Clear the weather.
+    usage: /sun
+    permission: heaven.weather
+  rain:
+    description: Set the weather to rain.
+    usage: /rain
+    permission: heaven.weather
+  broadcast:
+    description: Broadcast a message to the whole server.
+    usage: /broadcast <message>
+    aliases: [bc]
+    permission: heaven.broadcast
+  msg:
+    description: Send a private message to a player.
+    usage: /msg <player> <message>
+    aliases: [tell, w, whisper]
+    permission: heaven.msg
+  reply:
+    description: Reply to the last player who messaged you.
+    usage: /reply <message>
+    aliases: [r]
+    permission: heaven.msg
+  ignore:
+    description: Ignore or un-ignore a player's private messages.
+    usage: /ignore <player>
+    permission: heaven.ignore
+
+permissions:
+  plugin.admin:
+    description: Access to the HeavenEssentials Lifesteal admin GUI and reload.
+    default: op
+  heaven.gamemode:
+    description: Allows changing game modes.
+    default: op
+  heaven.gamemode.others:
+    description: Allows changing another player's game mode.
+    default: op
+  heaven.fly:
+    description: Allows toggling flight.
+    default: op
+  heaven.fly.others:
+    description: Allows toggling another player's flight.
+    default: op
+  heaven.heal:
+    description: Allows healing.
+    default: op
+  heaven.heal.others:
+    description: Allows healing another player.
+    default: op
+  heaven.feed:
+    description: Allows feeding.
+    default: op
+  heaven.feed.others:
+    description: Allows feeding another player.
+    default: op
+  heaven.god:
+    description: Allows toggling god mode.
+    default: op
+  heaven.god.others:
+    description: Allows toggling another player's god mode.
+    default: op
+  heaven.speed:
+    description: Allows changing speed.
+    default: op
+  heaven.speed.others:
+    description: Allows changing another player's speed.
+    default: op
+  heaven.tp:
+    description: Allows teleporting.
+    default: op
+  heaven.tphere:
+    description: Allows teleporting players to you.
+    default: op
+  heaven.tpall:
+    description: Allows teleporting all players to you.
+    default: op
+  heaven.spawn:
+    description: Allows teleporting to spawn.
+    default: true
+  heaven.spawn.others:
+    description: Allows teleporting others to spawn.
+    default: op
+  heaven.setspawn:
+    description: Allows setting the spawn.
+    default: op
+  heaven.back:
+    description: Allows returning to a previous location.
+    default: true
+  heaven.invsee:
+    description: Allows viewing player inventories.
+    default: op
+  heaven.enderchest:
+    description: Allows opening ender chests.
+    default: op
+  heaven.enderchest.others:
+    description: Allows opening another player's ender chest.
+    default: op
+  heaven.clear:
+    description: Allows clearing inventories.
+    default: op
+  heaven.clear.others:
+    description: Allows clearing another player's inventory.
+    default: op
+  heaven.repair:
+    description: Allows repairing items.
+    default: op
+  heaven.workbench:
+    description: Allows opening a crafting table.
+    default: op
+  heaven.anvil:
+    description: Allows opening an anvil.
+    default: op
+  heaven.hat:
+    description: Allows wearing items as a hat.
+    default: op
+  heaven.top:
+    description: Allows teleporting to the top block.
+    default: op
+  heaven.bottom:
+    description: Allows teleporting to the bottom block.
+    default: op
+  heaven.time:
+    description: Allows changing the time.
+    default: op
+  heaven.weather:
+    description: Allows changing the weather.
+    default: op
+  heaven.broadcast:
+    description: Allows broadcasting messages.
+    default: op
+  heaven.msg:
+    description: Allows private messaging.
+    default: true
+  heaven.ignore:
+    description: Allows ignoring players.
+    default: true
