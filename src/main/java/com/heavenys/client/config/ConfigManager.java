@@ -28,10 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JSON-backed configuration system for Heavenys Client.
+ * JSON-backed configuration system for Know Mods.
  *
  * <p>Each named <em>profile</em> is a standalone JSON document under
- * {@code config/heavenys/profiles/<name>.json}. A tiny {@code state.json} tracks
+ * {@code config/knowmods/profiles/<name>.json}. A tiny {@code state.json} tracks
  * which profile is active. The manager supports auto-saving, importing an
  * external JSON file as a new profile, and exporting a profile to an arbitrary
  * path - covering the requested "JSON / Auto Save / Profiles / Import / Export"
@@ -39,7 +39,7 @@ import java.util.List;
  */
 public class ConfigManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("Heavenys/Config");
+    private static final Logger LOGGER = LoggerFactory.getLogger("KnowMods/Config");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final String DEFAULT_PROFILE = "default";
 
@@ -53,7 +53,7 @@ public class ConfigManager {
 
     public ConfigManager(ModuleManager moduleManager) {
         this.moduleManager = moduleManager;
-        this.root = FabricLoader.getInstance().getConfigDir().resolve("heavenys");
+        this.root = FabricLoader.getInstance().getConfigDir().resolve("knowmods");
         this.profilesDir = root.resolve("profiles");
         this.stateFile = root.resolve("state.json");
         try {
@@ -199,7 +199,7 @@ public class ConfigManager {
 
     private JsonObject serialize() {
         JsonObject root = new JsonObject();
-        root.addProperty("client", "Heavenys Client");
+        root.addProperty("client", "Know Mods");
         root.addProperty("format", 1);
 
         JsonObject modules = new JsonObject();

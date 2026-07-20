@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "id": "heavenys",
+  "id": "knowmods",
   "version": "${version}",
-  "name": "Heavenys Client",
-  "description": "Heavenys Client - an open-source, heaven-themed Minecraft client for Fabric. Custom ClickGUI, drag & drop HUD editor, visual tweaks and mod-compatibility integrations. Original work inspired by the open-source Sol Client (GPL-3.0).",
+  "name": "Know Mods",
+  "description": "Know Mods (KnowClient) - a premium, open-source Fabric client focused on FPS, PvP, survival, customization and visual quality. A fair, vanilla-compatible alternative to commercial clients: custom ClickGUI, drag & drop HUD editor with PvP/survival counters, an orange-on-near-black premium theme and read-only compatibility integrations for popular performance and visual mods. Original work inspired by the open-source Sol Client (GPL-3.0); it bundles no third-party mods and gives no unfair gameplay advantage.",
   "authors": [
-    "Heavenys Client contributors"
+    "Know Mods contributors"
   ],
   "contact": {
     "homepage": "https://github.com/swiqzulesud-ctrl/heavenys",
     "sources": "https://github.com/swiqzulesud-ctrl/heavenys"
   },
   "license": "GPL-3.0-or-later",
-  "icon": "assets/heavenys/icon.png",
+  "icon": "assets/knowmods/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
@@ -29,6 +29,17 @@
     "sodium": "*",
     "lithium": "*",
     "ferritecore": "*",
+    "immediatelyfast": "*",
+    "entityculling": "*",
+    "modernfix": "*",
+    "dynamic_fps": "*",
+    "indium": "*",
+    "iris": "*",
+    "continuity": "*",
+    "lambdynlights": "*",
+    "inventoryprofilesnext": "*",
+    "appleskin": "*",
+    "betterf3": "*",
     "voicechat": "*"
   }
 }
