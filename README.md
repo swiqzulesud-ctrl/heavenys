@@ -1,83 +1,89 @@
 # Heavenys Client
 
-A clean, lightweight and **fully rule‑compliant** Minecraft utility client built as a
-[Fabric](https://fabricmc.net/) mod. Heavenys focuses on performance, visual polish and a
-tidy user experience — **no cheats, no unfair advantages**, safe for competitive servers
-(Hypixel / Lifesteal‑style rules).
+A premium, **Heaven-themed** Minecraft PvP client — a custom desktop **launcher** plus an
+in-game **Fabric mod** — focused on competitive play, performance and a clean, polished UI.
 
-- **Aesthetic:** clean **Black & Yellow** UI with a bundled sans‑serif client font.
-- **Performance stack:** ships alongside **Sodium** (FPS), **Iris** (shaders) and
-  **Lithium** (tick perf) instead of OptiFine.
-- **Voice:** works with **Simple Voice Chat** (modular proximity voice chat).
-- **HUD modules (all non‑bannable):** ArmorStatus, PotionStatus, minimal Keystrokes,
-  FPS and Ping — every module toggleable from a clean in‑game menu (default key: `Right Shift`).
+- **100% original & license-respecting.** No proprietary Lunar Client code, assets, textures,
+  or branding. Optimization and voice mods are pulled from their official open-source releases
+  and credited; bundled fonts ship with their OFL/Apache licenses.
+- **Theme:** Black (`#0D0D0D`), white outlines, gold (`#E8B923`) accents, rounded corners,
+  smooth animations.
 
-> **Strictly excluded by design:** ESP, reach, auto‑clicker, or anything that reads
-> server‑side combat data. Heavenys only *reads and displays* information the local player
-> already has.
+<p>
+  <img src="brand/icon.png" width="96" alt="Heavenys logo"/>
+</p>
 
-## Target version
+## Components
 
-| Component | Version |
-|-----------|---------|
-| Minecraft | `1.21.11` (see note below) |
-| Fabric Loader | `0.19.3` |
-| Yarn mappings | `1.21.11+build.6` |
-| Fabric API | `0.141.5+1.21.11` |
-| Java | 21 |
+| Module | What it is | Build |
+|--------|------------|-------|
+| `launcher/` | Standalone **JavaFX** launcher: accounts, RAM, resolution, versions, fonts, opacity, optimization presets. Packaged as a Windows `.exe` via `jpackage`. | `./gradlew :launcher:run` |
+| `client/` | In-game **Fabric mod**: modular HUD, in-game config menu, black/gold theme, custom UI font. | `./gradlew :client:runClient` |
 
-**Why 1.21.11 and not 26.x?** Heavenys is designed for the latest "26.x" generation, but the
-Fabric mapping toolchain (Yarn / official mappings) and a matching Java runtime are not yet
-published for 26.x. The dev environment therefore targets the newest fully‑mapped stable
-release. Bumping is a one‑line change in `gradle.properties` once 26.x mappings ship.
+## Launcher features (implemented)
 
-## Project layout
+- **Accounts:** offline login, multiple accounts, active-account selection, "remember".
+  Microsoft (Xbox) device-code login is implemented and enabled once an Azure client id is set
+  (`HEAVENYS_MSA_CLIENT_ID`); it degrades gracefully when absent.
+- **Java & memory:** min/max RAM sliders, GC selection, custom JVM args, Java-path picker.
+- **Video:** resolution presets + custom size, fullscreen toggle.
+- **Directories & versions:** game directory picker, version selector.
+- **Launcher UI:** live opacity slider, UI **font selector** (Poppins / Inter / Montserrat /
+  JetBrains Mono, + system fallback), UI scale, dark mode, Discord Rich Presence hook.
+- **Optimization page:** toggle the Fabulously-Optimized-style stack (Sodium, Lithium,
+  FerriteCore, Entity Culling, ImmediatelyFast, More Culling, Krypton, Dynamic FPS, FastQuit,
+  Noisium, Enhanced Block Entities, Memory Leak Fix) with **Quality / Balanced / Competitive /
+  Ultra FPS** presets.
+- **Config system:** JSON, auto-save, versioned migration, profiles, backup/restore.
+- **Launch:** assembles + validates the JVM command and runs a real runtime dry-run.
 
-```
-build.gradle / settings.gradle / gradle.properties   # Fabric Loom build
-src/main/                     # common (environment-agnostic) entrypoint + resources
-  java/com/heavenys/HeavenysClient.java
-  resources/fabric.mod.json, assets/heavenys/{icon.png, font/, lang/}
-src/client/                   # client-only code (split source set)
-  java/com/heavenys/client/
-    HeavenysClientMod.java     # client entrypoint: HUD + key bind
-    config/HeavenysConfig.java # JSON-backed settings singleton
-    theme/HeavenysTheme.java   # Black/Yellow palette + opacity
-    theme/HeavenysFont.java    # bundled client font (per-Text, never touches game font)
-    hud/HudModule.java, HudManager.java, hud/modules/*   # modular HUD
-    gui/HeavenysConfigScreen.java + themed widgets       # in-game menu
-```
+## In-game client features
 
-The HUD is modular: a single `HudElement` is registered with Fabric's `HudElementRegistry`
-and delegates to each enabled `HudModule`, so adding a module is one `register(...)` call and
-the render‑hook count stays at exactly one.
+Modular HUD (FPS, Ping, Armor, Potions, Keystrokes) with per-panel opacity and a custom,
+toggleable UI font — see `client/`'s section in the repo. Ships alongside Sodium/Iris/Lithium
+and Simple Voice Chat as dev-runtime mods.
 
-## Build & run
+## Quick start
 
 ```bash
-./gradlew build         # compile + produce the mod jar in build/libs/
-./gradlew runClient     # launch a dev Minecraft client with the mod loaded
+# Everything (mod jar + launcher jar + tests)
+./gradlew :client:build :launcher:test :launcher:fatJar
+
+# Run the launcher (add -Pswrender on a headless / software-GL machine)
+./gradlew :launcher:run
+
+# Package the launcher (native app-image; add -PinstallerType=exe on Windows for the installer)
+./gradlew :launcher:jpackage
+
+# Run the in-game mod in a dev client
+./gradlew :client:runClient
 ```
 
-The performance stack and voice chat are pulled as **dev‑runtime** mods. Disable them if
-needed (e.g. on headless/software OpenGL):
+See [`docs/INSTALL.md`](docs/INSTALL.md) and [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
-```bash
-./gradlew runClient -Penable_render_stack=false   # skip Sodium/Iris/Lithium
-./gradlew runClient -Penable_voicechat=false       # skip Simple Voice Chat
-```
+## Scope, honesty & roadmap
 
-## Installing on your PC
+This is a large product; the repository delivers a **working, tested foundation** with a clean
+architecture and clear extension points, rather than unfinished stubs:
 
-A Fabric mod is distributed as the built **`.jar`** (`build/libs/heavenys-client-*.jar`), not
-an `.exe`. To run it:
+- ✅ Tested end-to-end: launcher UI, offline accounts, settings persistence, opacity/font live
+  changes, optimization presets, launch dry-run, unit tests, and `jpackage` packaging.
+- 🔌 **Microsoft login** needs a user-provided Azure app client id (`HEAVENYS_MSA_CLIENT_ID`).
+- 🪟 The **Windows `.exe`** is produced by the build/CI on Windows (not committed) — see the CI
+  workflow and `scripts/build-windows.bat`.
+- 🧭 **Minecraft 1.26.2:** the in-game mod currently targets `1.21.11`. The Fabric mapping
+  toolchain (Yarn/official mappings) and the required Java 25 runtime are **not yet published**
+  for the 1.26.2 / "26.x" line, so the newest fully-mapped release is used. This is a one-line
+  bump in `gradle.properties` once mappings ship.
+- 🎙️ **Voice chat / Simple Voice Chat** is wired for the client's current version; the launcher
+  keeps voice/optimization integrations modular so unavailable-for-1.26.2 components are simply
+  disabled until a compatible release exists.
+- 🗺️ Further in-game systems (full 60-module PvP suite, drag-and-drop HUD editor, cosmetics
+  framework, in-depth performance graphs, replay) are architected for but not all implemented in
+  this iteration.
 
-1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 1.21.11.
-2. Drop `heavenys-client-*.jar` **and** [Fabric API](https://modrinth.com/mod/fabric-api) into
-   your `.minecraft/mods/` folder (optionally add Sodium/Iris/Lithium and Simple Voice Chat).
-3. Launch the Fabric profile.
+## Licensing
 
-> RAM allocation, game resolution presets and account login are **launcher‑level** features
-> (handled by the Minecraft launcher / a wrapper launcher), not something a mod controls at
-> runtime. The in‑game menu applies window resolution live and surfaces the current RAM/user
-> for clarity; changing the actual allocated RAM or the signed‑in account is done in the launcher.
+Heavenys is MIT-licensed (see `LICENSE`). Bundled fonts retain their original licenses
+(e.g. Poppins — SIL OFL). Third-party mods referenced by the launcher/optimization stack remain
+under their own open-source licenses and are downloaded from their official sources.

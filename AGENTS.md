@@ -38,6 +38,23 @@ non‑obvious things.
 - Software rendering is **slow** (single‑digit FPS). When driving the UI, wait several seconds
   between interactions.
 
+### Multi-module layout
+- The build now has two subprojects: **`:client`** (the Fabric mod) and **`:launcher`** (a
+  standalone JavaFX desktop launcher). Always use the root `./gradlew` wrapper. The Fabric mod
+  lives under `client/` (its `src/main` = common, `src/client` = client source set).
+
+### Launcher (`:launcher`) on this VM
+- Run it with the JavaFX **software** pipeline (no GPU): `DISPLAY=:1 ./gradlew :launcher:run -Pswrender`.
+  Without `-Pswrender` JavaFX tries hardware GL and fails; the app window appears on `DISPLAY=:1`
+  (viewable in the Desktop pane). Look for the log line "Fallback to Prism SW pipeline".
+- Tests: `./gradlew :launcher:test` (headless, no display needed).
+- Packaging is verified on Linux: `./gradlew :launcher:fatJar` (runnable `*-all.jar`) and
+  `./gradlew :launcher:jpackage` (native app-image under `launcher/build/jpackage/`). The Windows
+  `.exe` is produced by the same `jpackage` task on Windows CI (`-PinstallerType=exe`, needs WiX).
+- **Microsoft login** is inert unless `HEAVENYS_MSA_CLIENT_ID` (an Azure app client id) is set —
+  this is expected; offline accounts work without it. Do not treat the "not configured" message
+  as a bug.
+
 ### UI architecture notes
 - The clean client font is a bundled TTF applied **per‑`Text`** via a font style
   (`StyleSpriteSource.Font`, id `heavenys:heavenys`). It only affects Heavenys' own UI — never
