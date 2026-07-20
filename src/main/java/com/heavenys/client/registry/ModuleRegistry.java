@@ -11,12 +11,16 @@ package com.heavenys.client.registry;
 
 import com.heavenys.client.HeavenysClient;
 import com.heavenys.client.hud.impl.ArmorStatusHud;
+import com.heavenys.client.hud.impl.ArrowCounterHud;
 import com.heavenys.client.hud.impl.BossBarModule;
 import com.heavenys.client.hud.impl.ClockHud;
 import com.heavenys.client.hud.impl.ComboCounterHud;
 import com.heavenys.client.hud.impl.CoordinatesHud;
 import com.heavenys.client.hud.impl.CpsHud;
 import com.heavenys.client.hud.impl.DirectionHud;
+import com.heavenys.client.hud.impl.DurabilityHud;
+import com.heavenys.client.hud.impl.EndCrystalCounterHud;
+import com.heavenys.client.hud.impl.EnderPearlCounterHud;
 import com.heavenys.client.hud.impl.FpsHud;
 import com.heavenys.client.hud.impl.InventoryHud;
 import com.heavenys.client.hud.impl.KeystrokesHud;
@@ -24,6 +28,7 @@ import com.heavenys.client.hud.impl.PingHud;
 import com.heavenys.client.hud.impl.PotionEffectsHud;
 import com.heavenys.client.hud.impl.ScoreboardModule;
 import com.heavenys.client.hud.impl.SessionStatsHud;
+import com.heavenys.client.hud.impl.TotemCounterHud;
 import com.heavenys.client.hud.impl.TpsHud;
 import com.heavenys.client.hud.impl.WatermarkHud;
 import com.heavenys.client.module.ModuleManager;
@@ -71,6 +76,13 @@ public final class ModuleRegistry {
         m.register(new KeystrokesHud());
         m.register(new WatermarkHud());
         m.register(new SessionStatsHud());
+
+        // PvP / survival counters (read-only inventory inspection, no cheats).
+        m.register(new TotemCounterHud());
+        m.register(new EndCrystalCounterHud());
+        m.register(new EnderPearlCounterHud());
+        m.register(new ArrowCounterHud());
+        m.register(new DurabilityHud());
 
         // HUD elements that toggle vanilla overlays.
         ScoreboardModule scoreboard = m.register(new ScoreboardModule());

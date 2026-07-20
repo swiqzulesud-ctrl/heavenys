@@ -53,8 +53,8 @@ import java.util.List;
  */
 public class HeavenysClient implements ClientModInitializer {
 
-    public static final String MOD_ID = "heavenys";
-    public static final String NAME = "Heavenys Client";
+    public static final String MOD_ID = "knowmods";
+    public static final String NAME = "Know Mods";
     public static final Logger LOGGER = LoggerFactory.getLogger(NAME);
 
     private static HeavenysClient instance;
@@ -104,9 +104,9 @@ public class HeavenysClient implements ClientModInitializer {
 
     private void registerKeybinds() {
         openGuiKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.heavenys.clickgui", GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
+                "key.knowmods.clickgui", GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC));
         hudEditorKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.heavenys.hudeditor", GLFW.GLFW_KEY_RIGHT_CONTROL, KeyMapping.Category.MISC));
+                "key.knowmods.hudeditor", GLFW.GLFW_KEY_RIGHT_CONTROL, KeyMapping.Category.MISC));
     }
 
     private void registerHudLayer() {

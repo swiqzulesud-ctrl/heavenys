@@ -17,13 +17,13 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
- * Branded watermark. Renders an accent-colored "H" mark followed by the client
- * name, matching the minimal premium Heaven theme.
+ * Branded watermark. Renders an accent-colored "K" mark followed by the client
+ * name, matching the minimal premium Know Mods theme.
  */
 public class WatermarkHud extends HudModule {
 
     private final StringSetting text =
-            register(new StringSetting("Text", "Watermark label.", "Heavenys"));
+            register(new StringSetting("Text", "Watermark label.", "Know Mods"));
 
     public WatermarkHud() {
         super("Watermark", "Branded client watermark.");
@@ -33,7 +33,7 @@ public class WatermarkHud extends HudModule {
 
     @Override
     protected void renderContent(GuiGraphicsExtractor g, Font font, int contentX, int contentY) {
-        String mark = "H";
+        String mark = "K";
         String label = " " + text.getValue();
         int accent = HeavenysColors.withAlpha(theme().accent(), 255);
         int white = HeavenysColors.withAlpha(theme().outline(), 255);
@@ -43,7 +43,7 @@ public class WatermarkHud extends HudModule {
 
     @Override
     protected int contentWidth(Font font) {
-        return font.width("H " + text.getValue());
+        return font.width("K " + text.getValue());
     }
 
     @Override

@@ -19,19 +19,20 @@ import com.heavenys.client.theme.AnimationStyle;
 import com.heavenys.client.theme.FontChoice;
 
 /**
- * Central "look and feel" module. It owns every setting that drives the Heaven
- * theme: the {@code #FFD54A} accent, {@code #111111} background, white outline,
- * UI background opacity, blur, glow and animation preferences.
+ * Central "look and feel" module. It owns every setting that drives the Know
+ * Mods theme: the {@code #FF7A1A} orange accent, {@code #0B0B0B} near-black
+ * background, white outline, UI background opacity, blur, glow and animation
+ * preferences.
  *
  * <p>This module is always enabled; toggling it simply has no gameplay effect.
  * It exists so that the theme settings appear as a normal tab in the ClickGUI.</p>
  */
 public class InterfaceModule extends Module {
 
-    /** Heaven theme defaults. */
-    public static final int DEFAULT_BACKGROUND = 0xFF111111;
+    /** Know Mods premium theme defaults: near-black panels with an orange accent. */
+    public static final int DEFAULT_BACKGROUND = 0xFF0B0B0B;
     public static final int DEFAULT_OUTLINE = 0xFFFFFFFF;
-    public static final int DEFAULT_ACCENT = 0xFFFFD54A;
+    public static final int DEFAULT_ACCENT = 0xFFFF7A1A;
 
     private final ColorSetting accent =
             register(new ColorSetting("Accent", "Primary accent color used across the UI.", DEFAULT_ACCENT));
@@ -48,7 +49,7 @@ public class InterfaceModule extends Module {
     private final BooleanSetting roundedCorners =
             register(new BooleanSetting("Rounded Corners", "Use rounded panel corners.", true));
     private final NumberSetting cornerRadius =
-            register(new NumberSetting("Corner Radius", "Panel corner radius in pixels.", 6, 0, 12, 1));
+            register(new NumberSetting("Corner Radius", "Panel corner radius in pixels.", 8, 0, 20, 1));
     private final EnumSetting<AnimationStyle> animationStyle =
             register(new EnumSetting<>("Animation", "Easing curve for UI animations.", AnimationStyle.EASE_OUT));
     private final NumberSetting animationSpeed =
@@ -57,7 +58,7 @@ public class InterfaceModule extends Module {
             register(new EnumSetting<>("Font", "Client UI font.", FontChoice.INTER));
 
     public InterfaceModule() {
-        super("Interface", "Heaven theme, colors, blur, glow and animation settings.", Category.INTERFACE);
+        super("Interface", "Know Mods theme, colors, blur, glow and animation settings.", Category.INTERFACE);
         setEnabled(true);
     }
 

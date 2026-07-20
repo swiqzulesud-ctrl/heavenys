@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    // Wraps the installer jar into a native Windows .exe (downloads launch4j itself).
+    id 'edu.sc.seis.launch4j' version '4.0.0'
+}
+
+version = rootProject.version
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    // Build with the available JDK 25 toolchain, but target a broadly-compatible
+    // bytecode level so the installer runs on any Java 17+ runtime a player has.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = 17
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.knowmods.installer.KnowModsInstaller',
+                'Implementation-Title': 'Know Mods Installer',
+                'Implementation-Version': project.version
+    }
+}
+
+// Embed the built Know Mods mod jar inside the installer jar as /knowmods.jar.
+def modJar = rootProject.tasks.named('jar')
+processResources {
+    dependsOn modJar
+    from(modJar.map { it.archiveFile }) {
+        rename { 'knowmods.jar' }
+    }
+}
+
+launch4j {
+    mainClassName = 'com.knowmods.installer.KnowModsInstaller'
+    outfile = 'KnowMods-Installer.exe'
+    productName = 'Know Mods Installer'
+    fileDescription = 'Installs the Know Mods (KnowClient) Fabric client into your Minecraft mods folder'
+    copyright = 'GPL-3.0-or-later Know Mods contributors'
+    version = "${rootProject.version}.0"
+    textVersion = rootProject.version.toString()
+    // GUI subsystem: no console window pops up when double-clicked on Windows.
+    headerType = 'gui'
+    // The installer only needs any modern desktop JRE to copy a file.
+    jreMinVersion = '17'
+}

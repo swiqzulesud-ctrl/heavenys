@@ -1,16 +1,19 @@
-Heavenys Client
-Copyright (C) 2026 Heavenys Client contributors
+Know Mods (KnowClient)
+Copyright (C) 2026 Know Mods contributors
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
 version. See the LICENSE file for the full license text.
 
+Know Mods was formerly developed under the name "Heavenys Client"; the Java
+package namespace (com.heavenys.client) is retained for source stability.
+
 --------------------------------------------------------------------------------
 Attribution
 --------------------------------------------------------------------------------
 
-Heavenys Client is an open-source Minecraft: Java Edition client for the Fabric
+Know Mods is an open-source Minecraft: Java Edition client for the Fabric
 mod loader. It was created as a spiritual successor to, and takes inspiration
 from, the open-source "Sol Client" project (also distributed as "Solar Client"):
 
@@ -25,7 +28,7 @@ code in this repository is original work authored for Fabric on modern
 Minecraft. Sol Client is credited here in accordance with its GNU GPL v3.0
 license.
 
-The Heavenys Client ClickGUI (com.heavenys.client.gui.ClickGuiScreen) is a
+The Know Mods ClickGUI (com.heavenys.client.gui.ClickGuiScreen) is a
 GPL-3.0 derivative work: its layout and behaviour are adapted from the design
 of Sol Client's ModsScreen (centered rounded "block" panel, top search field,
 scrollable module cards with descriptions, per-module settings area and a
@@ -61,4 +64,4 @@ Bundled fonts
 * Poppins  - Copyright (C) The Poppins Project Authors, SIL Open Font License 1.1
 
 Fonts are used for the client user interface only. See
-src/main/resources/assets/heavenys/fonts/OFL.txt for the full font license.
+src/main/resources/assets/knowmods/fonts/OFL.txt for the full font license.

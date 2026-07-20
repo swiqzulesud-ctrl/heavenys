@@ -1,10 +1,32 @@
-# Heavenys Client - Agent Guide
+# Know Mods (KnowClient) - Agent Guide
 
-Heavenys Client is an original, open-source (GPL-3.0) Fabric client for **Minecraft 26.2**
+Know Mods (KnowClient) is an original, open-source (GPL-3.0) Fabric client for **Minecraft 26.2**
 (marketed as "1.26.2"). It is inspired by the open-source Sol Client but contains none of its
 code, and no proprietary Lunar Client code/assets. Keep it that way.
 
 ## Cursor Cloud specific instructions
+
+### Branding vs. namespace (non-obvious)
+- The client is branded **Know Mods** (mod id `knowmods`, display name "Know Mods"), but the
+  Java package/namespace is still **`com.heavenys.client`** and the entrypoint class is
+  `HeavenysClient` (retained for source stability). Don't be confused by the mismatch: user-facing
+  strings say "Know Mods"; internal packages/classes say "heavenys". The formerly-"Heavenys"
+  asset namespace now lives under `assets/knowmods`.
+- Premium theme defaults live in `InterfaceModule`: near-black `#0B0B0B` background, orange
+  `#FF7A1A` accent, corner radius up to 20px. HUD/GUI colors read from that module.
+- The PvP/survival counter HUDs (Totem/EndCrystal/EnderPearl/Arrow/Durability) do **read-only**
+  inventory inspection via `com.heavenys.client.util.InventoryUtil` - no cheats, no automation.
+
+### Windows installer subproject (non-obvious)
+- The `installer` Gradle subproject (`com.knowmods.installer.KnowModsInstaller`) is a plain Java
+  app that embeds the built mod jar as the resource `/knowmods.jar` and copies it into the
+  Minecraft `mods` folder. Build the exe with `./gradlew :installer:createExe` (output under
+  `installer/build/launch4j/KnowMods-Installer.exe`). The `edu.sc.seis.launch4j` plugin downloads
+  launch4j on first run (needs network) and produces a real Windows PE binary from Linux **without
+  wine**; the exe itself can't be executed on this headless Linux VM, so validate it by checking
+  the PE header and by running the installer jar's logic (`java -jar .../installer-*.jar --console
+  --dir <tmp>`). `createExe` is intentionally NOT wired into the root `build` so the mod build stays
+  offline-friendly.
 
 ### Toolchain (non-obvious)
 - **Minecraft 26.2 requires JDK 25**, not Java 21. Loom refuses to configure on Java 21. A JDK 25

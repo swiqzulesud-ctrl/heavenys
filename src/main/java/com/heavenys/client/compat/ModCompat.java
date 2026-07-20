@@ -16,24 +16,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Detects popular performance and visual mods so Heavenys Client can integrate
+ * Detects popular performance and visual mods so Know Mods can integrate
  * with them rather than fight them. Detection is purely read-only via
- * {@link FabricLoader#isModLoaded(String)} - Heavenys never bundles or ships any
+ * {@link FabricLoader#isModLoaded(String)} - Know Mods never bundles or ships any
  * of these mods.
  */
 public final class ModCompat {
 
-    /** A third-party mod Heavenys knows how to co-exist with. */
+    /** A third-party mod Know Mods knows how to co-exist with. */
     public enum Integration {
+        // Performance
         SODIUM("sodium", "Sodium"),
         LITHIUM("lithium", "Lithium"),
         FERRITE_CORE("ferritecore", "FerriteCore"),
-        ENTITY_CULLING("entityculling", "Entity Culling"),
         IMMEDIATELY_FAST("immediatelyfast", "ImmediatelyFast"),
+        ENTITY_CULLING("entityculling", "Entity Culling"),
+        MODERN_FIX("modernfix", "ModernFix"),
         DYNAMIC_FPS("dynamic_fps", "Dynamic FPS"),
+        INDIUM("indium", "Indium"),
         MORE_CULLING("moreculling", "More Culling"),
         ENHANCED_BLOCK_ENTITIES("enhancedblockentities", "Enhanced Block Entities"),
         NOISIUM("noisium", "Noisium"),
+        // Graphics & visual
+        IRIS("iris", "Iris Shaders"),
+        CONTINUITY("continuity", "Continuity"),
+        LAMB_DYNAMIC_LIGHTS("lambdynlights", "LambDynamicLights"),
+        // Survival quality-of-life
+        INVENTORY_PROFILES_NEXT("inventoryprofilesnext", "Inventory Profiles Next"),
+        APPLE_SKIN("appleskin", "AppleSkin"),
+        BETTER_F3("betterf3", "BetterF3"),
+        // Communication
         SIMPLE_VOICE_CHAT("voicechat", "Simple Voice Chat");
 
         private final String modId;
