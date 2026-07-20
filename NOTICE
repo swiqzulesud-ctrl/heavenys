@@ -22,8 +22,20 @@ from, the open-source "Sol Client" project (also distributed as "Solar Client"):
 Sol Client targets legacy Minecraft (1.8.9) using a fundamentally different
 toolchain, so no source code from Sol Client is reproduced here. All source
 code in this repository is original work authored for Fabric on modern
-Minecraft. Sol Client is credited above in accordance with the spirit of its
-GNU GPL v3.0 license.
+Minecraft. Sol Client is credited here in accordance with its GNU GPL v3.0
+license.
+
+The Heavenys Client ClickGUI (com.heavenys.client.gui.ClickGuiScreen) is a
+GPL-3.0 derivative work: its layout and behaviour are adapted from the design
+of Sol Client's ModsScreen (centered rounded "block" panel, top search field,
+scrollable module cards with descriptions, per-module settings area and a
+smooth open animation). It was re-implemented from scratch against the
+Minecraft 26.2 rendering API - no Sol Client source is copied - and remains
+under the GNU GPL v3.0.
+
+    Sol Client ModsScreen and GUI design
+    Copyright (C) 2021-2023 TheKodeToad and Sol Client Contributors
+    Licensed under the GNU General Public License v3.0
 
 --------------------------------------------------------------------------------
 Third-party components

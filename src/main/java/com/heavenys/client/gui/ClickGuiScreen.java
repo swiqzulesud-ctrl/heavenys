@@ -6,12 +6,25 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version. See the LICENSE file for details.
+ *
+ * ----------------------------------------------------------------------------
+ * The layout and behaviour of this screen (centered rounded "block" panel, a
+ * top search field, scrollable module cards with descriptions, a per-module
+ * settings area and a smooth open animation) are adapted from the GUI design of
+ * the open-source Sol Client (GPL-3.0) - specifically its ModsScreen. No Sol
+ * Client source is reproduced: Sol Client targets Minecraft 1.8.9 with its own
+ * component framework, so this is an original re-implementation against the
+ * Minecraft 26.2 rendering API. Original design:
+ *   Sol Client - Copyright (C) 2021-2023 TheKodeToad and Contributors (GPL-3.0)
+ *   https://github.com/Sol-Client/Client
+ * ----------------------------------------------------------------------------
  */
 package com.heavenys.client.gui;
 
 import com.heavenys.client.HeavenysClient;
 import com.heavenys.client.module.Category;
 import com.heavenys.client.module.Module;
+import com.heavenys.client.module.ModuleManager;
 import com.heavenys.client.module.impl.client.InterfaceModule;
 import com.heavenys.client.module.setting.BooleanSetting;
 import com.heavenys.client.module.setting.ColorSetting;
@@ -24,6 +37,7 @@ import com.heavenys.client.render.UIRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -34,19 +48,25 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * The Heavenys Client ClickGUI. Renders a rounded, blurred, glowing panel with
- * category tabs on the left and a scrollable list of modules and their settings
- * on the right. All widgets are drawn with {@link UIRenderer}; interaction is
- * driven by a per-frame list of {@link Region hit regions} so the layout logic
- * lives in exactly one place.
+ * The Heavenys Client ClickGUI. Renders a rounded, glowing "block" panel with a
+ * search field, category tabs and a scrollable list of module cards (name +
+ * description + toggle) plus an expandable per-module settings area. Drawing
+ * uses {@link UIRenderer}; interaction is driven by a per-frame list of
+ * {@link Region hit regions} so the layout logic lives in one place.
+ *
+ * <p>The visual design is adapted from Sol Client's ModsScreen (see the file
+ * header for attribution) and re-implemented for Minecraft 26.2.</p>
  */
 public class ClickGuiScreen extends Screen {
 
-    private static final int PANEL_W = 400;
-    private static final int PANEL_H = 250;
+    private static final int PANEL_W = 420;
+    private static final int PANEL_H = 262;
     private static final int TAB_W = 96;
-    private static final int ROW_H = 16;
+    private static final int HEADER_H = 22;
+    private static final int SEARCH_H = 16;
+    private static final int CARD_H = 24;
     private static final int SETTING_H = 14;
+    private static final long ANIM_MS = 260;
 
     /** Preset accent palette used when cycling color settings. */
     private static final int[] PALETTE = {
@@ -54,10 +74,12 @@ public class ClickGuiScreen extends Screen {
     };
 
     private final List<Region> regions = new ArrayList<>();
+    private final long openedAt = System.currentTimeMillis();
 
     private Category selectedCategory = Category.HUD;
     private Module expanded;
     private int scroll;
+    private String search = "";
 
     private NumberSetting draggingSlider;
     private int sliderX;
@@ -80,81 +102,120 @@ public class ClickGuiScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
         InterfaceModule theme = theme();
-        // The base Screen background pass already applies the vanilla in-world
-        // blur (governed by the menu-blur option) exactly once per frame, so we
-        // must not call blurBeforeThisStratum() again here. We simply add our own
-        // dim tint on top for extra contrast behind the panel.
+
+        // Dim tint behind the panel (drawn unscaled). The base Screen background
+        // pass already applies the single allowed per-frame blur.
         UIRenderer.rect(g, 0, 0, g.guiWidth(), g.guiHeight(), 0x66000000);
 
         int px = (g.guiWidth() - PANEL_W) / 2;
         int py = (g.guiHeight() - PANEL_H) / 2;
-        int radius = theme.cornerRadius();
+
+        // Smooth "pop" open animation: scale from 0.85 -> 1.0 around the panel
+        // centre, easing with the configured animation style/speed.
+        float progress = animationProgress();
+        boolean animating = progress < 1.0f;
+        if (animating) {
+            float scale = 0.85f + 0.15f * progress;
+            float cx = px + PANEL_W / 2f;
+            float cy = py + PANEL_H / 2f;
+            g.pose().pushMatrix();
+            g.pose().translate(cx, cy);
+            g.pose().scale(scale, scale);
+            g.pose().translate(-cx, -cy);
+        }
 
         regions.clear();
+        drawPanel(g, theme, px, py, progress);
 
-        int bg = HeavenysColors.scaleAlpha(theme.background(), theme.backgroundOpacity());
-        if (theme.glow()) {
-            UIRenderer.glow(g, px, py, PANEL_W, PANEL_H, radius, HeavenysColors.withAlpha(theme.accent(), 70), 4);
+        if (animating) {
+            g.pose().popMatrix();
         }
-        UIRenderer.roundedRect(g, px, py, PANEL_W, PANEL_H, radius, bg);
-        UIRenderer.roundedOutline(g, px, py, PANEL_W, PANEL_H, radius, HeavenysColors.withAlpha(theme.outline(), 60));
-
-        drawHeader(g, px, py);
-        drawTabs(g, px, py + 24);
-        drawModuleList(g, px + TAB_W, py + 24, PANEL_W - TAB_W, PANEL_H - 24, mouseX, mouseY);
     }
 
-    private void drawHeader(GuiGraphicsExtractor g, int px, int py) {
-        InterfaceModule theme = theme();
+    private void drawPanel(GuiGraphicsExtractor g, InterfaceModule theme, int px, int py, float progress) {
+        int radius = theme.cornerRadius();
+        float fade = Math.max(0.2f, progress);
+
+        int bg = HeavenysColors.scaleAlpha(
+                HeavenysColors.scaleAlpha(theme.background(), theme.backgroundOpacity()), fade);
+        if (theme.glow()) {
+            UIRenderer.glow(g, px, py, PANEL_W, PANEL_H, radius,
+                    HeavenysColors.scaleAlpha(HeavenysColors.withAlpha(theme.accent(), 70), fade), 4);
+        }
+        UIRenderer.roundedRect(g, px, py, PANEL_W, PANEL_H, radius, bg);
+        UIRenderer.roundedOutline(g, px, py, PANEL_W, PANEL_H, radius,
+                HeavenysColors.scaleAlpha(HeavenysColors.withAlpha(theme.outline(), 60), fade));
+
+        drawHeader(g, theme, px, py);
+        drawSearch(g, theme, px + 6, py + HEADER_H, PANEL_W - 12);
+
+        int contentY = py + HEADER_H + SEARCH_H + 4;
+        int contentH = PANEL_H - (HEADER_H + SEARCH_H + 4);
+        if (search.isBlank()) {
+            drawTabs(g, theme, px, contentY);
+        }
+        int listX = search.isBlank() ? px + TAB_W : px + 6;
+        int listW = search.isBlank() ? PANEL_W - TAB_W - 6 : PANEL_W - 12;
+        drawModuleList(g, theme, listX, contentY, listW, contentH);
+    }
+
+    private void drawHeader(GuiGraphicsExtractor g, InterfaceModule theme, int px, int py) {
         // Accent "H" logo mark in a rounded chip.
-        UIRenderer.roundedRect(g, px + 8, py + 6, 14, 14, 3, HeavenysColors.withAlpha(theme.accent(), 255));
-        UIRenderer.centeredText(g, font, "H", px + 8 + 7, py + 6 + 3, 0xFF111111);
-        UIRenderer.text(g, font, "Heavenys Client", px + 28, py + 9,
+        UIRenderer.roundedRect(g, px + 8, py + 5, 14, 14, 3, HeavenysColors.withAlpha(theme.accent(), 255));
+        UIRenderer.centeredText(g, font, "H", px + 8 + 7, py + 5 + 3, 0xFF111111);
+        UIRenderer.text(g, font, "Heavenys Client", px + 28, py + 8,
                 HeavenysColors.withAlpha(theme.outline(), 255), true);
 
-        // Profile chip on the right (click cycles profiles + saves).
+        // Profile chip on the right (click cycles profiles + loads).
         String profile = HeavenysClient.getInstance().getConfigManager().getActiveProfile();
         String label = "Profile: " + profile;
         int chipW = font.width(label) + 12;
         int chipX = px + PANEL_W - chipW - 8;
-        UIRenderer.roundedRect(g, chipX, py + 6, chipW, 14, 3, HeavenysColors.withAlpha(theme.outline(), 25));
-        UIRenderer.text(g, font, label, chipX + 6, py + 9, HeavenysColors.withAlpha(theme.accent(), 255), true);
-        addRegion(chipX, py + 6, chipW, 14, b -> cycleProfile());
+        UIRenderer.roundedRect(g, chipX, py + 5, chipW, 14, 3, HeavenysColors.withAlpha(theme.outline(), 25));
+        UIRenderer.text(g, font, label, chipX + 6, py + 8, HeavenysColors.withAlpha(theme.accent(), 255), true);
+        addRegion(chipX, py + 5, chipW, 14, b -> cycleProfile());
     }
 
-    private void drawTabs(GuiGraphicsExtractor g, int px, int py) {
-        InterfaceModule theme = theme();
-        int y = py + 4;
+    private void drawSearch(GuiGraphicsExtractor g, InterfaceModule theme, int x, int y, int width) {
+        UIRenderer.roundedRect(g, x, y, width, SEARCH_H - 2, 3, HeavenysColors.withAlpha(theme.outline(), 18));
+        UIRenderer.roundedOutline(g, x, y, width, SEARCH_H - 2, 3, HeavenysColors.withAlpha(theme.outline(), 35));
+        boolean empty = search.isBlank();
+        String shown = empty ? "Search modules..." : search + "_";
+        int color = empty ? HeavenysColors.withAlpha(theme.outline(), 90)
+                : HeavenysColors.withAlpha(theme.outline(), 230);
+        UIRenderer.text(g, font, shown, x + 6, y + 3, color, false);
+    }
+
+    private void drawTabs(GuiGraphicsExtractor g, InterfaceModule theme, int px, int py) {
+        int y = py + 2;
         for (Category category : Category.values()) {
             boolean selected = category == selectedCategory;
             int fill = selected ? HeavenysColors.withAlpha(theme.accent(), 210)
                     : HeavenysColors.withAlpha(theme.outline(), 18);
-            UIRenderer.roundedRect(g, px + 6, y, TAB_W - 12, ROW_H, 3, fill);
+            UIRenderer.roundedRect(g, px + 6, y, TAB_W - 12, 16, 3, fill);
             int textColor = selected ? 0xFF111111 : HeavenysColors.withAlpha(theme.outline(), 220);
-            UIRenderer.text(g, font, category.getDisplayName(), px + 12, y + (ROW_H - font.lineHeight) / 2 + 1, textColor, false);
-            addRegion(px + 6, y, TAB_W - 12, ROW_H, b -> {
+            UIRenderer.text(g, font, category.getDisplayName(), px + 12, y + 4, textColor, false);
+            addRegion(px + 6, y, TAB_W - 12, 16, b -> {
                 selectedCategory = category;
                 expanded = null;
                 scroll = 0;
             });
-            y += ROW_H + 3;
+            y += 19;
         }
     }
 
-    private void drawModuleList(GuiGraphicsExtractor g, int x, int y, int width, int height, int mouseX, int mouseY) {
-        InterfaceModule theme = theme();
+    private void drawModuleList(GuiGraphicsExtractor g, InterfaceModule theme, int x, int y, int width, int height) {
         g.enableScissor(x, y, x + width, y + height);
-        int rowY = y + 4 - scroll;
-        List<Module> modules = HeavenysClient.getInstance().getModuleManager().getByCategory(selectedCategory);
-        for (Module module : modules) {
-            drawModuleRow(g, module, x + 4, rowY, width - 8);
-            rowY += ROW_H + 2;
+        int rowY = y + 2 - scroll;
+        for (Module module : visibleModules()) {
+            drawModuleCard(g, theme, module, x + 2, rowY, width - 4);
+            rowY += CARD_H + 2;
             if (module == expanded) {
                 for (Setting<?> setting : module.getSettings()) {
                     if (!setting.isVisible()) {
                         continue;
                     }
-                    drawSettingRow(g, setting, x + 12, rowY, width - 20);
+                    drawSettingRow(g, theme, setting, x + 10, rowY, width - 18);
                     rowY += SETTING_H + 2;
                 }
             }
@@ -162,37 +223,37 @@ public class ClickGuiScreen extends Screen {
         g.disableScissor();
     }
 
-    private void drawModuleRow(GuiGraphicsExtractor g, Module module, int x, int y, int width) {
-        InterfaceModule theme = theme();
-        UIRenderer.roundedRect(g, x, y, width, ROW_H, 3, HeavenysColors.withAlpha(theme.outline(), 16));
+    private void drawModuleCard(GuiGraphicsExtractor g, InterfaceModule theme, Module module, int x, int y, int width) {
+        UIRenderer.roundedRect(g, x, y, width, CARD_H, 3, HeavenysColors.withAlpha(theme.outline(), 16));
         int nameColor = module.isEnabled()
                 ? HeavenysColors.withAlpha(theme.accent(), 255)
-                : HeavenysColors.withAlpha(theme.outline(), 210);
-        UIRenderer.text(g, font, module.getName(), x + 8, y + (ROW_H - font.lineHeight) / 2 + 1, nameColor, false);
+                : HeavenysColors.withAlpha(theme.outline(), 220);
+        UIRenderer.text(g, font, module.getName(), x + 8, y + 4, nameColor, false);
+        String desc = truncate(module.getDescription(), width - 46);
+        UIRenderer.text(g, font, desc, x + 8, y + 14, HeavenysColors.withAlpha(theme.outline(), 110), false);
 
         // Toggle pill on the right.
         int pillW = 20;
+        int pillH = 10;
         int pillX = x + width - pillW - 6;
-        int pillY = y + 4;
+        int pillY = y + (CARD_H - pillH) / 2;
         int track = module.isEnabled()
                 ? HeavenysColors.withAlpha(theme.accent(), 220)
                 : HeavenysColors.withAlpha(theme.outline(), 40);
-        UIRenderer.roundedRect(g, pillX, pillY, pillW, ROW_H - 8, (ROW_H - 8) / 2, track);
-        int knobX = module.isEnabled() ? pillX + pillW - (ROW_H - 8) : pillX;
-        UIRenderer.roundedRect(g, knobX, pillY, ROW_H - 8, ROW_H - 8, (ROW_H - 8) / 2, 0xFFFFFFFF);
+        UIRenderer.roundedRect(g, pillX, pillY, pillW, pillH, pillH / 2, track);
+        int knobX = module.isEnabled() ? pillX + pillW - pillH : pillX;
+        UIRenderer.roundedRect(g, knobX, pillY, pillH, pillH, pillH / 2, 0xFFFFFFFF);
 
-        addRegion(pillX, pillY, pillW, ROW_H - 8, b -> {
+        addRegion(pillX, pillY, pillW, pillH, b -> {
             module.toggle();
             HeavenysClient.getInstance().getConfigManager().saveIfAuto();
         });
-        // Clicking the row body expands/collapses settings.
-        addRegion(x, y, width - pillW - 10, ROW_H, b -> expanded = (expanded == module ? null : module));
+        addRegion(x, y, width - pillW - 10, CARD_H, b -> expanded = (expanded == module ? null : module));
     }
 
-    private void drawSettingRow(GuiGraphicsExtractor g, Setting<?> setting, int x, int y, int width) {
-        InterfaceModule theme = theme();
+    private void drawSettingRow(GuiGraphicsExtractor g, InterfaceModule theme, Setting<?> setting, int x, int y, int width) {
         int label = HeavenysColors.withAlpha(theme.outline(), 200);
-        UIRenderer.text(g, font, setting.getName(), x, y + (SETTING_H - font.lineHeight) / 2 + 1, label, false);
+        UIRenderer.text(g, font, setting.getName(), x, y + 3, label, false);
 
         if (setting instanceof BooleanSetting bool) {
             String state = bool.getValue() ? "ON" : "OFF";
@@ -249,7 +310,6 @@ public class ClickGuiScreen extends Screen {
         if (event.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             int mx = (int) event.x();
             int my = (int) event.y();
-            // Iterate in reverse so widgets drawn last (on top) win.
             for (int i = regions.size() - 1; i >= 0; i--) {
                 Region region = regions.get(i);
                 if (region.contains(mx, my)) {
@@ -264,8 +324,7 @@ public class ClickGuiScreen extends Screen {
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
         if (draggingSlider != null && sliderW > 0) {
-            double fraction = (event.x() - sliderX) / (double) sliderW;
-            draggingSlider.setFromFraction(fraction);
+            draggingSlider.setFromFraction((event.x() - sliderX) / (double) sliderW);
             return true;
         }
         return super.mouseDragged(event, dx, dy);
@@ -288,6 +347,18 @@ public class ClickGuiScreen extends Screen {
     }
 
     @Override
+    public boolean charTyped(CharacterEvent event) {
+        int cp = event.codepoint();
+        if (cp >= ' ' && cp != 127) {
+            search += event.codepointAsString();
+            expanded = null;
+            scroll = 0;
+            return true;
+        }
+        return super.charTyped(event);
+    }
+
+    @Override
     public boolean keyPressed(KeyEvent event) {
         if (listeningKeybind != null) {
             listeningKeybind.setValue(event.key() == GLFW.GLFW_KEY_ESCAPE ? KeybindSetting.UNBOUND : event.key());
@@ -295,7 +366,16 @@ public class ClickGuiScreen extends Screen {
             HeavenysClient.getInstance().getConfigManager().saveIfAuto();
             return true;
         }
+        if (event.key() == GLFW.GLFW_KEY_BACKSPACE && !search.isEmpty()) {
+            search = search.substring(0, search.length() - 1);
+            scroll = 0;
+            return true;
+        }
         if (event.key() == GLFW.GLFW_KEY_ESCAPE) {
+            if (!search.isEmpty()) {
+                search = "";
+                return true;
+            }
             onClose();
             return true;
         }
@@ -310,6 +390,28 @@ public class ClickGuiScreen extends Screen {
 
     // ----------------------------------------------------------- helpers
 
+    private float animationProgress() {
+        double speed = Math.max(0.1, theme().animationSpeed());
+        double elapsed = (System.currentTimeMillis() - openedAt) * speed;
+        double t = Math.min(1.0, elapsed / ANIM_MS);
+        return (float) theme().animationStyle().apply(t);
+    }
+
+    private List<Module> visibleModules() {
+        ModuleManager manager = HeavenysClient.getInstance().getModuleManager();
+        if (search.isBlank()) {
+            return manager.getByCategory(selectedCategory);
+        }
+        String q = search.toLowerCase();
+        List<Module> matches = new ArrayList<>();
+        for (Module module : manager.getModules()) {
+            if (module.getName().toLowerCase().contains(q) || module.getDescription().toLowerCase().contains(q)) {
+                matches.add(module);
+            }
+        }
+        return matches;
+    }
+
     private void cycleProfile() {
         var config = HeavenysClient.getInstance().getConfigManager();
         List<String> profiles = config.listProfiles();
@@ -323,8 +425,7 @@ public class ClickGuiScreen extends Screen {
         int alpha = color.getAlpha();
         for (int i = 0; i < PALETTE.length; i++) {
             if ((PALETTE[i] & 0x00FFFFFF) == (current & 0x00FFFFFF)) {
-                int next = PALETTE[(i + 1) % PALETTE.length];
-                color.setValue(HeavenysColors.withAlpha(next, alpha));
+                color.setValue(HeavenysColors.withAlpha(PALETTE[(i + 1) % PALETTE.length], alpha));
                 return;
             }
         }
@@ -333,6 +434,20 @@ public class ClickGuiScreen extends Screen {
 
     private void addRegion(int x, int y, int w, int h, Consumer<Integer> action) {
         regions.add(new Region(x, y, w, h, action));
+    }
+
+    private String truncate(String text, int maxWidth) {
+        if (font.width(text) <= maxWidth) {
+            return text;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (char c : text.toCharArray()) {
+            if (font.width(sb.toString() + c + "...") > maxWidth) {
+                break;
+            }
+            sb.append(c);
+        }
+        return sb + "...";
     }
 
     private static String trim(double value) {
