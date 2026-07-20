@@ -87,7 +87,7 @@ public class ClickGuiScreen extends Screen {
     private KeybindSetting listeningKeybind;
 
     public ClickGuiScreen() {
-        super(Component.literal("Heavenys Client"));
+        super(Component.literal("Know Mods"));
     }
 
     @Override
@@ -160,10 +160,10 @@ public class ClickGuiScreen extends Screen {
     }
 
     private void drawHeader(GuiGraphicsExtractor g, InterfaceModule theme, int px, int py) {
-        // Accent "H" logo mark in a rounded chip.
+        // Accent "K" logo mark in a rounded chip.
         UIRenderer.roundedRect(g, px + 8, py + 5, 14, 14, 3, HeavenysColors.withAlpha(theme.accent(), 255));
-        UIRenderer.centeredText(g, font, "H", px + 8 + 7, py + 5 + 3, 0xFF111111);
-        UIRenderer.text(g, font, "Heavenys Client", px + 28, py + 8,
+        UIRenderer.centeredText(g, font, "K", px + 8 + 7, py + 5 + 3, 0xFF0B0B0B);
+        UIRenderer.text(g, font, "Know Mods", px + 28, py + 8,
                 HeavenysColors.withAlpha(theme.outline(), 255), true);
 
         // Profile chip on the right (click cycles profiles + loads).

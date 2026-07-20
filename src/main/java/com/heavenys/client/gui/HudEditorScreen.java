@@ -33,7 +33,7 @@ public class HudEditorScreen extends Screen {
     private int grabOffsetY;
 
     public HudEditorScreen() {
-        super(Component.literal("Heavenys HUD Editor"));
+        super(Component.literal("Know Mods HUD Editor"));
     }
 
     @Override
