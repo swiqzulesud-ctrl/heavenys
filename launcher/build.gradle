@@ -1,0 +1,109 @@
+plugins {
+    id 'application'
+    id 'java'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+group = 'com.heavenys.launcher'
+version = project.findProperty('mod_version') ?: '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    version = '21.0.4'
+    modules = ['javafx.controls', 'javafx.graphics', 'javafx.base']
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'org.slf4j:slf4j-api:2.0.13'
+    runtimeOnly 'org.slf4j:slf4j-simple:2.0.13'
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+application {
+    mainClass = 'com.heavenys.launcher.HeavenysLauncher'
+    applicationName = 'HeavenysLauncher'
+}
+
+// Allow forcing JavaFX's software rendering pipeline (used when running on a headless /
+// software-GL machine such as CI or the dev VM): ./gradlew :launcher:run -Pswrender
+run {
+    if (project.hasProperty('swrender')) {
+        systemProperty 'prism.order', 'sw'
+        systemProperty 'prism.verbose', 'true'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// ---------------------------------------------------------------------------
+// Packaging
+// ---------------------------------------------------------------------------
+// Self-contained runnable jar (bundles Gson/SLF4J + the platform JavaFX jars).
+// Launched via the non-Application `Main` so it runs from the classpath.
+tasks.register('fatJar', Jar) {
+    archiveClassifier = 'all'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn configurations.runtimeClasspath
+    from sourceSets.main.output
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class'
+    manifest {
+        attributes 'Main-Class': 'com.heavenys.launcher.Main'
+    }
+}
+
+// Produces a native application image (and, with a WiX/Inno toolchain on Windows, an .exe
+// installer) using the JDK's bundled `jpackage`. Cross-platform:
+//   ./gradlew :launcher:jpackage                       -> app-image for the host OS
+//   ./gradlew :launcher:jpackage -PinstallerType=exe   -> Windows .exe installer (run on Windows)
+tasks.register('jpackage', Exec) {
+    dependsOn 'fatJar'
+    def outDir = layout.buildDirectory.dir('jpackage').get().asFile
+    def inputDir = tasks.named('fatJar').get().archiveFile.get().asFile.parentFile
+    def jarName = tasks.named('fatJar').get().archiveFileName.get()
+    def type = project.findProperty('installerType') ?: 'app-image'
+    def os = org.gradle.internal.os.OperatingSystem.current()
+    def iconPath = os.windows ? 'src/main/resources/assets/icon.ico' : 'src/main/resources/assets/icon.png'
+
+    doFirst {
+        outDir.deleteDir()
+        outDir.mkdirs()
+    }
+
+    def cmd = [
+            'jpackage',
+            '--name', 'HeavenysLauncher',
+            '--app-version', (project.version ?: '1.0.0').toString(),
+            '--input', inputDir.absolutePath,
+            '--main-jar', jarName,
+            '--main-class', 'com.heavenys.launcher.Main',
+            '--dest', outDir.absolutePath,
+            '--type', type.toString(),
+            '--vendor', 'Heavenys',
+            '--java-options', '-Dprism.order=d3d,es2,sw'
+    ]
+    if (file(iconPath).exists()) {
+        cmd += ['--icon', file(iconPath).absolutePath]
+    }
+    if (type == 'exe' || type == 'msi') {
+        cmd += ['--win-dir-chooser', '--win-shortcut', '--win-menu']
+    }
+    commandLine cmd
+}

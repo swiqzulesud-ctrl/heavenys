@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'heavenys'
+
+// :client   -> the in-game Fabric mod (Heavenys Client)
+// :launcher -> the standalone premium desktop launcher (JavaFX)
+include('client')
+include('launcher')

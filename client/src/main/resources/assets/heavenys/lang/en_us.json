@@ -1,0 +1,15 @@
+{
+	"heavenys.name": "Heavenys Client",
+	"heavenys.key.category": "Heavenys Client",
+	"heavenys.key.openMenu": "Open Heavenys Menu",
+	"heavenys.screen.title": "Heavenys Client",
+	"heavenys.screen.subtitle": "Modules",
+	"heavenys.screen.done": "Done",
+	"heavenys.module.armorstatus": "Armor Status",
+	"heavenys.module.potionstatus": "Potion Status",
+	"heavenys.module.keystrokes": "Keystrokes",
+	"heavenys.module.fps": "FPS",
+	"heavenys.module.ping": "Ping",
+	"heavenys.state.on": "ON",
+	"heavenys.state.off": "OFF"
+}
