@@ -17,6 +17,17 @@ code, and no proprietary Lunar Client code/assets. Keep it that way.
 - The PvP/survival counter HUDs (Totem/EndCrystal/EnderPearl/Arrow/Durability) do **read-only**
   inventory inspection via `com.heavenys.client.util.InventoryUtil` - no cheats, no automation.
 
+### Windows installer subproject (non-obvious)
+- The `installer` Gradle subproject (`com.knowmods.installer.KnowModsInstaller`) is a plain Java
+  app that embeds the built mod jar as the resource `/knowmods.jar` and copies it into the
+  Minecraft `mods` folder. Build the exe with `./gradlew :installer:createExe` (output under
+  `installer/build/launch4j/KnowMods-Installer.exe`). The `edu.sc.seis.launch4j` plugin downloads
+  launch4j on first run (needs network) and produces a real Windows PE binary from Linux **without
+  wine**; the exe itself can't be executed on this headless Linux VM, so validate it by checking
+  the PE header and by running the installer jar's logic (`java -jar .../installer-*.jar --console
+  --dir <tmp>`). `createExe` is intentionally NOT wired into the root `build` so the mod build stays
+  offline-friendly.
+
 ### Toolchain (non-obvious)
 - **Minecraft 26.2 requires JDK 25**, not Java 21. Loom refuses to configure on Java 21. A JDK 25
   is installed at `/opt/jdk-25` and the Gradle daemon is pointed at it via

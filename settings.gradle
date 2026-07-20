@@ -10,3 +10,5 @@ pluginManagement {
 }
 
 rootProject.name = 'heavenys-client'
+
+include 'installer'

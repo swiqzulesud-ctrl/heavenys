@@ -53,6 +53,22 @@ Requires **JDK 25** (Minecraft 26.2 ships as Java 25 class files). The mod's own
 
 Default keybinds: **Right Shift** opens the ClickGUI, **Right Ctrl** opens the HUD Editor.
 
+## Windows installer (.exe)
+
+For players who don't want to copy jars by hand, the `installer` subproject builds
+**`KnowMods-Installer.exe`** — a tiny native Windows executable (produced with
+[launch4j](https://launch4j.sourceforge.net/)) that embeds the mod jar and copies it into
+`%APPDATA%\.minecraft\mods` when run.
+
+```bash
+./gradlew :installer:createExe   # -> installer/build/launch4j/KnowMods-Installer.exe
+```
+
+The same program also runs as a cross-platform jar (`java -jar installer/build/libs/installer-<version>.jar`).
+It only copies a file into your `mods` folder — no network access, registry edits, or elevated
+permissions. You still need the Fabric loader for Minecraft 26.2 installed. Optional flags:
+`--console` (print instead of showing a dialog) and `--dir <path>` (install into a specific folder).
+
 ## Architecture
 
 ```
