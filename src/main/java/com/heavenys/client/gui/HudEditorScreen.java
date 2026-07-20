@@ -48,9 +48,8 @@ public class HudEditorScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
         InterfaceModule theme = theme();
-        if (theme.blur()) {
-            g.blurBeforeThisStratum();
-        }
+        // The base Screen background pass already blurs the world once per frame;
+        // calling blurBeforeThisStratum() again would exceed the per-frame limit.
         UIRenderer.rect(g, 0, 0, g.guiWidth(), g.guiHeight(), 0x88000000);
 
         // Header banner.

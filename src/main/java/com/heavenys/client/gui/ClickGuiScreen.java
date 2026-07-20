@@ -80,10 +80,10 @@ public class ClickGuiScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
         InterfaceModule theme = theme();
-        if (theme.blur()) {
-            g.blurBeforeThisStratum();
-        }
-        // Dim the world slightly behind the panel.
+        // The base Screen background pass already applies the vanilla in-world
+        // blur (governed by the menu-blur option) exactly once per frame, so we
+        // must not call blurBeforeThisStratum() again here. We simply add our own
+        // dim tint on top for extra contrast behind the panel.
         UIRenderer.rect(g, 0, 0, g.guiWidth(), g.guiHeight(), 0x66000000);
 
         int px = (g.guiWidth() - PANEL_W) / 2;
