@@ -1,0 +1,52 @@
+Heavenys Client
+Copyright (C) 2026 Heavenys Client contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. See the LICENSE file for the full license text.
+
+--------------------------------------------------------------------------------
+Attribution
+--------------------------------------------------------------------------------
+
+Heavenys Client is an open-source Minecraft: Java Edition client for the Fabric
+mod loader. It was created as a spiritual successor to, and takes inspiration
+from, the open-source "Sol Client" project (also distributed as "Solar Client"):
+
+    Sol Client
+    Copyright (C) the Sol Client contributors
+    Licensed under the GNU General Public License v3.0
+    https://github.com/Sol-Client/Client
+
+Sol Client targets legacy Minecraft (1.8.9) using a fundamentally different
+toolchain, so no source code from Sol Client is reproduced here. All source
+code in this repository is original work authored for Fabric on modern
+Minecraft. Sol Client is credited above in accordance with the spirit of its
+GNU GPL v3.0 license.
+
+--------------------------------------------------------------------------------
+Third-party components
+--------------------------------------------------------------------------------
+
+* Fabric Loader, Fabric API, and Fabric Loom
+  Copyright (C) FabricMC
+  Licensed under the Apache License 2.0
+  https://fabricmc.net
+
+* Minecraft: Java Edition is the property of Mojang Studios / Microsoft. This
+  project is a client-side modification and does not distribute any Minecraft
+  assets or code.
+
+No proprietary code or assets from Lunar Client, or any other closed-source
+client, are included in this project.
+
+--------------------------------------------------------------------------------
+Bundled fonts
+--------------------------------------------------------------------------------
+
+* Inter    - Copyright (C) The Inter Project Authors, SIL Open Font License 1.1
+* Poppins  - Copyright (C) The Poppins Project Authors, SIL Open Font License 1.1
+
+Fonts are used for the client user interface only. See
+src/main/resources/assets/heavenys/fonts/OFL.txt for the full font license.
