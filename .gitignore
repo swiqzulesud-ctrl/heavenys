@@ -1,9 +1,15 @@
 # Gradle
 .gradle/
-build/
+**/build/
 
 # Fabric Loom dev run directory
+**/run/
 run/
+
+# jpackage / launcher output
+**/jpackage/
+*.exe
+*.msi
 
 # IDE
 .idea/

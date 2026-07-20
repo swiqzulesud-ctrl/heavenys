@@ -9,4 +9,9 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'heavenys-client'
+rootProject.name = 'heavenys'
+
+// :client   -> the in-game Fabric mod (Heavenys Client)
+// :launcher -> the standalone premium desktop launcher (JavaFX)
+include('client')
+include('launcher')
