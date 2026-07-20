@@ -1,0 +1,159 @@
+/*
+ * Heavenys Launcher — "Heaven" theme.
+ * Black (#0D0D0D) base, white outlines, gold (#E8B923) accent, soft gold hover glow.
+ * Clean, minimal, rounded, premium.
+ */
+
+.root {
+    -fx-font-family: "Poppins", "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -heaven-bg: #0D0D0D;
+    -heaven-surface: #151515;
+    -heaven-surface-2: #1C1C1C;
+    -heaven-gold: #E8B923;
+    -heaven-gold-bright: #FFD54A;
+    -heaven-text: #FFFFFF;
+    -heaven-muted: #9A9A9A;
+    -heaven-error: #E5484D;
+    -fx-background-color: transparent;
+}
+
+/* Rounded, outlined app window (undecorated + transparent stage). */
+.app-window {
+    -fx-background-color: -heaven-bg;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(255,255,255,0.14);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.75), 40, 0.2, 0, 12);
+}
+
+/* ---- Title bar ---- */
+.titlebar {
+    -fx-padding: 10 14 10 16;
+    -fx-background-color: transparent;
+}
+.title-text {
+    -fx-text-fill: -heaven-text;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+.title-sub {
+    -fx-text-fill: -heaven-gold;
+    -fx-font-size: 11px;
+}
+.win-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -heaven-muted;
+    -fx-font-size: 14px;
+    -fx-min-width: 30;
+    -fx-min-height: 26;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+.win-button:hover { -fx-background-color: rgba(255,255,255,0.08); -fx-text-fill: -heaven-text; }
+.win-close:hover { -fx-background-color: rgba(229,72,77,0.85); -fx-text-fill: white; }
+
+/* ---- Sidebar nav ---- */
+.nav {
+    -fx-background-color: -heaven-surface;
+    -fx-background-radius: 12;
+    -fx-padding: 10;
+    -fx-spacing: 6;
+    -fx-min-width: 168;
+    -fx-pref-width: 168;
+}
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -heaven-muted;
+    -fx-alignment: center-left;
+    -fx-padding: 10 14;
+    -fx-background-radius: 10;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-max-width: infinity;
+}
+.nav-button:hover { -fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: -heaven-text; }
+.nav-button-active {
+    -fx-background-color: rgba(232,185,35,0.14);
+    -fx-text-fill: -heaven-gold;
+    -fx-border-color: rgba(232,185,35,0.55);
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+/* ---- Cards / content ---- */
+.content { -fx-padding: 6 8 8 8; }
+.card {
+    -fx-background-color: -heaven-surface;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(255,255,255,0.08);
+    -fx-border-width: 1;
+    -fx-padding: 18;
+}
+.h1 { -fx-text-fill: -heaven-text; -fx-font-size: 22px; -fx-font-weight: bold; }
+.h2 { -fx-text-fill: -heaven-text; -fx-font-size: 15px; -fx-font-weight: bold; }
+.muted { -fx-text-fill: -heaven-muted; -fx-font-size: 12px; }
+.gold { -fx-text-fill: -heaven-gold; }
+.mono { -fx-font-family: "JetBrains Mono", monospace; -fx-font-size: 11px; }
+
+/* ---- Buttons ---- */
+.primary-button {
+    -fx-background-color: linear-gradient(to bottom, #F2C838, #E8B923);
+    -fx-text-fill: #0D0D0D;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 12;
+    -fx-padding: 12 26;
+    -fx-cursor: hand;
+}
+.primary-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #FFDE6A, #FFD54A);
+    -fx-effect: dropshadow(gaussian, rgba(232,185,35,0.65), 22, 0.35, 0, 0);
+}
+.ghost-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -heaven-text;
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+.ghost-button:hover { -fx-border-color: -heaven-gold; -fx-text-fill: -heaven-gold; }
+.danger-button { -fx-text-fill: -heaven-error; -fx-border-color: rgba(229,72,77,0.5); }
+.danger-button:hover { -fx-border-color: -heaven-error; }
+
+/* ---- Inputs ---- */
+.text-field, .combo-box, .combo-box .list-cell {
+    -fx-background-color: -heaven-surface-2;
+    -fx-text-fill: -heaven-text;
+    -fx-prompt-text-fill: -heaven-muted;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: rgba(255,255,255,0.10);
+    -fx-border-width: 1;
+    -fx-padding: 8 10;
+}
+.text-field:focused, .combo-box:focused { -fx-border-color: -heaven-gold; }
+.combo-box-popup .list-view { -fx-background-color: -heaven-surface-2; -fx-border-color: rgba(255,255,255,0.12); }
+.combo-box-popup .list-cell:filled:hover { -fx-background-color: rgba(232,185,35,0.18); }
+
+.slider .track { -fx-background-color: rgba(255,255,255,0.14); -fx-background-radius: 6; -fx-pref-height: 6; }
+.slider .thumb { -fx-background-color: -heaven-gold; -fx-background-radius: 20; -fx-pref-width: 15; -fx-pref-height: 15; }
+.slider:hover .thumb { -fx-effect: dropshadow(gaussian, rgba(232,185,35,0.7), 12, 0.4, 0, 0); }
+
+.check-box .box { -fx-background-color: -heaven-surface-2; -fx-border-color: rgba(255,255,255,0.25); -fx-background-radius: 5; -fx-border-radius: 5; }
+.check-box:selected .box { -fx-background-color: -heaven-gold; -fx-border-color: -heaven-gold; }
+.check-box:selected .mark { -fx-background-color: #0D0D0D; }
+.check-box .text { -fx-text-fill: -heaven-text; }
+
+.progress-bar { -fx-accent: -heaven-gold; }
+.progress-bar .track { -fx-background-color: rgba(255,255,255,0.10); -fx-background-radius: 8; }
+.progress-bar .bar { -fx-background-color: linear-gradient(to right, #E8B923, #FFD54A); -fx-background-radius: 8; -fx-padding: 6; }
+
+.list-view { -fx-background-color: transparent; -fx-border-color: transparent; }
+.list-view .list-cell { -fx-background-color: transparent; -fx-text-fill: -heaven-text; -fx-padding: 4 0; }
+
+.scroll-pane, .scroll-pane .viewport { -fx-background-color: transparent; }
