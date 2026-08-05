@@ -1,12 +1,6 @@
 'use strict';
 
-const {
-  SlashCommandBuilder,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
-  ActionRowBuilder,
-} = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -17,6 +11,53 @@ module.exports = {
         .setName('creer')
         .setDescription(
           'Créer une partie (rôle Organisateur de Parties). Embed + salons vocaux automatiques.',
+        )
+        .addStringOption((opt) =>
+          opt
+            .setName('lobby')
+            .setDescription('Nom du lobby Valorant (affiché en éphémère via 🎮)')
+            .setRequired(false),
+        )
+        .addStringOption((opt) =>
+          opt
+            .setName('code')
+            .setDescription('Code / mot de passe du lobby (éphémère via 🎮)')
+            .setRequired(false),
+        )
+        .addStringOption((opt) =>
+          opt
+            .setName('invitation')
+            .setDescription('Lien d\'invitation (Riot ou autre) — le bouton 🎮 devient un lien URL')
+            .setRequired(false),
+        ),
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('infos')
+        .setDescription('Mettre à jour les infos de connexion (lobby / code / lien)')
+        .addStringOption((opt) =>
+          opt
+            .setName('id')
+            .setDescription('Identifiant court ou Game A/B/…')
+            .setRequired(false),
+        )
+        .addStringOption((opt) =>
+          opt.setName('lobby').setDescription('Nom du lobby').setRequired(false),
+        )
+        .addStringOption((opt) =>
+          opt.setName('code').setDescription('Code / mot de passe').setRequired(false),
+        )
+        .addStringOption((opt) =>
+          opt
+            .setName('invitation')
+            .setDescription('Lien d\'invitation (bouton 🎮 en mode URL)')
+            .setRequired(false),
+        )
+        .addBooleanOption((opt) =>
+          opt
+            .setName('retirer_invitation')
+            .setDescription('Retirer le lien URL et repasser le bouton 🎮 en mode éphémère')
+            .setRequired(false),
         ),
     )
     .addSubcommand((sub) =>
@@ -46,6 +87,10 @@ module.exports = {
 
     if (sub === 'creer') {
       return gameManager.createGame(interaction);
+    }
+
+    if (sub === 'infos') {
+      return gameManager.updateGameInfo(interaction);
     }
 
     if (sub === 'liste') {

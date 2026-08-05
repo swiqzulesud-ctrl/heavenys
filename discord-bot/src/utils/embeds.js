@@ -21,6 +21,11 @@ function formatPlayerList(players) {
   return players.map((p, i) => `\`${i + 1}.\` <@${p.id}>`).join('\n');
 }
 
+/** Discord deep-link to a guild channel (voice or text). */
+function channelUrl(guildId, channelId) {
+  return `https://discord.com/channels/${guildId}/${channelId}`;
+}
+
 /**
  * Build the public match embed (waiting / in progress / finished).
  */
@@ -102,6 +107,56 @@ function buildJoinButtons(gameId, disabled = false) {
   );
 }
 
+/**
+ * Access row under the embed:
+ *  - 🔊 Rejoindre le vocal → interaction (resolves the player's team, then URL link)
+ *  - 🎮 Informations → URL button if inviteUrl, else interaction (ephemeral lobby/code)
+ */
+function buildAccessButtons(game, disabled = false) {
+  const voiceBtn = new ButtonBuilder()
+    .setCustomId(`game:voice:${game.id}`)
+    .setLabel('Rejoindre le vocal')
+    .setEmoji('🔊')
+    .setStyle(ButtonStyle.Primary)
+    .setDisabled(disabled);
+
+  let infoBtn;
+  if (game.inviteUrl) {
+    infoBtn = new ButtonBuilder()
+      .setLabel('Informations de la partie')
+      .setEmoji('🎮')
+      .setStyle(ButtonStyle.Link)
+      .setURL(game.inviteUrl);
+  } else {
+    infoBtn = new ButtonBuilder()
+      .setCustomId(`game:info:${game.id}`)
+      .setLabel('Informations de la partie')
+      .setEmoji('🎮')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(disabled);
+  }
+
+  return new ActionRowBuilder().addComponents(voiceBtn, infoBtn);
+}
+
+/** All component rows for an active game message. */
+function buildGameComponents(game, { disabled = false } = {}) {
+  return [buildJoinButtons(game.id, disabled), buildAccessButtons(game, disabled)];
+}
+
+/**
+ * Ephemeral reply components: URL button pointing at the player's team voice channel.
+ */
+function buildVoiceLinkRow(guildId, voiceChannelId) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setLabel('Ouvrir le salon vocal')
+      .setEmoji('🔊')
+      .setStyle(ButtonStyle.Link)
+      .setURL(channelUrl(guildId, voiceChannelId)),
+  );
+}
+
 function voiceChannelName(teamNumber, { multi = false, slotIndex = 0 } = {}) {
   const base = `🎧 Équipe ${teamNumber}`;
   if (!multi) return base;
@@ -111,7 +166,11 @@ function voiceChannelName(teamNumber, { multi = false, slotIndex = 0 } = {}) {
 module.exports = {
   GAME_LETTERS,
   gameLabel,
+  channelUrl,
   buildGameEmbed,
   buildJoinButtons,
+  buildAccessButtons,
+  buildGameComponents,
+  buildVoiceLinkRow,
   voiceChannelName,
 };

@@ -22,6 +22,16 @@ Répartition **alternée** à l'inscription :
 (défaut **5**, règles compétitives Valorant). En cas d'égalité réglementaire, l'OT
 continue jusqu'à **+2 manches** (rappelé dans l'embed ; les scores à égalité sont refusés).
 
+### Accès rapide (sous l'embed)
+Deux boutons supplémentaires :
+
+| Bouton | Comportement |
+|---|---|
+| 🔊 **Rejoindre le vocal** | Identifie l'équipe du joueur, le déplace si possible, et répond en **éphémère** avec un **bouton URL** `https://discord.com/channels/ID_SERVEUR/ID_SALON_VOCAL` vers le vocal de son équipe. |
+| 🎮 **Informations de la partie** | Si un `invitation` (URL) a été fourni → **bouton lien** direct. Sinon → message **éphémère** avec lobby / code (privés). |
+
+Renseigner les infos à la création (`/partie creer lobby:… code:… invitation:…`) ou plus tard via `/partie infos`.
+
 ### Résultat (`/resultat`)
 Ouvre un **Modal Discord** pour saisir :
 - Score Équipe 1 / Équipe 2
@@ -74,7 +84,8 @@ npm start
 
 | Commande | Description |
 |---|---|
-| `/partie creer` | Lance une partie + vocaux |
+| `/partie creer [lobby] [code] [invitation]` | Lance une partie + vocaux (+ infos connexion) |
+| `/partie infos [id] …` | Met à jour lobby / code / lien d'invitation |
 | `/partie liste` | Liste les parties actives |
 | `/partie annuler [id]` | Annule une partie |
 | `/resultat [id]` | Modal score + MVP |

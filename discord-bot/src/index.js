@@ -60,6 +60,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (action === 'join') return gameManager.joinGame(interaction, gameId);
       if (action === 'leave') return gameManager.leaveGame(interaction, gameId);
       if (action === 'cancel') return gameManager.cancelGame(interaction, gameId);
+      if (action === 'voice') return gameManager.joinVoice(interaction, gameId);
+      if (action === 'info') return gameManager.showGameInfo(interaction, gameId);
       return;
     }
 

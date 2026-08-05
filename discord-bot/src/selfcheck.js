@@ -7,7 +7,14 @@
 
 const assert = require('node:assert/strict');
 const { parseKda, parseScore, validateMatchScores } = require('./utils/score');
-const { gameLabel, voiceChannelName, buildGameEmbed } = require('./utils/embeds');
+const {
+  gameLabel,
+  voiceChannelName,
+  buildGameEmbed,
+  buildGameComponents,
+  buildVoiceLinkRow,
+  channelUrl,
+} = require('./utils/embeds');
 const { GameStore } = require('./services/GameStore');
 
 assert.deepEqual(parseKda('24/12/5'), { kills: 24, deaths: 12, assists: 5 });
@@ -22,8 +29,12 @@ assert.equal(gameLabel(0), 'Game A');
 assert.equal(gameLabel(1), 'Game B');
 assert.equal(voiceChannelName(1, { multi: false }), '🎧 Équipe 1');
 assert.equal(voiceChannelName(2, { multi: true, slotIndex: 0 }), '🎧 Équipe 2 - Game A');
+assert.equal(
+  channelUrl('111', '222'),
+  'https://discord.com/channels/111/222',
+);
 
-const embed = buildGameEmbed({
+const sampleGame = {
   id: 'abcdef12-3456-7890-abcd-ef1234567890',
   status: 'open',
   teamSize: 5,
@@ -32,8 +43,30 @@ const embed = buildGameEmbed({
   organizerTag: 'Org#0001',
   createdAt: Date.now(),
   slotIndex: 0,
-});
+  voiceChannel1Id: 'vc1',
+  voiceChannel2Id: 'vc2',
+  guildId: 'guild1',
+  inviteUrl: null,
+  lobbyName: 'Heavenys Cust',
+  lobbyCode: 'ABCD',
+};
+
+const embed = buildGameEmbed(sampleGame);
 assert.ok(embed.data.title.includes('Partie'));
+
+const rows = buildGameComponents(sampleGame);
+assert.equal(rows.length, 2);
+assert.equal(rows[1].components.length, 2);
+assert.equal(rows[1].components[0].data.custom_id, `game:voice:${sampleGame.id}`);
+assert.equal(rows[1].components[1].data.custom_id, `game:info:${sampleGame.id}`);
+
+const withInvite = { ...sampleGame, inviteUrl: 'https://example.com/join' };
+const linkRows = buildGameComponents(withInvite);
+assert.equal(linkRows[1].components[1].data.style, 5); // ButtonStyle.Link
+assert.equal(linkRows[1].components[1].data.url, 'https://example.com/join');
+
+const voiceRow = buildVoiceLinkRow('guild1', 'vc1');
+assert.equal(voiceRow.components[0].data.url, 'https://discord.com/channels/guild1/vc1');
 
 const store = new GameStore();
 const id = 'test-game-selfcheck';

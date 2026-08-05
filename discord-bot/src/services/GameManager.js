@@ -4,8 +4,10 @@ const { ChannelType, PermissionFlagsBits } = require('discord.js');
 const { randomUUID } = require('node:crypto');
 const {
   buildGameEmbed,
-  buildJoinButtons,
+  buildGameComponents,
+  buildVoiceLinkRow,
   voiceChannelName,
+  channelUrl,
 } = require('../utils/embeds');
 
 class GameManager {
@@ -83,7 +85,7 @@ class GameManager {
 
     await message.edit({
       embeds: [buildGameEmbed(game, { multi })],
-      components: finished ? [] : [buildJoinButtons(game.id, false)],
+      components: finished ? [] : buildGameComponents(game),
     });
   }
 
@@ -121,6 +123,16 @@ class GameManager {
     // Second+ concurrent game → all matches use Game A/B/C labels.
     const willBeMulti = activeBefore.length >= 1;
 
+    const inviteUrl = interaction.options.getString('invitation');
+    const lobbyName = interaction.options.getString('lobby');
+    const lobbyCode = interaction.options.getString('code');
+
+    if (inviteUrl && !/^https?:\/\//i.test(inviteUrl)) {
+      return interaction.editReply({
+        content: 'Le lien d\'invitation doit commencer par `http://` ou `https://`.',
+      });
+    }
+
     const id = randomUUID();
     const game = {
       id,
@@ -131,6 +143,7 @@ class GameManager {
       joinOrder: [],
       organizerId: interaction.user.id,
       organizerTag: interaction.user.tag,
+      guildId: guild.id,
       slotIndex,
       multi: willBeMulti,
       voiceChannel1Id: null,
@@ -139,6 +152,9 @@ class GameManager {
       messageId: null,
       createdAt: Date.now(),
       result: null,
+      inviteUrl: inviteUrl || null,
+      lobbyName: lobbyName || null,
+      lobbyCode: lobbyCode || null,
     };
 
     try {
@@ -173,15 +189,156 @@ class GameManager {
 
     const message = await gamesChannel.send({
       embeds: [buildGameEmbed(refreshed, { multi: multiNow })],
-      components: [buildJoinButtons(id)],
+      components: buildGameComponents(refreshed),
     });
 
     refreshed.messageId = message.id;
     this.store.upsert(refreshed);
 
+    const infoHint = refreshed.inviteUrl
+      ? 'Bouton 🎮 = lien d\'invitation.'
+      : refreshed.lobbyName || refreshed.lobbyCode
+        ? 'Bouton 🎮 = infos lobby (éphémère).'
+        : 'Astuce : `/partie infos` pour renseigner lobby/code ou un lien.';
+
     return interaction.editReply({
-      content: `Partie créée dans ${gamesChannel}${multiNow ? ` (**${require('../utils/embeds').gameLabel(refreshed.slotIndex)}**)` : ''}.`,
+      content:
+        `Partie créée dans ${gamesChannel}` +
+        `${multiNow ? ` (**${require('../utils/embeds').gameLabel(refreshed.slotIndex)}**)` : ''}.\n` +
+        infoHint,
     });
+  }
+
+  /** Update lobby / invite details after creation. */
+  async updateGameInfo(interaction) {
+    if (!this.isOrganizer(interaction.member)) {
+      return interaction.reply({
+        content: `Seul le rôle **${this.config.organizerRoleName}** peut modifier les infos.`,
+        ephemeral: true,
+      });
+    }
+
+    const query = interaction.options.getString('id');
+    const { game, error } = this.resolveGame(query);
+    if (error) {
+      return interaction.reply({ content: error, ephemeral: true });
+    }
+
+    const inviteUrl = interaction.options.getString('invitation');
+    const lobbyName = interaction.options.getString('lobby');
+    const lobbyCode = interaction.options.getString('code');
+    const clearInvite = interaction.options.getBoolean('retirer_invitation') === true;
+
+    if (inviteUrl && !/^https?:\/\//i.test(inviteUrl)) {
+      return interaction.reply({
+        content: 'Le lien d\'invitation doit commencer par `http://` ou `https://`.',
+        ephemeral: true,
+      });
+    }
+
+    if (!inviteUrl && !lobbyName && !lobbyCode && !clearInvite) {
+      return interaction.reply({
+        content: 'Indiquez au moins `lobby`, `code`, `invitation` ou `retirer_invitation`.',
+        ephemeral: true,
+      });
+    }
+
+    if (clearInvite) game.inviteUrl = null;
+    if (inviteUrl) game.inviteUrl = inviteUrl;
+    if (lobbyName !== null) game.lobbyName = lobbyName;
+    if (lobbyCode !== null) game.lobbyCode = lobbyCode;
+
+    this.store.upsert(game);
+    await this._updateMessage(interaction.guild, game);
+
+    return interaction.reply({
+      content: 'Informations de connexion mises à jour (boutons de l\'embed rafraîchis).',
+      ephemeral: true,
+    });
+  }
+
+  /**
+   * 🔊 button: move player to team VC when possible, always reply with a URL link button
+   * to https://discord.com/channels/{guild}/{voiceChannel}.
+   */
+  async joinVoice(interaction, gameId) {
+    const game = this.store.get(gameId);
+    if (!game || game.status === 'finished' || game.status === 'cancelled') {
+      return interaction.reply({ content: 'Cette partie n\'est plus disponible.', ephemeral: true });
+    }
+
+    const userId = interaction.user.id;
+    const in1 = game.team1.some((p) => p.id === userId);
+    const in2 = game.team2.some((p) => p.id === userId);
+    if (!in1 && !in2) {
+      return interaction.reply({
+        content: 'Rejoignez d\'abord la partie via le bouton **Rejoindre**, puis utilisez 🔊.',
+        ephemeral: true,
+      });
+    }
+
+    const team = in1 ? 1 : 2;
+    const voiceId = team === 1 ? game.voiceChannel1Id : game.voiceChannel2Id;
+    if (!voiceId) {
+      return interaction.reply({
+        content: 'Salon vocal introuvable pour votre équipe.',
+        ephemeral: true,
+      });
+    }
+
+    const guildId = game.guildId || interaction.guildId;
+    const member = interaction.member;
+    let moved = false;
+    if (member?.voice?.channelId) {
+      try {
+        await member.voice.setChannel(voiceId);
+        moved = true;
+      } catch {
+        // Missing Move Members permission — fall back to the URL button only.
+      }
+    }
+
+    const url = channelUrl(guildId, voiceId);
+    const prefix = moved
+      ? `Vous avez été déplacé dans le vocal **Équipe ${team}**.`
+      : `Salon vocal **Équipe ${team}** — connectez-vous à un vocal Discord, ou ouvrez le lien :`;
+
+    return interaction.reply({
+      content: `${prefix}\n\`${url}\``,
+      components: [buildVoiceLinkRow(guildId, voiceId)],
+      ephemeral: true,
+    });
+  }
+
+  /** 🎮 button (interaction mode): ephemeral lobby / code. */
+  async showGameInfo(interaction, gameId) {
+    const game = this.store.get(gameId);
+    if (!game || game.status === 'finished' || game.status === 'cancelled') {
+      return interaction.reply({ content: 'Cette partie n\'est plus disponible.', ephemeral: true });
+    }
+
+    // If an invite URL was set after the message was cached oddly, prefer directing them.
+    if (game.inviteUrl) {
+      return interaction.reply({
+        content: `Lien d'invitation : ${game.inviteUrl}`,
+        ephemeral: true,
+      });
+    }
+
+    const lines = ['**Informations de connexion** (visibles uniquement par vous)'];
+    if (game.lobbyName) lines.push(`• Lobby : \`${game.lobbyName}\``);
+    if (game.lobbyCode) lines.push(`• Code / mot de passe : \`${game.lobbyCode}\``);
+
+    if (lines.length === 1) {
+      return interaction.reply({
+        content:
+          'Aucune information de connexion n\'a encore été renseignée.\n' +
+          'L\'organisateur peut utiliser `/partie infos`.',
+        ephemeral: true,
+      });
+    }
+
+    return interaction.reply({ content: lines.join('\n'), ephemeral: true });
   }
 
   async joinGame(interaction, gameId) {
