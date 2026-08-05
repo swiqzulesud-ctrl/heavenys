@@ -1,6 +1,7 @@
 {
-  "enabled": true,
-  "channelId": "REPLACE_WITH_WELCOME_CHANNEL_ID",
+  "enabled": false,
+  "channelId": "",
+  "newAccountDays": 7,
 
   "colors": {
     "welcome": "#5865F2",
@@ -15,20 +16,22 @@
 
   "welcome": {
     "title": "🎉 Welcome!",
-    "description": "🎉 Welcome, **{member}**!\nWe're excited to have you join our community.\nMake sure to read the rules, customize your roles, and enjoy your stay.\nHave fun and good luck in your games! 💙",
+    "description": "🎉 Welcome, **{member}**!\n\nWe're excited to have you join our community.\n\nRead the rules, customize your roles and enjoy your stay.\n\nGood luck and have fun!",
     "showAvatar": true,
     "showBanner": true,
     "showMemberCount": true,
     "showJoinedAt": true,
+    "showAccountAge": true,
     "footerText": "{server} • You are member #{count}"
   },
 
   "goodbye": {
     "title": "👋 Goodbye",
-    "description": "👋 **{member}** has left the server.\nThank you for being part of our community.\nWe wish you the best and hope to see you again someday.",
+    "description": "👋 **{member}** has left the server.\n\nThank you for being part of our community.\n\nWe hope to see you again someday.",
     "showAvatar": true,
     "showBanner": true,
     "showMemberCount": true,
+    "showLeftAt": true,
     "footerText": "{server} • {count} members remaining"
   },
 
@@ -38,7 +41,7 @@
       "label": "Rules",
       "emoji": "📜",
       "enabled": true,
-      "channelId": "REPLACE_WITH_RULES_CHANNEL_ID",
+      "channelId": "",
       "url": ""
     },
     {
@@ -46,15 +49,15 @@
       "label": "Roles",
       "emoji": "🎭",
       "enabled": true,
-      "channelId": "REPLACE_WITH_ROLES_CHANNEL_ID",
+      "channelId": "",
       "url": ""
     },
     {
       "id": "general",
-      "label": "General Chat",
+      "label": "General",
       "emoji": "💬",
       "enabled": true,
-      "channelId": "REPLACE_WITH_GENERAL_CHANNEL_ID",
+      "channelId": "",
       "url": ""
     },
     {
@@ -63,7 +66,15 @@
       "emoji": "🌐",
       "enabled": false,
       "channelId": "",
-      "url": "https://example.com"
+      "url": ""
+    },
+    {
+      "id": "tracker",
+      "label": "Valorant Tracker",
+      "emoji": "🎮",
+      "enabled": false,
+      "channelId": "",
+      "url": "https://tracker.gg/valorant"
     }
   ]
 }

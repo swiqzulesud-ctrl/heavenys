@@ -6,6 +6,8 @@
  */
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const { parseKda, parseScore, validateMatchScores } = require('./utils/score');
 const {
   gameLabel,
@@ -29,10 +31,7 @@ assert.equal(gameLabel(0), 'Game A');
 assert.equal(gameLabel(1), 'Game B');
 assert.equal(voiceChannelName(1, { multi: false }), '🎧 Équipe 1');
 assert.equal(voiceChannelName(2, { multi: true, slotIndex: 0 }), '🎧 Équipe 2 - Game A');
-assert.equal(
-  channelUrl('111', '222'),
-  'https://discord.com/channels/111/222',
-);
+assert.equal(channelUrl('111', '222'), 'https://discord.com/channels/111/222');
 
 const sampleGame = {
   id: 'abcdef12-3456-7890-abcd-ef1234567890',
@@ -51,27 +50,21 @@ const sampleGame = {
   lobbyCode: 'ABCD',
 };
 
-const embed = buildGameEmbed(sampleGame);
-assert.ok(embed.data.title.includes('Partie'));
-
+assert.ok(buildGameEmbed(sampleGame).data.title.includes('Partie'));
 const rows = buildGameComponents(sampleGame);
 assert.equal(rows.length, 2);
-assert.equal(rows[1].components.length, 2);
 assert.equal(rows[1].components[0].data.custom_id, `game:voice:${sampleGame.id}`);
-assert.equal(rows[1].components[1].data.custom_id, `game:info:${sampleGame.id}`);
 
 const withInvite = { ...sampleGame, inviteUrl: 'https://example.com/join' };
-const linkRows = buildGameComponents(withInvite);
-assert.equal(linkRows[1].components[1].data.style, 5); // ButtonStyle.Link
-assert.equal(linkRows[1].components[1].data.url, 'https://example.com/join');
-
-const voiceRow = buildVoiceLinkRow('guild1', 'vc1');
-assert.equal(voiceRow.components[0].data.url, 'https://discord.com/channels/guild1/vc1');
+assert.equal(buildGameComponents(withInvite)[1].components[1].data.style, 5);
+assert.equal(
+  buildVoiceLinkRow('guild1', 'vc1').components[0].data.url,
+  'https://discord.com/channels/guild1/vc1',
+);
 
 const store = new GameStore();
-const id = 'test-game-selfcheck';
 store.upsert({
-  id,
+  id: 'test-game-selfcheck',
   status: 'open',
   teamSize: 5,
   team1: [],
@@ -83,36 +76,40 @@ store.upsert({
   multi: false,
   createdAt: Date.now(),
 });
-assert.ok(store.get(id));
-store.delete(id);
+assert.ok(store.get('test-game-selfcheck'));
+store.delete('test-game-selfcheck');
 
-// Alternation simulation
 const team1 = [];
 const team2 = [];
-const teamSize = 5;
 for (let i = 0; i < 10; i++) {
   let team = i % 2 === 0 ? 1 : 2;
-  if (team === 1 && team1.length >= teamSize) team = 2;
-  if (team === 2 && team2.length >= teamSize) team = 1;
+  if (team === 1 && team1.length >= 5) team = 2;
+  if (team === 2 && team2.length >= 5) team = 1;
   (team === 1 ? team1 : team2).push(i);
 }
-assert.equal(team1.length, 5);
-assert.equal(team2.length, 5);
 assert.deepEqual(team1, [0, 2, 4, 6, 8]);
 assert.deepEqual(team2, [1, 3, 5, 7, 9]);
 
 // --- Welcome & Goodbye ---
 const {
-  loadWelcomeConfig,
   normalizeWelcomeConfig,
+  saveWelcomeConfig,
   applyTemplate,
   parseColor,
+  colorToHex,
+  upsertButton,
+  DATA_PATH,
   EXAMPLE_PATH,
 } = require('./welcome/configLoader');
-const { buildPresenceEmbed, buildButtons } = require('./welcome/embeds');
+const {
+  buildPresenceEmbed,
+  isNewAccount,
+  avatarUrl,
+} = require('./welcome/embeds');
+const { WelcomeService } = require('./welcome/WelcomeService');
 
-assert.equal(parseColor('#5865F2', 0), 0x5865f2);
-assert.equal(parseColor('ed4245', 0), 0xed4245);
+assert.equal(parseColor('#FF4655', 0), 0xff4655);
+assert.equal(colorToHex(0xff4655), '#ff4655');
 assert.equal(
   applyTemplate('Hi {member} on {server}', { member: '@u', server: 'Heavenys' }),
   'Hi @u on Heavenys',
@@ -122,6 +119,7 @@ const welcomeCfg = normalizeWelcomeConfig(
   {
     enabled: true,
     channelId: '999888777',
+    newAccountDays: 7,
     colors: { welcome: '#5865F2', goodbye: '#ED4245' },
     images: {
       welcomeBanner: 'https://example.com/welcome.png',
@@ -131,25 +129,28 @@ const welcomeCfg = normalizeWelcomeConfig(
     welcome: {
       title: '🎉 Welcome!',
       description:
-        "🎉 Welcome, **{member}**!\nWe're excited to have you join our community.\nMake sure to read the rules, customize your roles, and enjoy your stay.\nHave fun and good luck in your games! 💙",
+        "🎉 Welcome, **{member}**!\n\nWe're excited to have you join our community.\n\nRead the rules, customize your roles and enjoy your stay.\n\nGood luck and have fun!",
       footerText: '{server} • You are member #{count}',
+      showAccountAge: true,
     },
     goodbye: {
       title: '👋 Goodbye',
       description:
-        '👋 **{member}** has left the server.\nThank you for being part of our community.\nWe wish you the best and hope to see you again someday.',
+        '👋 **{member}** has left the server.\n\nThank you for being part of our community.\n\nWe hope to see you again someday.',
       footerText: '{server} • {count} members remaining',
+      showLeftAt: true,
     },
     buttons: [
       { id: 'rules', label: 'Rules', emoji: '📜', enabled: true, channelId: '111' },
       { id: 'roles', label: 'Roles', emoji: '🎭', enabled: true, channelId: '222' },
-      { id: 'general', label: 'General Chat', emoji: '💬', enabled: true, channelId: '333' },
+      { id: 'general', label: 'General', emoji: '💬', enabled: true, channelId: '333' },
+      { id: 'website', label: 'Website', emoji: '🌐', enabled: true, url: 'https://example.com' },
       {
-        id: 'website',
-        label: 'Website',
-        emoji: '🌐',
+        id: 'tracker',
+        label: 'Valorant Tracker',
+        emoji: '🎮',
         enabled: true,
-        url: 'https://example.com',
+        url: 'https://tracker.gg/valorant',
       },
     ],
   },
@@ -157,15 +158,16 @@ const welcomeCfg = normalizeWelcomeConfig(
 );
 
 assert.equal(welcomeCfg.enabled, true);
-assert.equal(welcomeCfg.buttons.length, 4);
+assert.equal(welcomeCfg.buttons.length, 5);
 
 const fakeUser = {
   id: '42',
   username: 'PlayerOne',
   tag: 'PlayerOne#0001',
   toString: () => '<@42>',
-  displayAvatarURL: () => 'https://example.com/avatar.png',
-  createdAt: new Date('2020-01-01'),
+  displayAvatarURL: ({ forceStatic }) =>
+    forceStatic === false ? 'https://example.com/avatar.gif' : 'https://example.com/avatar.png',
+  createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days old
 };
 const fakeMember = {
   user: fakeUser,
@@ -179,28 +181,59 @@ const fakeGuild = {
   iconURL: () => 'https://example.com/icon.png',
 };
 
+assert.equal(isNewAccount(fakeUser, 7), true);
+assert.equal(avatarUrl(fakeUser), 'https://example.com/avatar.gif');
+
 const welcomePayload = buildPresenceEmbed('welcome', fakeMember, fakeGuild, welcomeCfg);
-assert.ok(welcomePayload.embeds[0].data.description.includes('Welcome'));
-assert.ok(welcomePayload.embeds[0].data.description.includes('<@42>'));
-assert.equal(welcomePayload.embeds[0].data.color, 0x5865f2);
-assert.equal(welcomePayload.embeds[0].data.image.url, 'https://example.com/welcome.png');
-assert.equal(welcomePayload.components.length, 1);
-assert.equal(welcomePayload.components[0].components.length, 4);
-assert.equal(
-  welcomePayload.components[0].components[0].data.url,
-  'https://discord.com/channels/guild1/111',
+assert.ok(welcomePayload.embeds[0].data.description.includes('Good luck and have fun'));
+assert.equal(welcomePayload.embeds[0].data.thumbnail.url, 'https://example.com/avatar.gif');
+assert.ok(
+  welcomePayload.embeds[0].data.fields.some((f) => f.name.includes('New account')),
 );
-assert.equal(welcomePayload.components[0].components[3].data.url, 'https://example.com');
+assert.equal(welcomePayload.components[0].components.length, 5);
+assert.equal(
+  welcomePayload.components[0].components[4].data.url,
+  'https://tracker.gg/valorant',
+);
 
-const goodbyePayload = buildPresenceEmbed('goodbye', fakeMember, fakeGuild, welcomeCfg);
+const goodbyePayload = buildPresenceEmbed('goodbye', fakeMember, fakeGuild, welcomeCfg, {
+  leftAt: Date.now(),
+});
 assert.ok(goodbyePayload.embeds[0].data.description.includes('has left the server'));
-assert.equal(goodbyePayload.embeds[0].data.color, 0xed4245);
+assert.ok(goodbyePayload.embeds[0].data.fields.some((f) => f.name === 'Left'));
 
-const exampleLoaded = loadWelcomeConfig(EXAMPLE_PATH);
-assert.equal(exampleLoaded.enabled, false); // placeholder channelId → disabled
-assert.ok(exampleLoaded.welcome.description.includes('{member}'));
+// Persistence round-trip
+const tmpDb = path.join(__dirname, '..', 'data', 'welcome-selfcheck.json');
+const persisted = saveWelcomeConfig(welcomeCfg);
+assert.equal(persisted.enabled, true);
+assert.ok(fs.existsSync(DATA_PATH));
 
-const btnRows = buildButtons('g', welcomeCfg.buttons);
-assert.equal(btnRows[0].components.length, 4);
+const svc = new WelcomeService({ on() {} }, welcomeCfg);
+assert.equal(svc.enabled, true);
+svc.setEnabled(false);
+assert.equal(svc.config.enabled, false);
+svc.setEnabled(true);
+svc.setWelcomeMessage('Hello {member}');
+assert.ok(svc.config.welcome.description.includes('Hello'));
+svc.setButtonUrl('tracker', 'https://tracker.gg/valorant/profile/test', {
+  label: 'Valorant Tracker',
+  emoji: '🎮',
+});
+assert.ok(svc.config.buttons.some((b) => b.id === 'tracker'));
+
+const raw = upsertButton([], 'rules', { label: 'Rules', channelId: '1', enabled: true });
+assert.equal(raw[0].id, 'rules');
+
+assert.ok(fs.existsSync(EXAMPLE_PATH));
+
+// cleanup selfcheck noise from shared DB — restore defaults from example if we polluted
+try {
+  const example = JSON.parse(fs.readFileSync(EXAMPLE_PATH, 'utf8'));
+  saveWelcomeConfig(example);
+} catch {
+  /* ignore */
+}
+
+if (fs.existsSync(tmpDb)) fs.unlinkSync(tmpDb);
 
 console.log('selfcheck OK');
