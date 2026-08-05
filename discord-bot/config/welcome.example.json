@@ -1,0 +1,80 @@
+{
+  "enabled": false,
+  "channelId": "",
+  "newAccountDays": 7,
+
+  "colors": {
+    "welcome": "#5865F2",
+    "goodbye": "#ED4245"
+  },
+
+  "images": {
+    "welcomeBanner": "",
+    "goodbyeBanner": "",
+    "serverLogo": ""
+  },
+
+  "welcome": {
+    "title": "🎉 Welcome!",
+    "description": "🎉 Welcome, **{member}**!\n\nWe're excited to have you join our community.\n\nRead the rules, customize your roles and enjoy your stay.\n\nGood luck and have fun!",
+    "showAvatar": true,
+    "showBanner": true,
+    "showMemberCount": true,
+    "showJoinedAt": true,
+    "showAccountAge": true,
+    "footerText": "{server} • You are member #{count}"
+  },
+
+  "goodbye": {
+    "title": "👋 Goodbye",
+    "description": "👋 **{member}** has left the server.\n\nThank you for being part of our community.\n\nWe hope to see you again someday.",
+    "showAvatar": true,
+    "showBanner": true,
+    "showMemberCount": true,
+    "showLeftAt": true,
+    "footerText": "{server} • {count} members remaining"
+  },
+
+  "buttons": [
+    {
+      "id": "rules",
+      "label": "Rules",
+      "emoji": "📜",
+      "enabled": true,
+      "channelId": "",
+      "url": ""
+    },
+    {
+      "id": "roles",
+      "label": "Roles",
+      "emoji": "🎭",
+      "enabled": true,
+      "channelId": "",
+      "url": ""
+    },
+    {
+      "id": "general",
+      "label": "General",
+      "emoji": "💬",
+      "enabled": true,
+      "channelId": "",
+      "url": ""
+    },
+    {
+      "id": "website",
+      "label": "Website",
+      "emoji": "🌐",
+      "enabled": false,
+      "channelId": "",
+      "url": ""
+    },
+    {
+      "id": "tracker",
+      "label": "Valorant Tracker",
+      "emoji": "🎮",
+      "enabled": false,
+      "channelId": "",
+      "url": "https://tracker.gg/valorant"
+    }
+  ]
+}

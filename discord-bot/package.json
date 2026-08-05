@@ -1,0 +1,21 @@
+{
+  "name": "heavenys-custom-games-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord Heavenys — parties personnalisées Valorant + Welcome/Goodbye",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "register": "node src/register-commands.js",
+    "dev": "node --watch src/index.js",
+    "selfcheck": "node src/selfcheck.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.7"
+  },
+  "license": "GPL-3.0-or-later"
+}
