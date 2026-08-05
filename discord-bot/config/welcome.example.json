@@ -1,0 +1,69 @@
+{
+  "enabled": true,
+  "channelId": "REPLACE_WITH_WELCOME_CHANNEL_ID",
+
+  "colors": {
+    "welcome": "#5865F2",
+    "goodbye": "#ED4245"
+  },
+
+  "images": {
+    "welcomeBanner": "",
+    "goodbyeBanner": "",
+    "serverLogo": ""
+  },
+
+  "welcome": {
+    "title": "🎉 Welcome!",
+    "description": "🎉 Welcome, **{member}**!\nWe're excited to have you join our community.\nMake sure to read the rules, customize your roles, and enjoy your stay.\nHave fun and good luck in your games! 💙",
+    "showAvatar": true,
+    "showBanner": true,
+    "showMemberCount": true,
+    "showJoinedAt": true,
+    "footerText": "{server} • You are member #{count}"
+  },
+
+  "goodbye": {
+    "title": "👋 Goodbye",
+    "description": "👋 **{member}** has left the server.\nThank you for being part of our community.\nWe wish you the best and hope to see you again someday.",
+    "showAvatar": true,
+    "showBanner": true,
+    "showMemberCount": true,
+    "footerText": "{server} • {count} members remaining"
+  },
+
+  "buttons": [
+    {
+      "id": "rules",
+      "label": "Rules",
+      "emoji": "📜",
+      "enabled": true,
+      "channelId": "REPLACE_WITH_RULES_CHANNEL_ID",
+      "url": ""
+    },
+    {
+      "id": "roles",
+      "label": "Roles",
+      "emoji": "🎭",
+      "enabled": true,
+      "channelId": "REPLACE_WITH_ROLES_CHANNEL_ID",
+      "url": ""
+    },
+    {
+      "id": "general",
+      "label": "General Chat",
+      "emoji": "💬",
+      "enabled": true,
+      "channelId": "REPLACE_WITH_GENERAL_CHANNEL_ID",
+      "url": ""
+    },
+    {
+      "id": "website",
+      "label": "Website",
+      "emoji": "🌐",
+      "enabled": false,
+      "channelId": "",
+      "url": "https://example.com"
+    }
+  ]
+}

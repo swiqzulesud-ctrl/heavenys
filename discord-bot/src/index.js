@@ -13,15 +13,16 @@ const {
 const config = require('./config');
 const { GameStore } = require('./services/GameStore');
 const { GameManager } = require('./services/GameManager');
+const { WelcomeService } = require('./welcome');
 const { parseKda, parseScore, validateMatchScores } = require('./utils/score');
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMembers, // required for welcome/goodbye + role checks
   ],
-  partials: [Partials.Channel],
+  partials: [Partials.Channel, Partials.GuildMember, Partials.User],
 });
 
 client.commands = new Collection();
@@ -35,13 +36,15 @@ for (const file of fs.readdirSync(commandsPath).filter((f) => f.endsWith('.js'))
 
 const store = new GameStore();
 const gameManager = new GameManager(client, store, config);
-const ctx = { gameManager, store, config };
+const welcomeService = new WelcomeService(client);
+const ctx = { gameManager, store, config, welcomeService };
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Connecté en tant que ${c.user.tag}`);
   console.log(
-    `Parties actives en mémoire : ${store.listActive().length} · cleanup=${config.voiceCleanupMode} · teamSize=${config.teamSize}`,
+    `Parties actives : ${store.listActive().length} · cleanup=${config.voiceCleanupMode} · teamSize=${config.teamSize}`,
   );
+  welcomeService.register();
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {

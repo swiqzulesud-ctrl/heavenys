@@ -1,7 +1,7 @@
 {
   "name": "heavenys-custom-games-bot",
   "version": "1.0.0",
-  "description": "Bot Discord pour les parties personnalisées Valorant (Heavenys)",
+  "description": "Bot Discord Heavenys — parties personnalisées Valorant + Welcome/Goodbye",
   "main": "src/index.js",
   "type": "commonjs",
   "scripts": {

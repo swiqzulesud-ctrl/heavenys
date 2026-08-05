@@ -101,4 +101,106 @@ assert.equal(team2.length, 5);
 assert.deepEqual(team1, [0, 2, 4, 6, 8]);
 assert.deepEqual(team2, [1, 3, 5, 7, 9]);
 
+// --- Welcome & Goodbye ---
+const {
+  loadWelcomeConfig,
+  normalizeWelcomeConfig,
+  applyTemplate,
+  parseColor,
+  EXAMPLE_PATH,
+} = require('./welcome/configLoader');
+const { buildPresenceEmbed, buildButtons } = require('./welcome/embeds');
+
+assert.equal(parseColor('#5865F2', 0), 0x5865f2);
+assert.equal(parseColor('ed4245', 0), 0xed4245);
+assert.equal(
+  applyTemplate('Hi {member} on {server}', { member: '@u', server: 'Heavenys' }),
+  'Hi @u on Heavenys',
+);
+
+const welcomeCfg = normalizeWelcomeConfig(
+  {
+    enabled: true,
+    channelId: '999888777',
+    colors: { welcome: '#5865F2', goodbye: '#ED4245' },
+    images: {
+      welcomeBanner: 'https://example.com/welcome.png',
+      goodbyeBanner: 'https://example.com/bye.png',
+      serverLogo: 'https://example.com/logo.png',
+    },
+    welcome: {
+      title: '🎉 Welcome!',
+      description:
+        "🎉 Welcome, **{member}**!\nWe're excited to have you join our community.\nMake sure to read the rules, customize your roles, and enjoy your stay.\nHave fun and good luck in your games! 💙",
+      footerText: '{server} • You are member #{count}',
+    },
+    goodbye: {
+      title: '👋 Goodbye',
+      description:
+        '👋 **{member}** has left the server.\nThank you for being part of our community.\nWe wish you the best and hope to see you again someday.',
+      footerText: '{server} • {count} members remaining',
+    },
+    buttons: [
+      { id: 'rules', label: 'Rules', emoji: '📜', enabled: true, channelId: '111' },
+      { id: 'roles', label: 'Roles', emoji: '🎭', enabled: true, channelId: '222' },
+      { id: 'general', label: 'General Chat', emoji: '💬', enabled: true, channelId: '333' },
+      {
+        id: 'website',
+        label: 'Website',
+        emoji: '🌐',
+        enabled: true,
+        url: 'https://example.com',
+      },
+    ],
+  },
+  'selfcheck',
+);
+
+assert.equal(welcomeCfg.enabled, true);
+assert.equal(welcomeCfg.buttons.length, 4);
+
+const fakeUser = {
+  id: '42',
+  username: 'PlayerOne',
+  tag: 'PlayerOne#0001',
+  toString: () => '<@42>',
+  displayAvatarURL: () => 'https://example.com/avatar.png',
+  createdAt: new Date('2020-01-01'),
+};
+const fakeMember = {
+  user: fakeUser,
+  displayName: 'PlayerOne',
+  joinedAt: new Date('2026-08-05T10:00:00Z'),
+};
+const fakeGuild = {
+  id: 'guild1',
+  name: 'Heavenys',
+  memberCount: 1284,
+  iconURL: () => 'https://example.com/icon.png',
+};
+
+const welcomePayload = buildPresenceEmbed('welcome', fakeMember, fakeGuild, welcomeCfg);
+assert.ok(welcomePayload.embeds[0].data.description.includes('Welcome'));
+assert.ok(welcomePayload.embeds[0].data.description.includes('<@42>'));
+assert.equal(welcomePayload.embeds[0].data.color, 0x5865f2);
+assert.equal(welcomePayload.embeds[0].data.image.url, 'https://example.com/welcome.png');
+assert.equal(welcomePayload.components.length, 1);
+assert.equal(welcomePayload.components[0].components.length, 4);
+assert.equal(
+  welcomePayload.components[0].components[0].data.url,
+  'https://discord.com/channels/guild1/111',
+);
+assert.equal(welcomePayload.components[0].components[3].data.url, 'https://example.com');
+
+const goodbyePayload = buildPresenceEmbed('goodbye', fakeMember, fakeGuild, welcomeCfg);
+assert.ok(goodbyePayload.embeds[0].data.description.includes('has left the server'));
+assert.equal(goodbyePayload.embeds[0].data.color, 0xed4245);
+
+const exampleLoaded = loadWelcomeConfig(EXAMPLE_PATH);
+assert.equal(exampleLoaded.enabled, false); // placeholder channelId → disabled
+assert.ok(exampleLoaded.welcome.description.includes('{member}'));
+
+const btnRows = buildButtons('g', welcomeCfg.buttons);
+assert.equal(btnRows[0].components.length, 4);
+
 console.log('selfcheck OK');

@@ -1,70 +1,72 @@
-# Bot Discord — Parties personnalisées Valorant
+# Bot Discord — Parties personnalisées + Welcome/Goodbye
 
-Bot Discord qui organise les **parties personnalisées** (custom games) pour une communauté
-Valorant : création réservée aux organisateurs, répartition automatique des joueurs, salons
-vocaux d'équipe, et clôture via un formulaire (score + MVP).
+Bot Discord pour une communauté Valorant : **parties personnalisées** et système
+**Welcome & Goodbye** automatisé.
 
 ## Fonctionnalités
 
-### Création (`/partie creer`)
-- Réservée au rôle **Organisateur de Parties** (configurable).
-- Publie un embed dans le salon dédié : Équipe 1 / Équipe 2, liste des joueurs, organisateur
-  en pied de page.
-- Crée automatiquement deux salons vocaux :
-  - Une seule partie : `🎧 Équipe 1` / `🎧 Équipe 2`
-  - Plusieurs parties en parallèle : `🎧 Équipe 1 - Game A`, `🎧 Équipe 2 - Game A`, etc.
+### Parties personnalisées
+- Création réservée au rôle **Organisateur de Parties** (`/partie creer`)
+- Embed + répartition alternée 5v5 + salons vocaux (`Game A/B/C` si multi)
+- Boutons 🔊 vocal / 🎮 infos (lien ou éphémère)
+- `/resultat` → Modal score + MVP · cleanup vocal `delete` | `archive`
 
-### Inscription
-Boutons sur l'embed : **Rejoindre** / **Quitter** / **Annuler**.
+### Welcome & Goodbye
+Un **seul salon** annonce arrivées et départs via des embeds anglais, avec avatar,
+bannière, compteur de membres, logo serveur et boutons de navigation :
 
-Répartition **alternée** à l'inscription :
-1er joueur → Équipe 1, 2e → Équipe 2, 3e → Équipe 1, … jusqu'à `TEAM_SIZE` par équipe
-(défaut **5**, règles compétitives Valorant). En cas d'égalité réglementaire, l'OT
-continue jusqu'à **+2 manches** (rappelé dans l'embed ; les scores à égalité sont refusés).
-
-### Accès rapide (sous l'embed)
-Deux boutons supplémentaires :
-
-| Bouton | Comportement |
+| Bouton | Rôle |
 |---|---|
-| 🔊 **Rejoindre le vocal** | Identifie l'équipe du joueur, le déplace si possible, et répond en **éphémère** avec un **bouton URL** `https://discord.com/channels/ID_SERVEUR/ID_SALON_VOCAL` vers le vocal de son équipe. |
-| 🎮 **Informations de la partie** | Si un `invitation` (URL) a été fourni → **bouton lien** direct. Sinon → message **éphémère** avec lobby / code (privés). |
+| 📜 Rules | Lien vers le salon des règles |
+| 🎭 Roles | Lien vers l'attribution des rôles |
+| 💬 General Chat | Salon de discussion principal |
+| 🌐 Website | Optionnel — site / Discord communautaire |
 
-Renseigner les infos à la création (`/partie creer lobby:… code:… invitation:…`) ou plus tard via `/partie infos`.
-
-### Résultat (`/resultat`)
-Ouvre un **Modal Discord** pour saisir :
-- Score Équipe 1 / Équipe 2
-- Pseudo du MVP + K/D/A (`24/12/5`)
-
-Après validation : l'embed est mis à jour (score final + MVP), la partie est marquée
-terminée, et les vocaux sont **supprimés** ou **archivés** selon `VOICE_CLEANUP_MODE`.
-
-Aucune statistique individuelle hors MVP n'est stockée.
+Toute la personnalisation (salon, couleurs, bannières, textes, emojis, boutons, liens)
+se fait dans **`config/welcome.json`** — aucun changement de code requis.
 
 ## Prérequis Discord
 
-1. Créer une application + bot sur le [Developer Portal](https://discord.com/developers/applications).
-2. Privileged Gateway Intent : **Server Members Intent** (recommandé pour le rôle).
-3. Inviter le bot avec les permissions :
-   - Gérer les salons
-   - Voir les salons / Envoyer des messages / Intégrer des liens
-   - Déplacer les membres (optionnel, pour auto-move vocal)
-   - Utiliser les commandes slash
-4. Créer le rôle nommé exactement `Organisateur de Parties` (ou adapter `.env`).
-5. Préparer : salon texte des parties, catégorie vocale, (optionnel) catégorie d'archives.
+1. Application + bot sur le [Developer Portal](https://discord.com/developers/applications)
+2. Privileged Intent : **Server Members Intent** (obligatoire pour welcome/goodbye)
+3. Permissions : Gérer les salons, Envoyer des messages, Intégrer des liens, Déplacer les membres (optionnel), Commandes slash
+4. Rôle `Organisateur de Parties` (parties)
+5. Salons : parties, welcome, règles, rôles, général + catégorie vocale
 
 ## Installation
 
 ```bash
 cd discord-bot
 cp .env.example .env
-# Éditer .env avec le token, les IDs, etc.
+cp config/welcome.example.json config/welcome.json
+# Éditer .env et config/welcome.json
 
 npm install
-npm run register   # enregistre /partie et /resultat sur le serveur
+npm run register
 npm start
 ```
+
+## Configuration Welcome (`config/welcome.json`)
+
+```bash
+cp config/welcome.example.json config/welcome.json
+```
+
+Champs principaux :
+
+| Champ | Description |
+|---|---|
+| `enabled` | Active / désactive le module |
+| `channelId` | Salon unique pour welcome **et** goodbye |
+| `colors.welcome` / `colors.goodbye` | Couleurs hex (`#5865F2`) |
+| `images.*Banner` / `serverLogo` | URLs d'images (vide = icône du serveur) |
+| `welcome` / `goodbye` | Titre, description, footer, toggles avatar/bannière/compteur |
+| `buttons[]` | Labels, emojis, `channelId` et/ou `url`, `enabled` |
+
+Placeholders disponibles dans les textes : `{member}` `{username}` `{display}`
+`{tag}` `{id}` `{server}` `{count}` `{joinedAt}` `{createdAt}`.
+
+Après édition : `/welcome reload` (ou redémarrage du bot).
 
 ## Variables d'environnement
 
@@ -73,9 +75,9 @@ npm start
 | `DISCORD_TOKEN` | Token du bot |
 | `CLIENT_ID` | Application ID |
 | `GUILD_ID` | ID du serveur |
-| `GAMES_CHANNEL_ID` | Salon où poster les embeds |
+| `GAMES_CHANNEL_ID` | Salon des embeds de parties |
 | `VOICE_CATEGORY_ID` | Catégorie des salons d'équipe |
-| `ARCHIVE_CATEGORY_ID` | Catégorie d'archives (si mode `archive`) |
+| `ARCHIVE_CATEGORY_ID` | Archives vocales (mode `archive`) |
 | `VOICE_CLEANUP_MODE` | `delete` ou `archive` |
 | `ORGANIZER_ROLE_NAME` | Défaut : `Organisateur de Parties` |
 | `TEAM_SIZE` | Joueurs par équipe (défaut `5`) |
@@ -84,35 +86,37 @@ npm start
 
 | Commande | Description |
 |---|---|
-| `/partie creer [lobby] [code] [invitation]` | Lance une partie + vocaux (+ infos connexion) |
-| `/partie infos [id] …` | Met à jour lobby / code / lien d'invitation |
+| `/partie creer [lobby] [code] [invitation]` | Lance une partie + vocaux |
+| `/partie infos [id] …` | Met à jour lobby / code / lien |
 | `/partie liste` | Liste les parties actives |
 | `/partie annuler [id]` | Annule une partie |
 | `/resultat [id]` | Modal score + MVP |
-
-L'`id` est le préfixe affiché en bas de l'embed (8 caractères) ou `Game A` / `Game B`…
-S'il n'y a qu'une partie en cours, l'`id` est optionnel.
+| `/welcome status` | État du module welcome |
+| `/welcome reload` | Recharge `config/welcome.json` |
+| `/welcome preview` | Aperçu éphémère welcome/goodbye |
 
 ## Architecture
 
 ```
 discord-bot/
+├── config/
+│   └── welcome.example.json     # Modèle (copier vers welcome.json)
 ├── src/
-│   ├── index.js                 # Client Discord + handlers
-│   ├── register-commands.js     # Déploiement des slash commands
-│   ├── config.js
+│   ├── index.js
+│   ├── register-commands.js
+│   ├── config.js                # .env (parties)
 │   ├── commands/
 │   │   ├── partie.js
-│   │   └── resultat.js
+│   │   ├── resultat.js
+│   │   └── welcome.js
 │   ├── services/
-│   │   ├── GameManager.js       # Création, join, vocaux, résultat
-│   │   └── GameStore.js         # Persistance JSON (data/games.json)
+│   │   ├── GameManager.js
+│   │   └── GameStore.js
+│   ├── welcome/
+│   │   ├── WelcomeService.js    # GuildMemberAdd / Remove
+│   │   ├── configLoader.js      # JSON hot-reloadable
+│   │   └── embeds.js
 │   └── utils/
-│       ├── embeds.js
-│       └── score.js
 ├── .env.example
 └── package.json
 ```
-
-Les parties actives sont persistées dans `data/games.json` pour survivre à un redémarrage
-du processus (les boutons restent valides tant que le message existe).
